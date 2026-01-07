@@ -9,6 +9,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 
 from app.configs.settings import STATIC_DIR
@@ -50,6 +52,15 @@ app.add_exception_handler(Exception, global_exception_handler)
 
 # 注册路由
 app.include_router(v1_routers)
+
+# 挂载静态文件
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+# favicon.ico
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse(os.path.join(STATIC_DIR, "favicon.png"))
 
 
 # API 健康检查
