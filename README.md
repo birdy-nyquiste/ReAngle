@@ -4,7 +4,7 @@
 
 ## 快速体验
 
-<https://reangle.com/>
+<https://reangle.app/>
 
 ## ✨ 核心功能
 
