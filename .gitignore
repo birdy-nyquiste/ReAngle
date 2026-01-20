@@ -65,3 +65,7 @@ dist-ssr/
 # Temporary folders
 tmp/
 temp/
+
+# Agent
+.agent/
+.shared/
