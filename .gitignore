@@ -26,6 +26,9 @@ venv.bak/
 .env.production.local
 *.local
 
+# Test
+tests/
+
 # IDE
 .vscode/
 !.vscode/settings.json
