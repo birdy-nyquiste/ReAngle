@@ -6,82 +6,111 @@ export default function LandingPage() {
     const navigate = useNavigate()
 
     return (
-        <div className="flex min-h-screen flex-col bg-background">
-            <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="container flex h-14 items-center">
-                    <div className="flex items-center space-x-2 font-bold text-xl">
-                        <FileText className="h-6 w-6" />
-                        <span>Article ReAngle</span>
+        <div className="min-h-screen flex flex-col bg-background aurora-bg">
+            {/* Floating Navigation */}
+            <header className="floating-nav">
+                <div className="container flex h-14 items-center px-6">
+                    <div className="flex items-center gap-2.5 font-bold text-lg">
+                        <img src="/favicon.png" alt="ReAngle" className="h-8 w-8 rounded-lg" />
+                        <span>ReAngle</span>
                     </div>
-                    <nav className="ml-auto flex gap-4 sm:gap-6">
-                        {/* Nav links could go here */}
+                    <nav className="ml-auto">
+                        {/* Clean nav - no extra links */}
                     </nav>
                 </div>
             </header>
-            <main className="flex-1">
-                <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">
-                    <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center">
-                        <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter">
-                            Transform Your Content with{" "}
-                            <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                                AI Precision
+
+            {/* Hero Section */}
+            <main className="flex-1 flex flex-col">
+                <section className="flex-1 flex items-center justify-center pt-24 pb-12">
+                    <div className="container flex max-w-4xl flex-col items-center gap-8 text-center px-4">
+                        {/* Badge */}
+                        <div className="animate-fade-in">
+                            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                                <Sparkles className="h-3.5 w-3.5" />
+                                AI-Powered Content Transformation
+                            </span>
+                        </div>
+
+                        {/* Headline */}
+                        <h1 className="animate-slide-up text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
+                            Same Story,{" "}
+                            <span className="gradient-text">
+                                Fresh Angle
                             </span>
                         </h1>
-                        <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8">
-                            Intelligent rewriting, summarization, and content optimization.
-                            Keep the core message, but change the angle.
+
+                        {/* Subheadline */}
+                        <p className="animate-slide-up delay-100 max-w-2xl text-lg sm:text-xl text-muted-foreground leading-relaxed">
+                            Transform your articles with AI precision. Rewrite content to match any tone,
+                            style, or audience—while keeping the core message intact.
                         </p>
-                        <div className="space-x-4">
-                            <Button size="lg" onClick={() => navigate("/app")}>
-                                Get Started
+
+                        {/* CTA Button */}
+                        <div className="animate-slide-up delay-200 pt-4">
+                            <Button
+                                size="lg"
+                                className="text-base px-8 glow-primary hover:glow-primary-sm cursor-pointer"
+                                onClick={() => navigate("/app")}
+                            >
+                                Start Rewriting
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
                         </div>
                     </div>
                 </section>
 
-                <section className="container space-y-6 py-8 md:py-12 lg:py-24">
-                    <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
-                        <div className="relative overflow-hidden rounded-lg border bg-background p-2">
-                            <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
-                                <Sparkles className="h-12 w-12 text-primary" />
-                                <div className="space-y-2">
-                                    <h3 className="font-bold">Smart Rewrite</h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        Adapt content to any style or tone with advanced LLMs like GPT-5 and Gemini.
-                                    </p>
-                                </div>
+                {/* Features Section */}
+                <section className="container py-16 md:py-24">
+                    <div className="mx-auto grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl">
+                        {/* Feature 1 */}
+                        <div className="group glass rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 cursor-pointer">
+                            <div className="mb-4 inline-flex p-3 rounded-xl bg-primary/10">
+                                <Sparkles className="h-6 w-6 text-primary" />
                             </div>
+                            <h3 className="text-lg font-semibold mb-2">Smart Rewriting</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                Powered by GPT-5, Gemini, and more. Adapt content to any style,
+                                tone, or audience with a single click.
+                            </p>
                         </div>
-                        <div className="relative overflow-hidden rounded-lg border bg-background p-2">
-                            <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
-                                <FileText className="h-12 w-12 text-primary" />
-                                <div className="space-y-2">
-                                    <h3 className="font-bold">Multi-Format</h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        Process text files, PDFs, Word docs, URLs, and even YouTube videos.
-                                    </p>
-                                </div>
+
+                        {/* Feature 2 */}
+                        <div className="group glass rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 cursor-pointer">
+                            <div className="mb-4 inline-flex p-3 rounded-xl bg-violet-500/10">
+                                <FileText className="h-6 w-6 text-violet-400" />
                             </div>
+                            <h3 className="text-lg font-semibold mb-2">Multi-Format Input</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                Process text, PDFs, Word documents, URLs, and even YouTube
+                                videos. All in one place.
+                            </p>
                         </div>
-                        <div className="relative overflow-hidden rounded-lg border bg-background p-2">
-                            <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
-                                <Zap className="h-12 w-12 text-primary" />
-                                <div className="space-y-2">
-                                    <h3 className="font-bold">Instant Analysis</h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        Get summaries, comparisons, and readability metrics in seconds.
-                                    </p>
-                                </div>
+
+                        {/* Feature 3 */}
+                        <div className="group glass rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 cursor-pointer sm:col-span-2 lg:col-span-1">
+                            <div className="mb-4 inline-flex p-3 rounded-xl bg-cyan-500/10">
+                                <Zap className="h-6 w-6 text-cyan-400" />
                             </div>
+                            <h3 className="text-lg font-semibold mb-2">Instant Analysis</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                Get summaries, side-by-side comparisons, and readability
+                                metrics in seconds.
+                            </p>
                         </div>
                     </div>
                 </section>
             </main>
-            <footer className="py-6 md:px-8 md:py-0">
-                <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
-                    <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-                        Built by Article ReAngle Team.
+
+            {/* Footer */}
+            <footer className="border-t border-white/5 py-8">
+                <div className="container flex flex-col sm:flex-row items-center justify-between gap-4 px-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <img src="/favicon.png" alt="ReAngle" className="h-5 w-5 rounded" />
+                        <span>ReAngle</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                        © 2026 ReAngle. Built for content creators.
                     </p>
                 </div>
             </footer>
