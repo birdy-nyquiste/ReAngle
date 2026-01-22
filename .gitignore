@@ -26,6 +26,12 @@ venv.bak/
 .env.production.local
 *.local
 
+# Test
+tests/
+
+# Miniprogram results
+results/
+
 # IDE
 .vscode/
 !.vscode/settings.json
