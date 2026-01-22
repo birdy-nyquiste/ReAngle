@@ -1,6 +1,6 @@
-# Article ReAngle - 智能洗稿程序
+# ReAngle - 智能洗稿程序
 
-一个基于大语言模型的智能文本重写应用，支持本地和云端部署。程序保留文章核心信息，根据用户指定的风格或立场重新组织和表达文章。采用了前后端分离的现代化架构，前端使用 React + Vite构建，后端基于 FastAPI。
+基于大语言模型的智能文本重写应用，保留文章核心信息，根据用户指定的风格或立场重新组织和表达文章。采用现代化前后端分离架构，前端 React + Vite，后端 FastAPI。
 
 ## 快速体验
 
@@ -8,101 +8,119 @@
 
 ## ✨ 核心功能
 
-### 1. 多源输入
+### 多源输入
 
 - **文本粘贴**：直接输入或粘贴文本
 - **URL 抓取**：自动提取网页正文
 - **文件上传**：支持 PDF, Word, TXT 格式
 - **YouTube 视频**：提取视频字幕内容
 
-### 2. 智能重写
+### 智能重写
 
-- **多模型支持**：集成 OpenAI GPT-5, Google Gemini 2.5 Flash, Qwen Flash
-- **风格定制**：支持幽默、学术、新闻等多种预设风格，也可自定义提示词
-- **结构化输出**：同时生成重写后的文章和精简摘要
+- **多模型支持**：OpenAI GPT-5, Google Gemini 2.5 Flash, Qwen Flash
+- **风格定制**：预设风格（幽默、学术、新闻等）+ 自定义提示词
+- **结构化输出**：同时生成重写文章和精简摘要
 
-### 3. 多维展示与交互
+### 多维展示
 
-- **摘要朗读 (TTS)**：支持对生成摘要进行语音朗读
-- **原文对比**：提供直观的 Diff 视图，高亮显示改动细节
-- **文件下载**：支持将重写结果下载为 TXT 文件
-- **响应式设计**：适配桌面和移动端，提供现代化的 UI 体验
+- **摘要朗读 (TTS)**：阿里云 DashScope 语音合成
+- **数字人视频**：HeyGen API 生成 Avatar 视频
+- **原文对比**：Diff 视图高亮显示改动
+- **文件下载**：导出 TXT 格式
 
 ## 🛠️ 技术栈
 
-### 前端 (Frontend)
+### 前端
 
-- **核心框架**: React 18, TypeScript, Vite
-- **UI 组件库**: shadcn/ui, Radix UI
-- **样式**: Tailwind CSS
-- **图标**: Lucide React
-- **路由**: React Router v6
+| 技术 | 用途 |
+| ------ | ------ |
+| React 18 + TypeScript | 核心框架 |
+| Vite | 构建工具 |
+| shadcn/ui + Radix UI | UI 组件库 |
+| Tailwind CSS | 样式系统 |
+| React Router v6 | 路由管理 |
 
-### 后端 (Backend)
+### 后端
 
-- **核心框架**: FastAPI
-- **语言模型**: OpenAI API, Google Gemini API, DashScope (阿里云)
-- **工具库**: Pydantic, httpx, BeautifulSoup4, Lxml, PyPDF, Python-docx
+| 技术 | 用途 |
+| ------ | ------ |
+| FastAPI | API 框架 |
+| OpenAI / Gemini / DashScope API | LLM 服务 |
+| HeyGen API | 数字人视频 |
+| BeautifulSoup4 + Lxml | 网页解析 |
+| PyPDF + Python-docx | 文档解析 |
 
 ## 🚀 本地部署
 
 ### 前置要求
 
 - Python 3.9+
-- Node.js 18+
-- API Keys (OpenAI, Gemini, 或 DashScope)
+- Node.js 20+
+- API Keys (详见下方环境变量)
 
-### 1. 后端配置与启动
+### 1. 环境变量
+
+```env
+# LLM APIs (至少配置一个)
+OPENAI_API_KEY=your-key
+GEMINI_API_KEY=your-key
+DASHSCOPE_API_KEY=your-key
+
+# TTS (可选)
+DASHSCOPE_API_KEY=your-key
+
+# Avatar 视频 (可选)
+HEYGEN_API_KEY=your-key
+```
+
+### 2. 后端启动
 
 ```bash
-# 进入项目根目录
-cd Article-ReAngle
+cd app
 
 # 安装依赖
 pip install -r requirements.txt
 
-# 设置环境变量 (Windows PowerShell 示例)
-$env:OPENAI_API_KEY="your-key"
-$env:GEMINI_API_KEY="your-key"
-$env:DASHSCOPE_API_KEY="your-key"
-# 或者在 .env 文件中配置
-
-# 启动后端服务
+# 启动服务
 python -m app.main
-# 服务运行在 http://localhost:8000
+# 运行在 http://localhost:8000
 ```
 
-### 2. 前端配置与启动
+### 3. 前端启动
 
 ```bash
-# 进入前端目录
 cd frontend
 
-# 安装依赖
 npm install
-
-# 启动开发服务器
 npm run dev
-# 前端运行在 http://localhost:5173
+# 运行在 http://localhost:5173
 ```
 
 ## 📁 项目结构
 
 ```text
 Article-ReAngle/
-├── app/                      # 后端 (FastAPI)
-│   ├── main.py               # 入口文件
-│   ├── routers/              # API 路由
-│   ├── services/             # 业务逻辑 (LLM, 提取器)
-│   └── schemas/              # Pydantic 模型
-├── frontend/                 # 前端 (React + Vite)
+├── app/                          # 后端 (FastAPI)
+│   ├── main.py                   # 入口
+│   ├── routers/                  # API 路由
+│   ├── services/
+│   │   ├── llms/                 # LLM 客户端
+│   │   │   ├── openai_client.py
+│   │   │   ├── gemini_client.py
+│   │   │   ├── qwen_client.py
+│   │   │   ├── tts_client.py     # 语音合成
+│   │   │   └── avatar_client.py  # 数字人视频
+│   │   └── extractors/           # 内容提取器
+│   └── schemas/                  # Pydantic 模型
+├── frontend/                     # 前端 (React + Vite)
 │   ├── src/
-│   │   ├── components/       # UI 组件 (shadcn/ui)
-│   │   ├── pages/            # 页面 (Landing, MainApp)
-│   │   ├── lib/              # 工具函数
-│   │   └── App.tsx           # 根组件
-│   ├── tailwind.config.js    # Tailwind 配置
-│   └── vite.config.ts        # Vite 配置
-├── tests/                    # 单元测试
-└── requirements.txt          # Python 依赖
+│   │   ├── pages/
+│   │   │   ├── LandingPage.tsx   # 首页
+│   │   │   └── MainApp.tsx       # 主应用
+│   │   ├── components/           # UI 组件
+│   │   └── index.css             # 设计系统
+│   └── public/
+│       └── favicon.png           # Logo
+├── docs/                         # 文档
+└── requirements.txt              # Python 依赖
 ```
