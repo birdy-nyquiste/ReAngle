@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
@@ -12,8 +12,6 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
     const { signUp } = useAuth()
-    const navigate = useNavigate()
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
