@@ -6,7 +6,7 @@ from typing import Annotated, List, Dict, Any
 from uuid import uuid4
 import time
 import json
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, Depends, Form, Request
 from loguru import logger
 
 from app.schemas.rewrite_schema import (
@@ -29,6 +29,7 @@ from app.core.exceptions import (
     LLMProviderError,
     InvalidInputError,
 )
+from app.core.dependencies import get_current_user, check_usage_limit
 
 # 设置路由前缀和标签
 rewrite_router = APIRouter(prefix="/rewrite")
@@ -36,7 +37,9 @@ rewrite_router = APIRouter(prefix="/rewrite")
 
 @rewrite_router.post("", response_model=RewriteResponse)
 async def rewrite_article(
-    request: Request, rewrite_request: Annotated[RewriteRequest, Form()]
+    request: Request,
+    rewrite_request: Annotated[RewriteRequest, Form()],
+    user: dict = Depends(check_usage_limit),
 ):
     """
     洗稿接口, 支持添加到队列的多重输入

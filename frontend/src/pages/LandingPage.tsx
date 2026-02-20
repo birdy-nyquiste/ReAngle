@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
-import { ArrowRight, FileText, Sparkles, Zap } from "lucide-react"
+import { ArrowRight, FileText, Sparkles, Zap, LogIn } from "lucide-react"
+import { useAuth } from "@/context/AuthContext"
 
 export default function LandingPage() {
     const navigate = useNavigate()
+    const { user } = useAuth()
 
     return (
         <div className="min-h-screen flex flex-col bg-background aurora-bg">
@@ -14,8 +16,53 @@ export default function LandingPage() {
                         <img src="/favicon.png" alt="ReAngle" className="h-8 w-8 rounded-lg" />
                         <span>ReAngle</span>
                     </div>
-                    <nav className="ml-auto">
-                        {/* Clean nav - no extra links */}
+                    <nav className="ml-auto flex items-center gap-3">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="cursor-pointer"
+                            onClick={() => navigate("/pricing")}
+                        >
+                            Pricing
+                        </Button>
+                        {user ? (
+                            <>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="cursor-pointer"
+                                    onClick={() => navigate("/profile")}
+                                >
+                                    Profile
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    className="cursor-pointer"
+                                    onClick={() => navigate("/app")}
+                                >
+                                    Open App
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="cursor-pointer"
+                                    onClick={() => navigate("/login")}
+                                >
+                                    <LogIn className="mr-1.5 h-4 w-4" />
+                                    Login
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    className="cursor-pointer"
+                                    onClick={() => navigate("/register")}
+                                >
+                                    Get Started
+                                </Button>
+                            </>
+                        )}
                     </nav>
                 </div>
             </header>
