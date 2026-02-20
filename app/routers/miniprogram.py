@@ -13,7 +13,7 @@ from fastapi.responses import JSONResponse
 from app.configs.settings import RESULTS_DIR
 from app.services.llms.llm import call_openai
 
-miniprogram_router = APIRouter(prefix="/miniprogram")
+miniprogram_router = APIRouter(prefix="/miniprogram", tags=["miniprogram"])
 
 
 def extract_story_params_from_payload(payload: dict) -> dict:

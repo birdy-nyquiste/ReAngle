@@ -28,6 +28,12 @@
 - **原文对比**：Diff 视图高亮显示改动
 - **文件下载**：导出 TXT 格式
 
+### 账号体系与鉴权
+
+- **用户认证**：基于 Supabase 的安全登录与注册
+- **路由保护**：安全的私有页面与应用访问控制
+- **个人中心**：管理用户偏好和状态
+
 ## 🛠️ 技术栈
 
 ### 前端
@@ -39,6 +45,7 @@
 | shadcn/ui + Radix UI | UI 组件库 |
 | Tailwind CSS | 样式系统 |
 | React Router v6 | 路由管理 |
+| Supabase | 身份认证与 BaaS |
 
 ### 后端
 
@@ -60,6 +67,8 @@
 
 ### 1. 环境变量
 
+#### 后端 (.env)
+
 ```env
 # LLM APIs (至少配置一个)
 OPENAI_API_KEY=your-key
@@ -73,16 +82,22 @@ DASHSCOPE_API_KEY=your-key
 HEYGEN_API_KEY=your-key
 ```
 
+#### 前端 (frontend/.env)
+
+```env
+# Supabase 配置
+VITE_SUPABASE_URL=your-supabase-url
+VITE_SUPABASE_PUBLISHABLE_KEY=your-supabase-anon-key
+```
+
 ### 2. 后端启动
 
 ```bash
-cd app
-
 # 安装依赖
 pip install -r requirements.txt
 
 # 启动服务
-python -m app.main
+uvicorn app.main:app --reload
 # 运行在 http://localhost:8000
 ```
 
@@ -116,8 +131,14 @@ Article-ReAngle/
 │   ├── src/
 │   │   ├── pages/
 │   │   │   ├── LandingPage.tsx   # 首页
-│   │   │   └── MainApp.tsx       # 主应用
+│   │   │   ├── LoginPage.tsx     # 登录页
+│   │   │   ├── RegisterPage.tsx  # 注册页
+│   │   │   ├── ProfilePage.tsx   # 个人中心
+│   │   │   └── MainApp.tsx       # 主应用界面 (需登录)
 │   │   ├── components/           # UI 组件
+│   │   ├── lib/                  
+│   │   │   └── supabase.ts       # Supabase 客户端
+│   │   ├── App.tsx               # 路由配置与 Auth Provider
 │   │   └── index.css             # 设计系统
 │   └── public/
 │       └── favicon.png           # Logo

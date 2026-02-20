@@ -32,7 +32,7 @@ from app.core.exceptions import (
 from app.core.dependencies import get_current_user, check_usage_limit
 
 # 设置路由前缀和标签
-rewrite_router = APIRouter(prefix="/rewrite")
+rewrite_router = APIRouter(prefix="/rewrite", tags=["rewrite"])
 
 
 @rewrite_router.post("", response_model=RewriteResponse)
