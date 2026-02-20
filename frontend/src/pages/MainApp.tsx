@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DiffView } from "@/components/DiffView"
-import { Loader2, Trash2, FileText, Link as LinkIcon, Youtube, Type, Play, Download, Sparkles, Settings2, FolderInput } from "lucide-react"
+import { Loader2, Trash2, FileText, Link as LinkIcon, Youtube, Type, Play, Download, Sparkles, Settings2, FolderInput, LogOut } from "lucide-react"
+import { useAuth } from "@/context/AuthContext"
 
 // Types
 interface InputItem {
@@ -26,6 +27,8 @@ interface RewriteResult {
 }
 
 export default function MainApp() {
+    const { user, session, signOut } = useAuth()
+
     // State
     const [activeInputTab, setActiveInputTab] = useState("text")
     const [inputItems, setInputItems] = useState<InputItem[]>([])
@@ -128,12 +131,24 @@ export default function MainApp() {
             formData.append("prompt", prompt)
             formData.append("llm_type", model)
 
+            const headers: HeadersInit = {}
+            if (session?.access_token) {
+                headers['Authorization'] = `Bearer ${session.access_token}`
+            }
+
             const res = await fetch("/api/v1/rewrite", {
                 method: "POST",
+                headers,
                 body: formData
             })
 
             if (!res.ok) {
+                if (res.status === 402) {
+                    throw new Error("Usage limit reached. Please upgrade your plan.")
+                }
+                if (res.status === 401) {
+                    throw new Error("Your session has expired. Please sign in again.")
+                }
                 throw new Error(`Server error: ${res.status}`)
             }
 
@@ -205,7 +220,26 @@ export default function MainApp() {
                         <img src="/favicon.png" alt="ReAngle" className="h-8 w-8 rounded-lg" />
                         <span>ReAngle</span>
                     </a>
-                    {/* Right side reserved for future use */}
+                    <div className="ml-auto flex items-center gap-3">
+                        <span className="text-xs text-muted-foreground">{user?.email}</span>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="cursor-pointer text-muted-foreground hover:text-foreground"
+                            onClick={() => window.location.href = "/profile"}
+                        >
+                            Profile
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="cursor-pointer text-muted-foreground hover:text-foreground"
+                            onClick={signOut}
+                        >
+                            <LogOut className="h-4 w-4 mr-1.5" />
+                            Sign Out
+                        </Button>
+                    </div>
                 </div>
             </header>
 
