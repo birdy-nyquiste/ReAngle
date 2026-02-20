@@ -34,10 +34,10 @@ payment_router = APIRouter(prefix="/payment", tags=["payment"])
 
 @payment_router.post("/create-checkout-session")
 async def api_create_checkout_session(user: dict = Depends(get_current_user)):
-    """创建 Stripe Checkout Session，返回重定向 URL"""
+    """创建 Stripe Checkout Session 或重定向到 Portal（如已有订阅）"""
     try:
-        url = create_checkout_session(user["id"], user["email"])
-        return {"url": url}
+        result = create_checkout_session(user["id"], user["email"])
+        return result  # {"url": "...", "action": "checkout" | "portal"}
     except Exception as e:
         logger.error(f"[payment] Failed to create checkout session: {e}")
         raise HTTPException(
@@ -107,8 +107,11 @@ async def stripe_webhook(request: Request):
 
     except Exception as e:
         logger.exception(f"[webhook] Error handling {event_type}: {e}")
-        # 返回 200 避免 Stripe 重试（错误已经记录）
-        # 如果返回非 2xx，Stripe 会重试最多 3 天
+        # 返回 500 以便 Stripe 重试（最多 3 天，指数退避）
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error processing {event_type}",
+        )
 
     return {"status": "ok"}
 

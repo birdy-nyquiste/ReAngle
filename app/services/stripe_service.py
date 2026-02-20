@@ -73,11 +73,32 @@ def get_or_create_stripe_customer(user_id: str, email: str) -> str:
 # ------------------------------------------------------------------
 
 
-def create_checkout_session(user_id: str, email: str) -> str:
+def create_checkout_session(user_id: str, email: str) -> dict:
     """
-    创建 Stripe Checkout Session，返回 URL。
+    创建 Stripe Checkout Session 或重定向到 Customer Portal。
+    如果用户已有 active/trialing 订阅，返回 Portal URL 以防止重复订阅。
+    返回 {"url": str, "action": "checkout" | "portal"}。
     """
     customer_id = get_or_create_stripe_customer(user_id, email)
+
+    # 检查是否已有 active 或 trialing 订阅
+    active_subs = stripe.Subscription.list(
+        customer=customer_id, status="active", limit=1
+    )
+    trialing_subs = stripe.Subscription.list(
+        customer=customer_id, status="trialing", limit=1
+    )
+
+    if active_subs.data or trialing_subs.data:
+        logger.info(
+            f"[stripe] User {user_id} already has an active/trialing subscription, "
+            f"redirecting to portal"
+        )
+        portal = stripe.billing_portal.Session.create(
+            customer=customer_id,
+            return_url=f"{FRONTEND_URL}/profile",
+        )
+        return {"url": portal.url, "action": "portal"}
 
     session = stripe.checkout.Session.create(
         customer=customer_id,
@@ -88,7 +109,7 @@ def create_checkout_session(user_id: str, email: str) -> str:
         cancel_url=f"{FRONTEND_URL}/pricing?checkout=canceled",
     )
 
-    return session.url
+    return {"url": session.url, "action": "checkout"}
 
 
 def create_portal_session(user_id: str, email: str) -> str:
