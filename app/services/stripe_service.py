@@ -171,6 +171,7 @@ def sync_subscription_from_stripe(subscription_id: str) -> None:
         "current_period_start": _ts_to_iso(sub.current_period_start),
         "current_period_end": _ts_to_iso(sub.current_period_end),
         "cancel_at_period_end": sub.cancel_at_period_end,
+        # 此处传入字符串，PostgreSQL会自动识别为NOW()函数，并返回当前时间戳
         "updated_at": "now()",
     }
 
