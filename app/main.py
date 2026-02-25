@@ -29,7 +29,7 @@ from app.core.handlers import (
 setup_logging()
 
 # 创建FastAPI实例
-app = FastAPI(title="Article ReAngle")
+app = FastAPI(title="ReAngle")
 
 # 配置中间件 (FastAPI中间件按后进先出顺序执行)
 # RequestLoggingMiddleware 放在最外层(最后添加)，以便捕获所有请求
@@ -70,7 +70,7 @@ async def health_check():
     Health Check endpoint.
     Frontend is hosted separately.
     """
-    return {"status": "ok", "service": "Article ReAngle API"}
+    return {"status": "ok", "service": "ReAngle API"}
 
 
 if __name__ == "__main__":

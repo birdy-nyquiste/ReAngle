@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DiffView } from "@/components/DiffView"
-import { Loader2, Trash2, FileText, Link as LinkIcon, Youtube, Type, Play, Download, Sparkles, Settings2, FolderInput, LogOut } from "lucide-react"
+import { Loader2, Trash2, FileText, Link as LinkIcon, Youtube, Type, Play, Download, Sparkles, Settings2, FolderInput, LogOut, Zap, X } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 
 // Types
@@ -47,11 +47,25 @@ export default function MainApp() {
     const [result, setResult] = useState<RewriteResult | null>(null)
     const [activeResultTab, setActiveResultTab] = useState("summary")
     const [error, setError] = useState<string | null>(null)
+    const [isUsageLimitError, setIsUsageLimitError] = useState(false)
+    const [checkoutSuccess, setCheckoutSuccess] = useState(false)
 
     // TTS State
     const [ttsLoading, setTtsLoading] = useState(false)
     const [audioUrl, setAudioUrl] = useState<string | null>(null)
     const audioRef = useRef<HTMLAudioElement | null>(null)
+
+    // Detect ?checkout=success in URL
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search)
+        if (params.get("checkout") === "success") {
+            setCheckoutSuccess(true)
+            // Clean URL without reload
+            window.history.replaceState({}, "", "/app")
+            const timer = setTimeout(() => setCheckoutSuccess(false), 5000)
+            return () => clearTimeout(timer)
+        }
+    }, [])
 
     // Handlers
     const handleAddInput = () => {
@@ -101,6 +115,7 @@ export default function MainApp() {
 
         setIsLoading(true)
         setError(null)
+        setIsUsageLimitError(false)
         setResult(null)
         setAudioUrl(null)
 
@@ -144,6 +159,7 @@ export default function MainApp() {
 
             if (!res.ok) {
                 if (res.status === 402) {
+                    setIsUsageLimitError(true)
                     throw new Error("Usage limit reached. Please upgrade your plan.")
                 }
                 if (res.status === 401) {
@@ -213,6 +229,16 @@ export default function MainApp() {
 
     return (
         <div className="flex h-screen flex-col bg-background aurora-bg">
+            {/* Checkout Success Banner */}
+            {checkoutSuccess && (
+                <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center gap-3 bg-green-500/20 border-b border-green-500/30 backdrop-blur px-4 py-3 text-sm text-green-300">
+                    <Sparkles className="h-4 w-4 flex-shrink-0" />
+                    <span>🎉 You're now on Pro! Enjoy unlimited rewrites.</span>
+                    <button onClick={() => setCheckoutSuccess(false)} className="ml-auto opacity-70 hover:opacity-100">
+                        <X className="h-4 w-4" />
+                    </button>
+                </div>
+            )}
             {/* Floating Navigation */}
             <header className="floating-nav">
                 <div className="container flex h-14 items-center px-6">
@@ -410,9 +436,26 @@ export default function MainApp() {
                                 )}
                             </Button>
 
-                            {error && (
+                            {error && !isUsageLimitError && (
                                 <div className="text-xs text-red-400 p-3 bg-red-500/10 rounded-lg border border-red-500/20">
                                     {error}
+                                </div>
+                            )}
+
+                            {isUsageLimitError && (
+                                <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg space-y-2">
+                                    <div className="flex items-center gap-2 text-primary text-xs font-semibold">
+                                        <Zap className="h-3.5 w-3.5" />
+                                        Monthly limit reached
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">Upgrade to Pro for unlimited rewrites.</p>
+                                    <Button
+                                        size="sm"
+                                        className="w-full cursor-pointer"
+                                        onClick={() => window.location.href = "/pricing"}
+                                    >
+                                        Upgrade to Pro
+                                    </Button>
                                 </div>
                             )}
                         </div>

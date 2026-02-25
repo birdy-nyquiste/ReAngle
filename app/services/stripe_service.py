@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Stripe 服务层:
 - 创建 / 获取 Stripe Customer
@@ -41,17 +43,17 @@ def get_or_create_stripe_customer(user_id: str, email: str) -> str:
     """
     supabase = _get_supabase_admin()
 
-    # 查询已有映射
+    # 查询已有映射（limit(1) 防止重复行时 PostgREST 返回 406）
     result = (
         supabase.table("stripe_customers")
         .select("stripe_customer_id")
         .eq("user_id", user_id)
-        .maybe_single()
+        .limit(1)
         .execute()
     )
 
-    if result.data:
-        return result.data["stripe_customer_id"]
+    if result and result.data:
+        return result.data[0]["stripe_customer_id"]
 
     # 创建 Stripe Customer
     customer = stripe.Customer.create(
@@ -148,28 +150,43 @@ def sync_subscription_from_stripe(subscription_id: str) -> None:
         supabase.table("stripe_customers")
         .select("user_id")
         .eq("stripe_customer_id", customer_id)
-        .maybe_single()
+        .limit(1)
         .execute()
     )
 
-    if not customer_result.data:
+    if not customer_result or not customer_result.data:
         logger.warning(
             f"[stripe] No user found for customer {customer_id}, skipping sync"
         )
         return
 
-    user_id = customer_result.data["user_id"]
+    user_id = customer_result.data[0]["user_id"]
+
+    # 兼容新旧 Stripe API：current_period_start/end 在新版本中移到了 item 级别
+    items = sub["items"]["data"]
+    first_item = items[0] if items else None
+    price_id = first_item["price"]["id"] if first_item else None
+
+    # 优先从 item 取，fallback 到 subscription 顶层（旧 API）
+    period_start = (
+        first_item.get("current_period_start") or sub.get("current_period_start")
+        if first_item
+        else sub.get("current_period_start")
+    )
+    period_end = (
+        first_item.get("current_period_end") or sub.get("current_period_end")
+        if first_item
+        else sub.get("current_period_end")
+    )
 
     # Upsert subscription 表
     sub_data = {
         "id": sub.id,
         "user_id": user_id,
         "status": sub.status,
-        "price_id": (
-            sub["items"]["data"][0]["price"]["id"] if sub["items"]["data"] else None
-        ),
-        "current_period_start": _ts_to_iso(sub.current_period_start),
-        "current_period_end": _ts_to_iso(sub.current_period_end),
+        "price_id": price_id,
+        "current_period_start": _ts_to_iso(period_start),
+        "current_period_end": _ts_to_iso(period_end),
         "cancel_at_period_end": sub.cancel_at_period_end,
         # 此处传入字符串，PostgreSQL会自动识别为NOW()函数，并返回当前时间戳
         "updated_at": "now()",

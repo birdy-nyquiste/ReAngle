@@ -1,18 +1,25 @@
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useNavigate, Link } from "react-router-dom"
-import { Check, Sparkles, ArrowLeft } from "lucide-react"
+import { Check, Sparkles, ArrowLeft, Loader2 } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 
 export default function PricingPage() {
     const navigate = useNavigate()
     const { user, session } = useAuth()
+    const [upgradeLoading, setUpgradeLoading] = useState(false)
+    const [upgradeError, setUpgradeError] = useState<string | null>(null)
 
+    // Check if user is already Pro by fetching usage data
+    // We rely on the action returned from the checkout session API to distinguish
     const handleUpgrade = async () => {
         if (!user || !session) {
             navigate("/register")
             return
         }
 
+        setUpgradeError(null)
+        setUpgradeLoading(true)
         try {
             const res = await fetch("/api/v1/payment/create-checkout-session", {
                 method: "POST",
@@ -20,14 +27,18 @@ export default function PricingPage() {
                     "Authorization": `Bearer ${session.access_token}`,
                 },
             })
+            if (!res.ok) throw new Error("Failed to create checkout session")
             const data = await res.json()
             if (data.url) {
                 window.location.href = data.url
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error("Failed to create checkout session:", err)
+            setUpgradeError("Something went wrong. Please try again.")
+            setUpgradeLoading(false)
         }
     }
+
 
     return (
         <div className="min-h-screen flex flex-col bg-background aurora-bg">
@@ -86,7 +97,7 @@ export default function PricingPage() {
                                 className="w-full bg-white/5 border-white/10 cursor-pointer"
                                 onClick={() => navigate(user ? "/app" : "/register")}
                             >
-                                {user ? "Current Plan" : "Get Started"}
+                                {user ? "Go to App" : "Get Started"}
                             </Button>
                         </div>
 
@@ -113,10 +124,19 @@ export default function PricingPage() {
 
                             <Button
                                 className="w-full glow-primary hover:glow-primary-sm cursor-pointer"
-                                onClick={handleUpgrade}
+                                onClick={user ? handleUpgrade : () => navigate("/register")}
+                                disabled={upgradeLoading}
                             >
-                                Upgrade to Pro
+                                {upgradeLoading ? (
+                                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Please wait...</>
+                                ) : (
+                                    "Upgrade to Pro"
+                                )}
                             </Button>
+
+                            {upgradeError && (
+                                <p className="text-xs text-red-400 mt-2 text-center">{upgradeError}</p>
+                            )}
                         </div>
                     </div>
 
