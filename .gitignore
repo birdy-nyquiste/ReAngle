@@ -75,3 +75,7 @@ temp/
 # Agent
 .agent/
 .shared/
+
+# Local Scripts
+scripts/
+.scripts/
