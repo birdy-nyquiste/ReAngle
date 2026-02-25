@@ -102,8 +102,8 @@ export default function ProfilePage() {
                             <div className="flex items-center justify-between">
                                 <span className="text-sm text-muted-foreground">Plan</span>
                                 <span className={`text-sm font-medium px-2.5 py-0.5 rounded-full ${isProPlan
-                                        ? "bg-primary/10 text-primary"
-                                        : "bg-white/10 text-muted-foreground"
+                                    ? "bg-primary/10 text-primary"
+                                    : "bg-white/10 text-muted-foreground"
                                     }`}>
                                     {loading ? "..." : isProPlan ? "Pro" : "Free"}
                                 </span>
@@ -141,19 +141,28 @@ export default function ProfilePage() {
                                         />
                                     </div>
                                 )}
-
-                                {!isProPlan && (
-                                    <Button
-                                        size="sm"
-                                        className="w-full mt-2 cursor-pointer"
-                                        onClick={() => navigate("/pricing")}
-                                    >
-                                        Upgrade for Unlimited
-                                    </Button>
-                                )}
                             </div>
                         )}
                     </div>
+
+                    {/* Upgrade Card — only for free users */}
+                    {!loading && !isProPlan && (
+                        <div className="glass rounded-2xl p-6 ring-2 ring-primary/30">
+                            <div className="flex items-center gap-2 mb-1">
+                                <CreditCard className="h-4 w-4 text-primary" />
+                                <h2 className="text-lg font-semibold">Upgrade to Pro</h2>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-4">
+                                Get unlimited rewrites, TTS & Avatar for $9.99/mo.
+                            </p>
+                            <Button
+                                className="w-full cursor-pointer"
+                                onClick={() => navigate("/pricing")}
+                            >
+                                View Plans
+                            </Button>
+                        </div>
+                    )}
 
                     {/* Subscription Management */}
                     {isProPlan && (
