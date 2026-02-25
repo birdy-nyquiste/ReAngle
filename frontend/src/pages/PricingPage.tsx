@@ -8,7 +8,6 @@ export default function PricingPage() {
     const navigate = useNavigate()
     const { user, session } = useAuth()
     const [upgradeLoading, setUpgradeLoading] = useState(false)
-    const [portalLoading, setPortalLoading] = useState(false)
     const [upgradeError, setUpgradeError] = useState<string | null>(null)
 
     // Check if user is already Pro by fetching usage data
@@ -40,23 +39,6 @@ export default function PricingPage() {
         }
     }
 
-    const handleManageSubscription = async () => {
-        if (!session) return
-        setUpgradeError(null)
-        setPortalLoading(true)
-        try {
-            const res = await fetch("/api/v1/payment/create-portal-session", {
-                method: "POST",
-                headers: { "Authorization": `Bearer ${session.access_token}` },
-            })
-            if (!res.ok) throw new Error("Failed to open portal")
-            const data = await res.json()
-            if (data.url) window.location.href = data.url
-        } catch (err: any) {
-            setUpgradeError("Something went wrong. Please try again.")
-            setPortalLoading(false)
-        }
-    }
 
     return (
         <div className="min-h-screen flex flex-col bg-background aurora-bg">
@@ -143,9 +125,9 @@ export default function PricingPage() {
                             <Button
                                 className="w-full glow-primary hover:glow-primary-sm cursor-pointer"
                                 onClick={user ? handleUpgrade : () => navigate("/register")}
-                                disabled={upgradeLoading || portalLoading}
+                                disabled={upgradeLoading}
                             >
-                                {upgradeLoading || portalLoading ? (
+                                {upgradeLoading ? (
                                     <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Please wait...</>
                                 ) : (
                                     "Upgrade to Pro"
