@@ -12,6 +12,7 @@ interface UsageData {
         price_id: string
         current_period_end: string
         cancel_at_period_end: boolean
+        cancel_at: string | null
     } | null
 }
 
@@ -68,10 +69,14 @@ export default function ProfilePage() {
     }
 
     const isProPlan = usage?.subscription?.status === "active" || usage?.subscription?.status === "trialing"
-    const isCancelled = isProPlan && usage?.subscription?.cancel_at_period_end === true
-    const periodEnd = usage?.subscription?.current_period_end
-        ? new Date(usage.subscription.current_period_end).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
-        : null
+    const isCancelled = isProPlan && !!usage?.subscription?.cancel_at
+    const periodEnd = (() => {
+        const rawDate = isCancelled
+            ? usage?.subscription?.cancel_at
+            : usage?.subscription?.current_period_end
+        if (!rawDate) return null
+        return new Date(rawDate).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+    })()
     const usageLimitDisplay = usage?.usage_limit === -1 ? "∞" : usage?.usage_limit ?? 5
     const usagePercent = usage?.usage_limit === -1 ? 0 : ((usage?.usage_count ?? 0) / (usage?.usage_limit ?? 5)) * 100
 

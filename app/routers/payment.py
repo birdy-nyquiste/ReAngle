@@ -133,7 +133,7 @@ async def get_usage(user: dict = Depends(get_current_user)):
     # 获取 subscription（订阅状态）
     sub_result = (
         supabase.table("subscriptions")
-        .select("status, price_id, current_period_end, cancel_at_period_end")
+        .select("status, price_id, current_period_end, cancel_at_period_end, cancel_at")
         .eq("user_id", user["id"])
         .order("created_at", desc=True)
         .limit(1)
