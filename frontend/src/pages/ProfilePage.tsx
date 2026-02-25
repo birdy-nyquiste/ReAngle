@@ -68,6 +68,10 @@ export default function ProfilePage() {
     }
 
     const isProPlan = usage?.subscription?.status === "active" || usage?.subscription?.status === "trialing"
+    const isCancelled = isProPlan && usage?.subscription?.cancel_at_period_end === true
+    const periodEnd = usage?.subscription?.current_period_end
+        ? new Date(usage.subscription.current_period_end).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+        : null
     const usageLimitDisplay = usage?.usage_limit === -1 ? "∞" : usage?.usage_limit ?? 5
     const usagePercent = usage?.usage_limit === -1 ? 0 : ((usage?.usage_count ?? 0) / (usage?.usage_limit ?? 5)) * 100
 
@@ -108,9 +112,12 @@ export default function ProfilePage() {
                                     {loading ? "..." : isProPlan ? "Pro" : "Free"}
                                 </span>
                             </div>
-                            {usage?.subscription?.cancel_at_period_end && (
-                                <div className="text-xs text-amber-400 bg-amber-500/10 p-2 rounded-lg">
-                                    Cancels at end of period ({new Date(usage.subscription.current_period_end).toLocaleDateString()})
+                            {periodEnd && (
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">
+                                        {isCancelled ? "Expires" : "Renews"}
+                                    </span>
+                                    <span className="text-sm font-medium">{periodEnd}</span>
                                 </div>
                             )}
                         </div>
@@ -145,43 +152,58 @@ export default function ProfilePage() {
                         )}
                     </div>
 
-                    {/* Upgrade Card — only for free users */}
-                    {!loading && !isProPlan && (
-                        <div className="glass rounded-2xl p-6 ring-2 ring-primary/30">
-                            <div className="flex items-center gap-2 mb-1">
-                                <CreditCard className="h-4 w-4 text-primary" />
-                                <h2 className="text-lg font-semibold">Upgrade to Pro</h2>
-                            </div>
-                            <p className="text-sm text-muted-foreground mb-4">
-                                Get unlimited rewrites, TTS & Avatar for $9.99/mo.
-                            </p>
-                            <Button
-                                className="w-full cursor-pointer"
-                                onClick={() => navigate("/pricing")}
-                            >
-                                View Plans
-                            </Button>
-                        </div>
-                    )}
-
-                    {/* Subscription Management */}
-                    {isProPlan && (
-                        <div className="glass rounded-2xl p-6">
+                    {/* Subscription Card */}
+                    {!loading && (
+                        <div className={`glass rounded-2xl p-6 ${isProPlan ? (isCancelled ? "ring-2 ring-amber-500/40" : "ring-2 ring-primary/30") : ""
+                            }`}>
                             <div className="flex items-center gap-2 mb-4">
                                 <CreditCard className="h-4 w-4 text-primary" />
                                 <h2 className="text-lg font-semibold">Subscription</h2>
                             </div>
-                            <Button
-                                variant="outline"
-                                className="w-full bg-white/5 border-white/10 cursor-pointer"
-                                onClick={handleManageSubscription}
-                                disabled={portalLoading}
-                            >
-                                {portalLoading ? "Opening..." : "Manage Subscription"}
-                            </Button>
-                            <p className="text-xs text-muted-foreground mt-2 text-center">
-                                Update payment method, cancel, or view invoices
-                            </p>
+
+                            {isProPlan ? (
+                                <>
+                                    {/* Cancelled warning */}
+                                    {isCancelled && periodEnd && (
+                                        <div className="mb-4 text-sm text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
+                                            Your Pro plan is active until <span className="font-semibold">{periodEnd}</span>. After that, you'll be moved to the Free plan.
+                                        </div>
+                                    )}
+
+                                    {/* Renewing info */}
+                                    {!isCancelled && periodEnd && (
+                                        <p className="text-sm text-muted-foreground mb-4">
+                                            Your plan renews on <span className="font-medium text-foreground">{periodEnd}</span>.
+                                        </p>
+                                    )}
+
+                                    <Button
+                                        variant="outline"
+                                        className="w-full bg-white/5 border-white/10 cursor-pointer"
+                                        onClick={handleManageSubscription}
+                                        disabled={portalLoading}
+                                    >
+                                        {portalLoading ? "Opening..." : "Manage Subscription"}
+                                    </Button>
+                                    <p className="text-xs text-muted-foreground mt-2 text-center">
+                                        {isCancelled
+                                            ? "Reactivate, update payment method, or view invoices"
+                                            : "Update payment method, cancel, or view invoices"}
+                                    </p>
+                                </>
+                            ) : (
+                                <>
+                                    <p className="text-sm text-muted-foreground mb-4">
+                                        Get unlimited rewrites, TTS & Avatar for $9.99/mo.
+                                    </p>
+                                    <Button
+                                        className="w-full cursor-pointer"
+                                        onClick={() => navigate("/pricing")}
+                                    >
+                                        View Plans
+                                    </Button>
+                                </>
+                            )}
                         </div>
                     )}
 
