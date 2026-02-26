@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
-import { ArrowRight, LogIn, Layers, Zap, Mic2, Filter, PenTool, Sparkles, LayoutDashboard, BrainCircuit } from "lucide-react"
+import { ArrowRight, LogIn, Layers, Zap, Mic2, Filter, PenTool, Sparkles, LayoutDashboard, BrainCircuit, Users } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 
 export default function LandingPage() {
@@ -86,7 +86,7 @@ export default function LandingPage() {
 
                         <h1 className="animate-slide-up text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.05] font-heading">
                             Don't Consume the Narrative. <br className="hidden md:block" />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-cyan-400 glow-primary">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-cyan-400">
                                 ReAngle It.
                             </span>
                         </h1>
@@ -116,14 +116,22 @@ export default function LandingPage() {
                                 Events are objective.<br />
                                 <span className="text-muted-foreground">Narratives are constructed.</span>
                             </h2>
-                            <p className="text-lg text-muted-foreground leading-relaxed">
-                                The exact same fact can be heroized, scandalized, institutionalized, or entertained. You are reading prejudices processed by others every day.
-                            </p>
+                            <div className="text-lg text-muted-foreground leading-relaxed space-y-4">
+                                <p>The exact same objective event can be:</p>
+                                <ul className="grid grid-cols-2 sm:grid-cols-3 gap-2 font-medium text-foreground/80 py-2">
+                                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary" /> Heroized</li>
+                                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary" /> Moralized</li>
+                                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary" /> Scandalized</li>
+                                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary" /> Institutionalized</li>
+                                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary" /> Ideologized</li>
+                                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary" /> Entertained</li>
+                                </ul>
+                            </div>
                             <div className="pl-6 border-l-2 border-primary/50 text-xl font-medium italic text-foreground/80">
                                 "Look at a mountain from the front, it's a ridge; from the side, a peak. Near, far, high, or low, no two views are identical."
                             </div>
                             <p className="text-lg text-foreground font-medium">
-                                <span className="text-primary font-bold">Break the cycle.</span> ReAngle brings "Narrative Capability" to everyone, democratizing the power to disassemble, reconstruct, and design your own story out of the noise.
+                                In the flood of the information explosion, most people are merely passive consumers; they lack the capability to disassemble, reconstruct, or actively design their own narratives. <span className="text-primary font-bold">This is the very reason ReAngle was born.</span>
                             </p>
                         </div>
 
@@ -166,118 +174,143 @@ export default function LandingPage() {
                     </div>
                 </section>
 
-                {/* --- Section 3: How to ReAngle --- */}
-                <section className="py-24 px-4 container max-w-6xl mx-auto text-center">
-                    <div className="max-w-3xl mx-auto mb-16">
-                        <h2 className="text-3xl md:text-5xl font-bold font-heading mb-6 tracking-tight">How to ReAngle</h2>
-                        <p className="text-xl text-muted-foreground">From the chaotic noise of the internet to a polished masterpiece in three simple steps.</p>
-                    </div>
+                {/* --- Section 3: The Narrative Engine --- */}
+                <section className="py-24 px-4 bg-muted/30 border-t border-white/5 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
 
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {/* Step 1 */}
-                        <div className="glass h-full rounded-3xl p-8 text-left hover:bg-white/10 transition-all duration-300 relative group">
-                            <div className="absolute top-8 right-8 text-6xl font-black text-white/[0.03] group-hover:text-white/[0.08] transition-colors pointer-events-none">01</div>
-                            <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 text-blue-400">
-                                <Layers className="w-7 h-7" />
+                    <div className="container max-w-5xl mx-auto relative z-10">
+                        <div className="flex flex-col md:flex-row gap-12 items-center mb-16">
+                            <div className="flex-1">
+                                <h2 className="text-3xl md:text-5xl font-bold font-heading mb-4 tracking-tight">The Narrative Engine</h2>
+                                <p className="text-lg text-muted-foreground leading-relaxed">
+                                    Not just another AI summarization tool. ReAngle is a purpose-built engine granting you absolute control over how a story is told and distributed.
+                                </p>
                             </div>
-                            <h3 className="text-2xl font-bold mb-3 font-heading">Gather</h3>
-                            <p className="text-muted-foreground leading-relaxed">Drop URLs, keywords, or documents. Feed the raw, conflicting events from around the web into the engine.</p>
+                            <div className="hidden md:flex flex-shrink-0 w-32 h-32 rounded-full border border-white/10 glass-strong items-center justify-center relative">
+                                <div className="absolute inset-0 bg-primary/10 rounded-full animate-ping opacity-20" />
+                                <BrainCircuit className="w-10 h-10 text-primary animate-pulse" />
+                            </div>
                         </div>
 
-                        {/* Step 2 */}
-                        <div className="glass h-full rounded-3xl p-8 text-left hover:bg-white/10 transition-all duration-300 relative group">
-                            <div className="absolute top-8 right-8 text-6xl font-black text-white/[0.03] group-hover:text-white/[0.08] transition-colors pointer-events-none">02</div>
-                            <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-6 text-indigo-400">
-                                <BrainCircuit className="w-7 h-7" />
+                        <div className="grid md:grid-cols-3 gap-6">
+                            {/* Feature 1 */}
+                            <div className="glass-strong p-8 rounded-3xl group hover:-translate-y-1 transition-transform duration-300">
+                                <div className="mb-6 inline-flex p-3 rounded-2xl bg-orange-500/10 text-orange-400 ring-1 ring-orange-500/20">
+                                    <LayoutDashboard className="w-6 h-6" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">Re-tell The Story</h3>
+                                <p className="text-muted-foreground text-sm leading-relaxed">
+                                    Refuse to accept pre-packaged viewpoints. Change the angle of observation and re-tell the story yourself.
+                                </p>
                             </div>
-                            <h3 className="text-2xl font-bold mb-3 font-heading">Set the Angle</h3>
-                            <p className="text-muted-foreground leading-relaxed">Heroize? Criticize? Analyze? Dial in your parameters and choose the exact stance you want to take.</p>
-                        </div>
 
-                        {/* Step 3 */}
-                        <div className="glass h-full rounded-3xl p-8 text-left hover:bg-white/10 transition-all duration-300 relative group">
-                            <div className="absolute top-8 right-8 text-6xl font-black text-white/[0.03] group-hover:text-white/[0.08] transition-colors pointer-events-none">03</div>
-                            <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-6 text-cyan-400">
-                                <Sparkles className="w-7 h-7" />
+                            {/* Feature 2 */}
+                            <div className="glass-strong p-8 rounded-3xl group hover:-translate-y-1 transition-transform duration-300">
+                                <div className="mb-6 inline-flex p-3 rounded-2xl bg-purple-500/10 text-purple-400 ring-1 ring-purple-500/20">
+                                    <Mic2 className="w-6 h-6" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">Productized Capability</h3>
+                                <p className="text-muted-foreground text-sm leading-relaxed">
+                                    Narrative capability is no longer the exclusive privilege of PR giants. We encapsulate it into an accessible service for creators.
+                                </p>
                             </div>
-                            <h3 className="text-2xl font-bold mb-3 font-heading">ReAngle</h3>
-                            <p className="text-muted-foreground leading-relaxed">Watch the engine spin facts through your unique perspective into a polished, unified long-form article.</p>
+
+                            {/* Feature 3 */}
+                            <div className="glass-strong p-8 rounded-3xl group hover:-translate-y-1 transition-transform duration-300">
+                                <div className="mb-6 inline-flex p-3 rounded-2xl bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20">
+                                    <Zap className="w-6 h-6" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">Streamlined Workflow</h3>
+                                <p className="text-muted-foreground text-sm leading-relaxed">
+                                    Compress hours of cross-referencing, multi-source research, and drafting into just a few clicks.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                {/* --- Section 4: Features --- */}
-                <section className="py-20 px-4 bg-muted/30 border-t border-white/5 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
-                    <div className="container max-w-5xl mx-auto relative z-10">
-                        <div className="mb-12">
-                            <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4 tracking-tight">The Arsenal of Creation</h2>
-                            <p className="text-lg text-muted-foreground max-w-2xl">Everything you need to assert your narrative authority.</p>
+                {/* --- Section 4: How to ReAngle --- */}
+                <section className="py-24 px-4 container max-w-5xl mx-auto">
+                    <div className="flex flex-col md:flex-row gap-12 items-center mb-16">
+                        <div className="flex-1">
+                            <h2 className="text-3xl md:text-5xl font-bold font-heading mb-4 tracking-tight">How to ReAngle</h2>
+                            <p className="text-lg text-muted-foreground leading-relaxed">From the chaotic noise of the internet to a polished masterpiece in three simple steps.</p>
+                        </div>
+                        <div className="hidden md:flex flex-shrink-0 w-32 h-32 rounded-full border border-white/10 glass-strong items-center justify-center relative">
+                            <div className="absolute inset-0 bg-primary/10 rounded-full animate-ping opacity-20" />
+                            <Sparkles className="w-10 h-10 text-primary animate-pulse" />
+                        </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-6">
+                        {/* Step 1 */}
+                        <div className="glass-strong p-8 rounded-3xl group hover:-translate-y-1 transition-transform duration-300 relative">
+                            <div className="absolute top-8 right-8 text-6xl font-black text-white/[0.03] group-hover:text-white/[0.08] transition-colors pointer-events-none">01</div>
+                            <div className="mb-6 inline-flex p-3 rounded-2xl bg-cyan-500/10 text-cyan-400 ring-1 ring-cyan-500/20">
+                                <Layers className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">Gather</h3>
+                            <p className="text-muted-foreground text-sm leading-relaxed">Toss in a bunch of URLs, Youtube, PDF, or plain text, throwing the chaos of the internet into the engine.</p>
                         </div>
 
-                        <div className="grid sm:grid-cols-2 gap-4">
-                            <div className="glass-strong p-6 rounded-3xl flex flex-col justify-between group">
-                                <div>
-                                    <div className="mb-4 inline-flex p-2.5 rounded-xl bg-orange-500/10 text-orange-400">
-                                        <LayoutDashboard className="w-5 h-5" />
-                                    </div>
-                                    <h3 className="text-xl font-bold mb-2 font-heading group-hover:text-primary transition-colors">The Angle Dials</h3>
-                                    <p className="text-muted-foreground leading-relaxed">
-                                        Infinite perspective templates. Objective analysis, harsh criticism, or humorous deconstruction. The perspective is yours to define.
-                                    </p>
-                                </div>
+                        {/* Step 2 */}
+                        <div className="glass-strong p-8 rounded-3xl group hover:-translate-y-1 transition-transform duration-300 relative">
+                            <div className="absolute top-8 right-8 text-6xl font-black text-white/[0.03] group-hover:text-white/[0.08] transition-colors pointer-events-none">02</div>
+                            <div className="mb-6 inline-flex p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 ring-1 ring-indigo-500/20">
+                                <BrainCircuit className="w-6 h-6" />
                             </div>
+                            <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">Set the Angle</h3>
+                            <p className="text-muted-foreground text-sm leading-relaxed">Heroize? Criticize? Analyze? Dial in your parameters and choose the exact stance you want to take.</p>
+                        </div>
 
-                            <div className="glass-strong p-6 rounded-3xl flex flex-col justify-between group">
-                                <div>
-                                    <div className="mb-4 inline-flex p-2.5 rounded-xl bg-purple-500/10 text-purple-400">
-                                        <Mic2 className="w-5 h-5" />
-                                    </div>
-                                    <h3 className="text-xl font-bold mb-2 font-heading group-hover:text-primary transition-colors">Voice Cloning</h3>
-                                    <p className="text-muted-foreground leading-relaxed">
-                                        Ensure every reshaping of text carries the DNA of your brand. Our AI perfectly maps and mimics your unique writing tone.
-                                    </p>
-                                </div>
+                        {/* Step 3 */}
+                        <div className="glass-strong p-8 rounded-3xl group hover:-translate-y-1 transition-transform duration-300 relative">
+                            <div className="absolute top-8 right-8 text-6xl font-black text-white/[0.03] group-hover:text-white/[0.08] transition-colors pointer-events-none">03</div>
+                            <div className="mb-6 inline-flex p-3 rounded-2xl bg-purple-500/10 text-purple-400 ring-1 ring-purple-500/20">
+                                <Sparkles className="w-6 h-6" />
                             </div>
-
-                            <div className="glass-strong p-6 rounded-3xl sm:col-span-2 flex flex-col md:flex-row items-center gap-6 group">
-                                <div className="flex-1">
-                                    <div className="mb-4 inline-flex p-2.5 rounded-xl bg-blue-500/10 text-blue-400">
-                                        <Zap className="w-5 h-5" />
-                                    </div>
-                                    <h3 className="text-xl font-bold mb-2 font-heading group-hover:text-primary transition-colors">Zero-Touch Automation</h3>
-                                    <p className="text-muted-foreground leading-relaxed">
-                                        From complex, conflicting information to perfect long-form content. What used to take hours of painstaking research and drafting, compressed into a hundredfold leap in efficiency.
-                                    </p>
-                                </div>
-                                <div className="w-full md:w-1/4 aspect-video md:aspect-[4/3] rounded-2xl glass flex items-center justify-center p-4 relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent" />
-                                    <Zap className="w-12 h-12 text-primary/50 animate-pulse" />
-                                </div>
-                            </div>
+                            <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">ReAngle</h3>
+                            <p className="text-muted-foreground text-sm leading-relaxed">Watch the engine spin facts through your unique perspective into a polished, unified long-form article.</p>
                         </div>
                     </div>
                 </section>
 
                 {/* --- Section 5: Who is ReAngling? --- */}
-                <section className="py-24 px-4 container max-w-6xl mx-auto">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-5xl font-bold font-heading mb-6 tracking-tight">Who is ReAngling?</h2>
-                        <p className="text-xl text-muted-foreground">Democratizing narrative power across industries.</p>
+                <section className="py-24 px-4 container max-w-5xl mx-auto">
+                    <div className="flex flex-col md:flex-row gap-12 items-center mb-16">
+                        <div className="flex-1">
+                            <h2 className="text-3xl md:text-5xl font-bold font-heading mb-4 tracking-tight">Who is ReAngling?</h2>
+                            <p className="text-lg text-muted-foreground leading-relaxed">Democratizing narrative power across industries.</p>
+                        </div>
+                        <div className="hidden md:flex flex-shrink-0 w-32 h-32 rounded-full border border-white/10 glass-strong items-center justify-center relative">
+                            <div className="absolute inset-0 bg-primary/10 rounded-full animate-ping opacity-20" />
+                            <Users className="w-10 h-10 text-primary animate-pulse" />
+                        </div>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-6">
-                        <div className="p-8 rounded-3xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] transition-colors">
-                            <h3 className="text-xl font-bold mb-3 text-white">Newsletter Creators</h3>
-                            <p className="text-muted-foreground">Synthesize weekly news into sharp, long-form articles loaded with your personal insight and signature tone.</p>
+                        <div className="glass-strong p-8 rounded-3xl group hover:-translate-y-1 transition-transform duration-300 relative">
+                            <div className="mb-6 inline-flex p-3 rounded-2xl bg-rose-500/10 text-rose-400 ring-1 ring-rose-500/20">
+                                <PenTool className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">Newsletter & Content Creators</h3>
+                            <p className="text-muted-foreground text-sm leading-relaxed">Synthesize weekly news into sharp, insightful long-form pieces layered with a personal signature tone.</p>
                         </div>
-                        <div className="p-8 rounded-3xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] transition-colors">
-                            <h3 className="text-xl font-bold mb-3 text-white">PR & Marketers</h3>
-                            <p className="text-muted-foreground">Draft rapid market responses and press releases that perfectly align with and violently defend your brand's stance.</p>
+
+                        <div className="glass-strong p-8 rounded-3xl group hover:-translate-y-1 transition-transform duration-300 relative">
+                            <div className="mb-6 inline-flex p-3 rounded-2xl bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20">
+                                <Mic2 className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">PR & Digital Marketers</h3>
+                            <p className="text-muted-foreground text-sm leading-relaxed">Draft rapid, market-ready responses and press releases that vehemently align with and defend brand positioning.</p>
                         </div>
-                        <div className="p-8 rounded-3xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] transition-colors">
-                            <h3 className="text-xl font-bold mb-3 text-white">Analysts & Researchers</h3>
-                            <p className="text-muted-foreground">Filter out industry noise and distill multiple reports into core research perspectives tailored to your firm's thesis.</p>
+
+                        <div className="glass-strong p-8 rounded-3xl group hover:-translate-y-1 transition-transform duration-300 relative">
+                            <div className="mb-6 inline-flex p-3 rounded-2xl bg-orange-500/10 text-orange-400 ring-1 ring-orange-500/20">
+                                <Filter className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">Analysts & Researchers</h3>
+                            <p className="text-muted-foreground text-sm leading-relaxed">Filter out industry hysteria to distill multiple data sources into core research perspectives tailored to a specific firm's thesis.</p>
                         </div>
                     </div>
                 </section>
