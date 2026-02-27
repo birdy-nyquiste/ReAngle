@@ -1,39 +1,51 @@
 # ReAngle
 
-基于大语言模型的智能文本重写应用，保留文章核心信息，根据用户指定的风格或立场重新组织和表达文章。采用现代化前后端分离架构，前端 React + Vite，后端 FastAPI。
+**ReAngle** - 把叙事能力还给每一个人
 
-## 快速体验
+横看成岭侧成峰，远近高低各不同。在信息爆炸的时代，新闻巨头、观点领袖、自媒体都在用自己的视角解读世界。由于立场不同、角度不同、观点不同，对同一个客观事件的不同主观叙事被强加给大众。ReAngle 致力于将「叙事能力」产品化，让每个人都能从被动的信息消费者，转变为掌握叙事主动权的创造者。
+
+通过封装复杂的大语言模型处理流程，ReAngle 能在一键之间，把纷繁复杂的多源素材（网页、PDF、Youtube视频等）根据您的需求视角提炼重组，生成逻辑严密、立场清晰的深度长文。
+
+## 访问ReAngle.app，免费体验
 
 <https://reangle.app/>
 
-## 核心功能
+## 核心优势及工作流 (Workflow)
 
-### 多源输入
+ReAngle 将复杂的文字生产和研究流程重塑为三个核心阶段：
+
+### 1. 汇聚与过滤 (Gather)
+
+将互联网上的信息投入引擎：
 
 - **文本粘贴**：直接输入或粘贴文本
 - **URL 抓取**：自动提取网页正文
 - **文件上传**：支持 PDF, Word, TXT 格式
 - **YouTube 视频**：提取视频字幕内容
 
-### 智能重写
+### 2. 设定视角 (Set the Angle)
 
-- **多模型支持**：OpenAI GPT, Google Gemini, Qwen Flash
-- **风格定制**：预设风格（幽默、学术、新闻等）+ 自定义提示词
-- **结构化输出**：同时生成重写文章和精简摘要
+决定您观察这座「山」的角度——由您来重新定调：
 
-### 多维展示
+- **多模型集成了当今世界最强的智慧大脑**：支持 OpenAI GPT-5, Google Gemini 3, Qwen 3
+- **深度定制的风格化**：不管您是科技乐观派还是悲观批判者，皆可通过预设风格（幽默、学术、新闻等）叠加自定义提示词掌握话语权
 
-- **摘要朗读 (TTS)**：阿里云 DashScope 语音合成
-- **数字人视频**：HeyGen API 生成 Avatar 视频
-- **原文对比**：Diff 视图高亮显示改动
-- **文件下载**：导出 TXT 格式
+### 3. 一键重塑 (ReAngle It)
 
-### 账号体系与订阅
+点击生成，AI 将瞬间读懂多源事实，产出结构化的洞察内容和不同媒介的「利器」：
+
+- **多维内容形态**：同时生成深度重写长文和精确的精简摘要
+- **摘要朗读 (TTS)**：语音合成，输出可听化素材
+- **数字人视频**：数字人新闻播报，分发流量
+- **原文对比工具**：高效的 Diff 视图高亮呈现文本改写脉络
+- **导出流**：随时导出 TXT 归档
+
+### 账号体系与体验闭环
 
 - **用户认证**：基于 Supabase 的安全登录与注册
-- **路由保护**：安全的私有页面与应用访问控制
-- **个人中心**：管理用户偏好和状态
-- **订阅付费**：Stripe 集成，支持 Pro 会员订阅
+- **私有隔离**：路由级别的应用访问控制保护用户隐私数据
+- **个人中心**：可保存您的生成记录并管理系统偏好
+- **订阅赋能**：提供专业版 (Pro) 订阅，解放完整功能
 
 ## 技术栈
 
@@ -46,6 +58,7 @@
 | shadcn/ui + Radix UI | UI 组件库 |
 | Tailwind CSS | 样式系统 |
 | React Router v6 | 路由管理 |
+| i18next & react-i18next | 多语言环境 (i18n) 与国际化支持 |
 | Supabase | 身份认证与 BaaS |
 
 ### 后端
@@ -64,8 +77,8 @@
 
 ### 前置要求
 
-- Python 3.9+
-- Node.js 20+
+- Python 3.13.4
+- Node.js 20.19.0
 - 环境变量和API Keys
 
 ### 1. 环境变量
@@ -84,16 +97,10 @@ STRIPE_SECRET_KEY=your-stripe-secret-key
 STRIPE_WEBHOOK_SECRET=your-stripe-webhook-secret
 PRICE_ID_PRO=your-stripe-price-id
 
-# 应用 URL
-API_URL=https://api.reangle.app
-FRONTEND_URL=https://reangle.app
-
-# LLM APIs (至少配置一个)
+# LLM APIs
 OPENAI_API_KEY=your-key
 GEMINI_API_KEY=your-key
 DASHSCOPE_API_KEY=your-key
-
-# Avatar 视频 (可选)
 HEYGEN_API_KEY=your-key
 ```
 
@@ -104,7 +111,7 @@ HEYGEN_API_KEY=your-key
 VITE_SUPABASE_URL=your-supabase-url
 VITE_SUPABASE_PUBLISHABLE_KEY=your-supabase-anon-key
 
-# Stripe 配置 (可选，用于前端直接跳转)
+# Stripe 配置
 VITE_STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
 ```
 
@@ -143,46 +150,68 @@ ReAngle/
 │   │   ├── dependencies.py       # 依赖注入 (Auth)
 │   │   ├── exceptions.py         # 自定义异常
 │   │   └── handlers.py           # 全局错误处理
-│   ├── middleware/               # 中间件
+│   ├── middleware/               # HTTP 中间件拦截
+│   │   └── request_logging.py    # 请求日志记录层
 │   ├── routers/                  # API 路由
 │   │   ├── rewrite.py            # 重写、TTS、Avatar
 │   │   ├── payment.py            # Stripe 订阅支付
 │   │   └── miniprogram.py        # 小程序接口
-│   ├── services/
-│   │   ├── llms/                 # LLM 客户端
+│   ├── services/                 # 核心业务逻辑
+│   │   ├── llms/                 # LLM 客户端层
+│   │   │   ├── llm.py            # LLM 通用基类
 │   │   │   ├── rewriting_client.py  # 统一重写入口
 │   │   │   ├── openai_client.py
 │   │   │   ├── gemini_client.py
 │   │   │   ├── qwen_client.py
 │   │   │   ├── tts_client.py     # 语音合成
 │   │   │   └── avatar_client.py  # 数字人视频
-│   │   ├── extractors.py         # 内容提取器
-│   │   └── stripe_service.py     # Stripe 业务逻辑
-│   └── schemas/                  # Pydantic 模型
+│   │   ├── extractors.py         # 内容采集与提取器
+│   │   ├── stripe_service.py     # Stripe 商业逻辑
+│   │   └── utils.py              # 全局通用服务函数
+│   ├── schemas/                  # Pydantic 类型验证模型
+│   │   ├── error_response_schema.py
+│   │   ├── miniprogram_schema.py
+│   │   └── rewrite_schema.py
+│   └── tests/                    # 单元/集成测试
+│       └── test_integration.py
 ├── frontend/                     # 前端 (React + Vite)
 │   ├── src/
-│   │   ├── pages/
+│   │   ├── pages/                # 各类视图页面
 │   │   │   ├── LandingPage.tsx   # 首页
 │   │   │   ├── LoginPage.tsx     # 登录页
 │   │   │   ├── RegisterPage.tsx  # 注册页
 │   │   │   ├── ProfilePage.tsx   # 个人中心
 │   │   │   ├── PricingPage.tsx   # 订阅定价页
 │   │   │   └── MainApp.tsx       # 主应用界面 (需登录)
-│   │   ├── components/
+│   │   ├── components/           # UI 及功能组件
+│   │   │   ├── AppHeader.tsx     # 导航顶栏
 │   │   │   ├── DiffView.tsx      # 原文对比组件
-│   │   │   ├── ProtectedRoute.tsx # 路由保护
+│   │   │   ├── ProtectedRoute.tsx # 路由保护组件
 │   │   │   └── ui/               # shadcn/ui 组件
-│   │   ├── context/              # React Context (Auth)
-│   │   ├── lib/
-│   │   │   ├── supabase.ts       # Supabase 客户端
-│   │   │   ├── diff-utils.ts     # Diff 工具函数
+│   │   ├── context/              # Context Providers
+│   │   │   ├── AuthContext.tsx   # 用户登录流支持
+│   │   │   └── LanguageContext.tsx # i18n 多语言环境
+│   │   ├── lib/                  # 工具类库
+│   │   │   ├── supabase.ts       # Supabase 通信
+│   │   │   ├── diff-utils.ts     # Diff 运算函数
 │   │   │   └── utils.ts
-│   │   ├── App.tsx               # 路由配置与 Auth Provider
-│   │   └── index.css             # 设计系统
-│   └── public/
+│   │   ├── locales/              # i18n 资源文件
+│   │   │   ├── index.ts
+│   │   │   ├── en.ts
+│   │   │   ├── es.ts
+│   │   │   └── zh.ts
+│   │   ├── test/                 # 前端自动化测试用例
+│   │   │   ├── components/
+│   │   │   ├── context/
+│   │   │   └── pages/
+│   │   ├── App.tsx               # 路由配置与 Providers 根目录
+│   │   ├── main.tsx              # 应用挂载入口
+│   │   └── index.css             # Tailwind 核心与系统变量
+│   └── public/                   # 静态资产
 │       └── favicon.png           # Logo
-├── docs/                         # 文档
-├── results/                      # 任务结果 (运行时生成)
-├── logs/                         # 运行日志 (运行时生成)
-└── requirements.txt              # Python 依赖
+├── docs/                         # 项目知识、价值主张 (Value Proposition) 等文档
+├── scripts/                      # 基础运维辅助脚本
+├── results/                      # 任务结果输出目录 (运行时构建)
+├── logs/                         # 持久化日志空间 (运行时构建)
+└── requirements.txt              # 后端 Python 环境约束
 ```
