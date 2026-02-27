@@ -6,11 +6,11 @@ import {
   useState,
   type ReactNode,
 } from "react"
-import { en, zh, getMessage } from "@/locales"
+import { en, zh, es, getMessage } from "@/locales"
 
 const STORAGE_KEY = "reangle-lang"
 
-export type Language = "en" | "zh"
+export type Language = "en" | "zh" | "es"
 
 function isBrowserChinese(): boolean {
   const lang =
@@ -20,11 +20,21 @@ function isBrowserChinese(): boolean {
   return /^zh(\b|-)/i.test(lang)
 }
 
+function isBrowserSpanish(): boolean {
+  const lang =
+    navigator.language ||
+    (navigator.languages && navigator.languages[0]) ||
+    ""
+  return /^es(\b|-)/i.test(lang)
+}
+
 function getInitialLanguage(): Language {
   if (typeof window === "undefined") return "en"
   const stored = localStorage.getItem(STORAGE_KEY) as Language | null
-  if (stored === "en" || stored === "zh") return stored
-  return isBrowserChinese() ? "zh" : "en"
+  if (stored === "en" || stored === "zh" || stored === "es") return stored
+  if (isBrowserChinese()) return "zh"
+  if (isBrowserSpanish()) return "es"
+  return "en"
 }
 
 interface LanguageContextType {
@@ -35,7 +45,7 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
-const messages = { en, zh } as const
+const messages = { en, zh, es } as const
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(getInitialLanguage)
@@ -43,7 +53,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang)
     localStorage.setItem(STORAGE_KEY, lang)
-    document.documentElement.lang = lang === "zh" ? "zh-CN" : "en"
+    document.documentElement.lang =
+      lang === "zh" ? "zh-CN" : lang === "es" ? "es-ES" : "en"
   }, [])
 
   const t = useCallback(
@@ -52,7 +63,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   )
 
   useEffect(() => {
-    document.documentElement.lang = language === "zh" ? "zh-CN" : "en"
+    document.documentElement.lang =
+      language === "zh" ? "zh-CN" : language === "es" ? "es-ES" : "en"
   }, [language])
 
   return (

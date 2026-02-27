@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
 import { LogOut, CreditCard, BarChart3 } from "lucide-react"
 import AppHeader from "@/components/AppHeader"
+import { useLanguage } from "@/context/LanguageContext"
 
 interface UsageData {
     usage_count: number
@@ -20,6 +21,7 @@ interface UsageData {
 export default function ProfilePage() {
     const navigate = useNavigate()
     const { user, session, signOut } = useAuth()
+    const { t } = useLanguage()
     const [usage, setUsage] = useState<UsageData | null>(null)
     const [loading, setLoading] = useState(true)
     const [portalLoading, setPortalLoading] = useState(false)
@@ -90,25 +92,31 @@ export default function ProfilePage() {
                 <div className="container max-w-lg px-4 space-y-6">
                     {/* Account Card */}
                     <div className="glass rounded-2xl p-6">
-                        <h1 className="text-xl font-bold mb-4">Account</h1>
+                        <h1 className="text-xl font-bold mb-4">
+                            {t('profile.accountTitle')}
+                        </h1>
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
-                                <span className="text-sm text-muted-foreground">Email</span>
+                                <span className="text-sm text-muted-foreground">
+                                    {t('profile.emailLabel')}
+                                </span>
                                 <span className="text-sm font-medium">{user?.email}</span>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-sm text-muted-foreground">Plan</span>
+                                <span className="text-sm text-muted-foreground">
+                                    {t('profile.planLabel')}
+                                </span>
                                 <span className={`text-sm font-medium px-2.5 py-0.5 rounded-full ${isProPlan
                                     ? "bg-primary/10 text-primary"
                                     : "bg-white/10 text-muted-foreground"
                                     }`}>
-                                    {loading ? "..." : isProPlan ? "Pro" : "Free"}
+                                    {loading ? "..." : isProPlan ? t('profile.planPro') : t('profile.planFree')}
                                 </span>
                             </div>
                             {periodEnd && (
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-muted-foreground">
-                                        {isCancelled ? "Expires" : "Renews"}
+                                                {isCancelled ? t('profile.expiresLabel') : t('profile.renewsLabel')}
                                     </span>
                                     <span className="text-sm font-medium">{periodEnd}</span>
                                 </div>
@@ -120,15 +128,21 @@ export default function ProfilePage() {
                     <div className="glass rounded-2xl p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <BarChart3 className="h-4 w-4 text-primary" />
-                            <h2 className="text-lg font-semibold">Usage</h2>
+                            <h2 className="text-lg font-semibold">
+                                {t('profile.usageTitle')}
+                            </h2>
                         </div>
 
                         {loading ? (
-                            <div className="text-sm text-muted-foreground animate-pulse">Loading...</div>
+                            <div className="text-sm text-muted-foreground animate-pulse">
+                                {t('profile.usageLoading')}
+                            </div>
                         ) : (
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="text-muted-foreground">Rewrites used</span>
+                                    <span className="text-muted-foreground">
+                                        {t('profile.rewritesUsed')}
+                                    </span>
                                     <span className="font-medium">{usage?.usage_count ?? 0} / {usageLimitDisplay}</span>
                                 </div>
 
@@ -151,7 +165,9 @@ export default function ProfilePage() {
                             }`}>
                             <div className="flex items-center gap-2 mb-4">
                                 <CreditCard className="h-4 w-4 text-primary" />
-                                <h2 className="text-lg font-semibold">Subscription</h2>
+                                <h2 className="text-lg font-semibold">
+                                    {t('profile.subscriptionTitle')}
+                                </h2>
                             </div>
 
                             {isProPlan ? (
@@ -159,14 +175,17 @@ export default function ProfilePage() {
                                     {/* Cancelled warning */}
                                     {isCancelled && periodEnd && (
                                         <div className="mb-4 text-sm text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
-                                            Your Pro plan is active until <span className="font-semibold">{periodEnd}</span>. After that, you'll be moved to the Free plan.
+                                            {t('profile.cancelledWarningPrefix')}{" "}
+                                            <span className="font-semibold">{periodEnd}</span>.{" "}
+                                            {t('profile.cancelledWarningSuffix')}
                                         </div>
                                     )}
 
                                     {/* Renewing info */}
                                     {!isCancelled && periodEnd && (
                                         <p className="text-sm text-muted-foreground mb-4">
-                                            Your plan renews on <span className="font-medium text-foreground">{periodEnd}</span>.
+                                            {t('profile.renewInfoPrefix')}{" "}
+                                            <span className="font-medium text-foreground">{periodEnd}</span>.
                                         </p>
                                     )}
 
@@ -176,24 +195,24 @@ export default function ProfilePage() {
                                         onClick={handleManageSubscription}
                                         disabled={portalLoading}
                                     >
-                                        {portalLoading ? "Opening..." : "Manage Subscription"}
+                                        {portalLoading ? t('profile.manageOpening') : t('profile.manageSubscription')}
                                     </Button>
                                     <p className="text-xs text-muted-foreground mt-2 text-center">
                                         {isCancelled
-                                            ? "Reactivate, update payment method, or view invoices"
-                                            : "Update payment method, cancel, or view invoices"}
+                                            ? t('profile.manageSubtitleCancelled')
+                                            : t('profile.manageSubtitleActive')}
                                     </p>
                                 </>
                             ) : (
                                 <>
                                     <p className="text-sm text-muted-foreground mb-4">
-                                        Get unlimited rewrites, TTS & Avatar for $9.99/mo.
+                                        {t('profile.upgradeTeaser')}
                                     </p>
                                     <Button
                                         className="w-full cursor-pointer"
                                         onClick={() => navigate("/pricing")}
                                     >
-                                        View Plans
+                                        {t('profile.viewPlans')}
                                     </Button>
                                 </>
                             )}
@@ -207,7 +226,7 @@ export default function ProfilePage() {
                         onClick={handleSignOut}
                     >
                         <LogOut className="h-4 w-4 mr-2" />
-                        Sign Out
+                        {t('profile.signOut')}
                     </Button>
                 </div>
             </main>

@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button"
 import { useNavigate, useLocation } from "react-router-dom"
 import { ArrowRight, LogIn, LogOut } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
-import { useLanguage } from "@/context/LanguageContext"
+import { useLanguage, type Language } from "@/context/LanguageContext"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function AppHeader() {
   const navigate = useNavigate()
@@ -30,6 +31,15 @@ export default function AppHeader() {
     </>
   )
 
+  const triggerLabel =
+    language === "en"
+      ? "Language: EN"
+      : language === "zh"
+      ? "语言：中文"
+      : "Idioma: ES"
+
+  const allLanguages: Language[] = ["en", "zh", "es"]
+
   return (
     <header className={headerClassName}>
       <div className={containerClassName}>
@@ -44,14 +54,28 @@ export default function AppHeader() {
         </div>
 
         {/* Language toggle: 紧挨 Logo 右侧（红圈位置） */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-sm font-medium hover:bg-white/5 min-w-[4rem] ml-2"
-          onClick={() => setLanguage(language === "en" ? "zh" : "en")}
+        <Select
+          value={language}
+          onValueChange={(value) => setLanguage(value as Language)}
         >
-          {language === "en" ? t("lang.zh") : t("lang.en")}
-        </Button>
+          <SelectTrigger className="ml-2 h-8 w-[9rem] bg-transparent border-0 text-sm font-medium hover:bg-white/5">
+            <SelectValue placeholder={triggerLabel}>
+              <span className="truncate">{triggerLabel}</span>
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent className="bg-background border-white/10">
+            {allLanguages.map((lang) => (
+              <SelectItem
+                key={lang}
+                value={lang}
+                disabled={lang === language}
+                className="cursor-pointer text-sm"
+              >
+                {lang === "en" ? "English" : lang === "zh" ? "中文" : "Español"}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         <div className="ml-auto flex items-center gap-4">
           {/* Nav: App (email + Profile + Sign Out) */}

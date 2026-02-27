@@ -4,12 +4,14 @@ import { useNavigate, Link } from "react-router-dom"
 import { Check, Sparkles, ArrowLeft, Loader2 } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import AppHeader from "@/components/AppHeader"
+import { useLanguage } from "@/context/LanguageContext"
 
 export default function PricingPage() {
     const navigate = useNavigate()
     const { user, session } = useAuth()
     const [upgradeLoading, setUpgradeLoading] = useState(false)
     const [upgradeError, setUpgradeError] = useState<string | null>(null)
+    const { t } = useLanguage()
 
     // Check if user is already Pro by fetching usage data
     // We rely on the action returned from the checkout session API to distinguish
@@ -35,7 +37,7 @@ export default function PricingPage() {
             }
         } catch (err: any) {
             console.error("Failed to create checkout session:", err)
-            setUpgradeError("Something went wrong. Please try again.")
+            setUpgradeError(t('pricing.upgradeErrorGeneric'))
             setUpgradeLoading(false)
         }
     }
@@ -49,19 +51,27 @@ export default function PricingPage() {
             <main className="flex-1 flex items-center justify-center pt-24 pb-12">
                 <div className="container max-w-4xl px-4">
                     <div className="text-center mb-12">
-                        <h1 className="text-3xl sm:text-4xl font-bold mb-3">Simple pricing</h1>
-                        <p className="text-muted-foreground">Start free, upgrade when you need more.</p>
+                        <h1 className="text-3xl sm:text-4xl font-bold mb-3">
+                            {t('pricing.title')}
+                        </h1>
+                        <p className="text-muted-foreground">
+                            {t('pricing.subtitle')}
+                        </p>
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
                         {/* Free Plan */}
                         <div className="glass rounded-2xl p-6 flex flex-col">
-                            <h3 className="text-lg font-semibold mb-1">Free</h3>
+                            <h3 className="text-lg font-semibold mb-1">
+                                {t('pricing.freeTitle')}
+                            </h3>
                             <div className="text-3xl font-bold mb-1">$0<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
-                            <p className="text-sm text-muted-foreground mb-6">For trying things out</p>
+                            <p className="text-sm text-muted-foreground mb-6">
+                                {t('pricing.freeTagline')}
+                            </p>
 
                             <ul className="space-y-3 mb-8 flex-1">
-                                {["5 rewrites per month", "All AI models", "All input formats", "Summary & comparison"].map(f => (
+                                {[t('pricing.freeFeature1'), t('pricing.freeFeature2'), t('pricing.freeFeature3'), t('pricing.freeFeature4')].map(f => (
                                     <li key={f} className="flex items-center gap-2 text-sm">
                                         <Check className="h-4 w-4 text-primary flex-shrink-0" />
                                         {f}
@@ -74,7 +84,7 @@ export default function PricingPage() {
                                 className="w-full bg-white/5 border-white/10 cursor-pointer"
                                 onClick={() => navigate(user ? "/app" : "/register")}
                             >
-                                {user ? "Go to App" : "Get Started"}
+                                {user ? t('pricing.freeCtaGoToApp') : t('pricing.freeCtaGetStarted')}
                             </Button>
                         </div>
 
@@ -82,16 +92,20 @@ export default function PricingPage() {
                         <div className="glass rounded-2xl p-6 flex flex-col ring-2 ring-primary/50 relative">
                             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                                 <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-primary text-primary-foreground">
-                                    <Sparkles className="h-3 w-3" /> Popular
+                                    <Sparkles className="h-3 w-3" /> {t('pricing.proBadge')}
                                 </span>
                             </div>
 
-                            <h3 className="text-lg font-semibold mb-1">Pro</h3>
+                            <h3 className="text-lg font-semibold mb-1">
+                                {t('pricing.proTitle')}
+                            </h3>
                             <div className="text-3xl font-bold mb-1">$9.99<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
-                            <p className="text-sm text-muted-foreground mb-6">For power users</p>
+                            <p className="text-sm text-muted-foreground mb-6">
+                                {t('pricing.proTagline')}
+                            </p>
 
                             <ul className="space-y-3 mb-8 flex-1">
-                                {["Unlimited rewrites", "All AI models", "All input formats", "Summary & comparison", "Priority support", "TTS & Avatar"].map(f => (
+                                {[t('pricing.proFeature1'), t('pricing.proFeature2'), t('pricing.proFeature3'), t('pricing.proFeature4'), t('pricing.proFeature5'), t('pricing.proFeature6')].map(f => (
                                     <li key={f} className="flex items-center gap-2 text-sm">
                                         <Check className="h-4 w-4 text-primary flex-shrink-0" />
                                         {f}
@@ -105,9 +119,9 @@ export default function PricingPage() {
                                 disabled={upgradeLoading}
                             >
                                 {upgradeLoading ? (
-                                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Please wait...</>
+                                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t('pricing.proCtaLoading')}</>
                                 ) : (
-                                    "Upgrade to Pro"
+                                    t('pricing.proCta')
                                 )}
                             </Button>
 
@@ -120,7 +134,7 @@ export default function PricingPage() {
                     <div className="text-center mt-6">
                         <Link to="/" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
                             <ArrowLeft className="h-3 w-3" />
-                            Back to home
+                            {t('common.backHome')}
                         </Link>
                     </div>
                 </div>

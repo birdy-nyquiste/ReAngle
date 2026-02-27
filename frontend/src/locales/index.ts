@@ -5,6 +5,7 @@
 
 export { en, type LocaleEn } from "./en"
 export { zh } from "./zh"
+export { es } from "./es"
 
 export type LocaleMessages = Record<string, unknown>
 

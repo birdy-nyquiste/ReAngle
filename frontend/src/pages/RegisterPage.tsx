@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import AppHeader from '@/components/AppHeader'
+import { useLanguage } from '@/context/LanguageContext'
 
 export default function RegisterPage() {
     const [email, setEmail] = useState('')
@@ -13,17 +14,18 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
     const { signUp } = useAuth()
+    const { t } = useLanguage()
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
 
         if (password !== confirmPassword) {
-            setError('Passwords do not match')
+            setError(t('auth.passwordMismatch'))
             return
         }
 
         if (password.length < 6) {
-            setError('Password must be at least 6 characters')
+            setError(t('auth.passwordTooShort'))
             return
         }
 
@@ -46,13 +48,15 @@ export default function RegisterPage() {
                 <main className="flex-1 flex items-center justify-center pt-24 pb-12">
                     <div className="w-full max-w-sm mx-auto px-4">
                         <div className="glass rounded-2xl p-8 text-center">
-                            <h1 className="text-2xl font-bold mb-2">Check your email</h1>
+                            <h1 className="text-2xl font-bold mb-2">
+                                {t('auth.registerSuccessTitle')}
+                            </h1>
                             <p className="text-sm text-muted-foreground mb-6">
-                                We've sent a confirmation link to <strong>{email}</strong>.
-                                Click the link to activate your account.
+                                {t('auth.registerSuccessPrefix')} <strong>{email}</strong>.{" "}
+                                {t('auth.registerSuccessSuffix')}
                             </p>
                             <Link to="/login">
-                                <Button className="cursor-pointer">Go to Login</Button>
+                                <Button className="cursor-pointer">{t('auth.goToLogin')}</Button>
                             </Link>
                         </div>
                     </div>
@@ -69,9 +73,11 @@ export default function RegisterPage() {
             <main className="flex-1 flex items-center justify-center pt-24 pb-12">
                 <div className="w-full max-w-sm mx-auto px-4">
                     <div className="glass rounded-2xl p-8">
-                        <h1 className="text-2xl font-bold text-center mb-2">Create an account</h1>
+                        <h1 className="text-2xl font-bold text-center mb-2">
+                            {t('auth.registerTitle')}
+                        </h1>
                         <p className="text-sm text-muted-foreground text-center mb-6">
-                            Start your free plan with 5 rewrites
+                            {t('auth.registerSubtitle')}
                         </p>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -83,7 +89,7 @@ export default function RegisterPage() {
 
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium mb-1.5">
-                                    Email
+                                    {t('auth.emailLabel')}
                                 </label>
                                 <input
                                     id="email"
@@ -92,13 +98,13 @@ export default function RegisterPage() {
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
                                     className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                    placeholder="you@example.com"
+                                    placeholder={t('auth.emailPlaceholder')}
                                 />
                             </div>
 
                             <div>
                                 <label htmlFor="password" className="block text-sm font-medium mb-1.5">
-                                    Password
+                                    {t('auth.passwordLabel')}
                                 </label>
                                 <input
                                     id="password"
@@ -107,13 +113,13 @@ export default function RegisterPage() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                     className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                    placeholder="••••••••"
+                                    placeholder={t('auth.passwordPlaceholder')}
                                 />
                             </div>
 
                             <div>
                                 <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1.5">
-                                    Confirm Password
+                                    {t('auth.confirmPasswordLabel')}
                                 </label>
                                 <input
                                     id="confirmPassword"
@@ -122,19 +128,19 @@ export default function RegisterPage() {
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     required
                                     className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                    placeholder="••••••••"
+                                    placeholder={t('auth.passwordPlaceholder')}
                                 />
                             </div>
 
                             <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
-                                {loading ? 'Creating account...' : 'Create Account'}
+                                {loading ? t('auth.creatingAccount') : t('auth.createAccount')}
                             </Button>
                         </form>
 
                         <p className="text-sm text-muted-foreground text-center mt-6">
-                            Already have an account?{' '}
+                            {t('auth.alreadyHaveAccount')}{' '}
                             <Link to="/login" className="text-primary hover:underline">
-                                Sign in
+                                {t('auth.registerSignInLink')}
                             </Link>
                         </p>
                     </div>
@@ -142,7 +148,7 @@ export default function RegisterPage() {
                     <div className="text-center mt-4">
                         <Link to="/" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
                             <ArrowLeft className="h-3 w-3" />
-                            Back to home
+                            {t('common.backHome')}
                         </Link>
                     </div>
                 </div>
