@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { useNavigate, Link } from "react-router-dom"
+import { useNavigate} from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
 import { LogOut, CreditCard, BarChart3 } from "lucide-react"
 import AppHeader from "@/components/AppHeader"
