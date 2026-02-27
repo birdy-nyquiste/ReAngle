@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
+import AppHeader from '@/components/AppHeader'
+import { useLanguage } from '@/context/LanguageContext'
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
@@ -11,6 +13,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false)
     const { signIn } = useAuth()
     const navigate = useNavigate()
+    const { t } = useLanguage()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -29,23 +32,17 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen flex flex-col bg-background aurora-bg">
-            {/* Header */}
-            <header className="floating-nav">
-                <div className="container flex h-14 items-center px-6">
-                    <Link to="/" className="flex items-center gap-2.5 font-bold text-lg">
-                        <img src="/favicon.png" alt="ReAngle" className="h-8 w-8 rounded-lg" />
-                        <span>ReAngle</span>
-                    </Link>
-                </div>
-            </header>
+            <AppHeader />
 
             {/* Form */}
             <main className="flex-1 flex items-center justify-center pt-24 pb-12">
                 <div className="w-full max-w-sm mx-auto px-4">
                     <div className="glass rounded-2xl p-8">
-                        <h1 className="text-2xl font-bold text-center mb-2">Welcome back</h1>
+                        <h1 className="text-2xl font-bold text-center mb-2">
+                            {t('auth.loginTitle')}
+                        </h1>
                         <p className="text-sm text-muted-foreground text-center mb-6">
-                            Sign in to your account
+                            {t('auth.loginSubtitle')}
                         </p>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -57,7 +54,7 @@ export default function LoginPage() {
 
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium mb-1.5">
-                                    Email
+                                    {t('auth.emailLabel')}
                                 </label>
                                 <input
                                     id="email"
@@ -66,13 +63,13 @@ export default function LoginPage() {
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
                                     className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                    placeholder="you@example.com"
+                                    placeholder={t('auth.emailPlaceholder')}
                                 />
                             </div>
 
                             <div>
                                 <label htmlFor="password" className="block text-sm font-medium mb-1.5">
-                                    Password
+                                    {t('auth.passwordLabel')}
                                 </label>
                                 <input
                                     id="password"
@@ -81,19 +78,19 @@ export default function LoginPage() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                     className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                    placeholder="••••••••"
+                                    placeholder={t('auth.passwordPlaceholder')}
                                 />
                             </div>
 
                             <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
-                                {loading ? 'Signing in...' : 'Sign In'}
+                                {loading ? t('auth.signingIn') : t('auth.signIn')}
                             </Button>
                         </form>
 
                         <p className="text-sm text-muted-foreground text-center mt-6">
-                            Don't have an account?{' '}
+                            {t('auth.noAccount')}{' '}
                             <Link to="/register" className="text-primary hover:underline">
-                                Sign up
+                                {t('auth.signUp')}
                             </Link>
                         </p>
                     </div>
@@ -101,7 +98,7 @@ export default function LoginPage() {
                     <div className="text-center mt-4">
                         <Link to="/" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
                             <ArrowLeft className="h-3 w-3" />
-                            Back to home
+                            {t('common.backHome')}
                         </Link>
                     </div>
                 </div>
