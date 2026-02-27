@@ -118,9 +118,9 @@ export const es: LocaleEn = {
     configuration: "Configuración",
     aiModel: "Modelo de IA",
     selectModel: "Seleccionar modelo",
-    modelGpt: "GPT-5 (Mejor calidad)",
-    modelGemini: "Gemini 2.5 Flash",
-    modelQwen: "Qwen Flash",
+    modelGpt: "GPT-5",
+    modelGemini: "Gemini 3",
+    modelQwen: "Qwen 3",
 
     styleInstructions: "Indicaciones de estilo",
     presets: "Preajustes",

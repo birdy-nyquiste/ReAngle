@@ -15,7 +15,7 @@ from app.schemas.rewrite_schema import LLMResponse
 async def get_rewriting_result(
     instruction: str,
     source: str,
-    model: str = "gpt-5",
+    model: str = "gpt-5-mini",
 ):
     """
     调用 OpenAI Responses API 洗稿。
@@ -23,7 +23,7 @@ async def get_rewriting_result(
     Args:
         instruction: 用户输入的洗稿方式或选择的洗稿风格预设
         source: 原始文章
-        model: 模型选择，默认为gpt-5
+        model: 模型选择，默认为gpt-5-mini
 
     Returns:
         OpenAI Response 对象

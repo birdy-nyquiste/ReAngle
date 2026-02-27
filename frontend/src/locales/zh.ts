@@ -113,9 +113,9 @@ export const zh: LocaleEn = {
     configuration: "设置",
     aiModel: "AI 模型",
     selectModel: "选择模型",
-    modelGpt: "GPT-5（质量最佳）",
-    modelGemini: "Gemini 2.5 Flash",
-    modelQwen: "Qwen Flash",
+    modelGpt: "GPT-5",
+    modelGemini: "Gemini 3",
+    modelQwen: "Qwen 3",
 
     styleInstructions: "风格要求",
     presets: "预设",

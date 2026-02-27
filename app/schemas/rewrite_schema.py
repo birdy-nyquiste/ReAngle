@@ -11,8 +11,8 @@ class LLMType(str, Enum):
     支持的大模型类型。
     """
 
-    OPENAI = "gpt-5"
-    GEMINI = "gemini-2.5-flash"
+    OPENAI = "gpt-5-mini"
+    GEMINI = "gemini-3-flash-preview"
     QWEN = "qwen-flash"
 
 

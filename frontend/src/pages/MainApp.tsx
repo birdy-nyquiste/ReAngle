@@ -365,8 +365,8 @@ export default function MainApp() {
                                         <SelectValue placeholder={t("mainApp.selectModel")} />
                                     </SelectTrigger>
                                     <SelectContent className="bg-[#1e293b] border-white/10">
-                                        <SelectItem value="gpt-5" className="cursor-pointer">{t("mainApp.modelGpt")}</SelectItem>
-                                        <SelectItem value="gemini-2.5-flash" className="cursor-pointer">{t("mainApp.modelGemini")}</SelectItem>
+                                        <SelectItem value="gpt-5-mini" className="cursor-pointer">{t("mainApp.modelGpt")}</SelectItem>
+                                        <SelectItem value="gemini-3-flash-preview" className="cursor-pointer">{t("mainApp.modelGemini")}</SelectItem>
                                         <SelectItem value="qwen-flash" className="cursor-pointer">{t("mainApp.modelQwen")}</SelectItem>
                                     </SelectContent>
                                 </Select>
