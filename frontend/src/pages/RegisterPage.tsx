@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
+import AppHeader from '@/components/AppHeader'
 
 export default function RegisterPage() {
     const [email, setEmail] = useState('')
@@ -41,14 +42,7 @@ export default function RegisterPage() {
     if (success) {
         return (
             <div className="min-h-screen flex flex-col bg-background aurora-bg">
-                <header className="floating-nav">
-                    <div className="container flex h-14 items-center px-6">
-                        <Link to="/" className="flex items-center gap-2.5 font-bold text-lg">
-                            <img src="/favicon.png" alt="ReAngle" className="h-8 w-8 rounded-lg" />
-                            <span>ReAngle</span>
-                        </Link>
-                    </div>
-                </header>
+                <AppHeader />
                 <main className="flex-1 flex items-center justify-center pt-24 pb-12">
                     <div className="w-full max-w-sm mx-auto px-4">
                         <div className="glass rounded-2xl p-8 text-center">
@@ -69,15 +63,7 @@ export default function RegisterPage() {
 
     return (
         <div className="min-h-screen flex flex-col bg-background aurora-bg">
-            {/* Header */}
-            <header className="floating-nav">
-                <div className="container flex h-14 items-center px-6">
-                    <Link to="/" className="flex items-center gap-2.5 font-bold text-lg">
-                        <img src="/favicon.png" alt="ReAngle" className="h-8 w-8 rounded-lg" />
-                        <span>ReAngle</span>
-                    </Link>
-                </div>
-            </header>
+            <AppHeader />
 
             {/* Form */}
             <main className="flex-1 flex items-center justify-center pt-24 pb-12">

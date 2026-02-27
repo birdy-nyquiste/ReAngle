@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DiffView } from "@/components/DiffView"
-import { Loader2, Trash2, FileText, Link as LinkIcon, Youtube, Type, Play, Download, Sparkles, Settings2, FolderInput, LogOut, Zap, X } from "lucide-react"
+import { Loader2, Trash2, FileText, Link as LinkIcon, Youtube, Type, Play, Download, Sparkles, Settings2, FolderInput, Zap, X } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
+import { useLanguage } from "@/context/LanguageContext"
+import AppHeader from "@/components/AppHeader"
 
 // Types
 interface InputItem {
@@ -27,7 +29,8 @@ interface RewriteResult {
 }
 
 export default function MainApp() {
-    const { user, session, signOut } = useAuth()
+    const { session } = useAuth()
+    const { t } = useLanguage()
 
     // State
     const [activeInputTab, setActiveInputTab] = useState("text")
@@ -75,19 +78,19 @@ export default function MainApp() {
         if (activeInputTab === "text" && inputText.trim()) {
             newItem = {
                 id, type: "text", content: inputText,
-                meta: { title: "Text Snippet", detail: `${inputText.length} chars` }
+                meta: { title: t("mainApp.textSnippet"), detail: `${inputText.length} chars` }
             }
             setInputText("")
         } else if (activeInputTab === "url" && inputUrl.trim()) {
             newItem = {
                 id, type: "url", content: inputUrl,
-                meta: { title: "URL", detail: inputUrl }
+                meta: { title: t("mainApp.url"), detail: inputUrl }
             }
             setInputUrl("")
         } else if (activeInputTab === "youtube" && inputUrl.trim()) {
             newItem = {
                 id, type: "youtube", content: inputUrl,
-                meta: { title: "YouTube", detail: inputUrl }
+                meta: { title: t("mainApp.youtube"), detail: inputUrl }
             }
             setInputUrl("")
         } else if (activeInputTab === "file" && inputFile) {
@@ -109,7 +112,7 @@ export default function MainApp() {
 
     const handleProcess = async () => {
         if (inputItems.length === 0) {
-            setError("Please add at least one input item.")
+            setError(t("mainApp.errorAddItem"))
             return
         }
 
@@ -160,10 +163,10 @@ export default function MainApp() {
             if (!res.ok) {
                 if (res.status === 402) {
                     setIsUsageLimitError(true)
-                    throw new Error("Usage limit reached. Please upgrade your plan.")
+                    throw new Error(t("mainApp.errorUsageLimit"))
                 }
                 if (res.status === 401) {
-                    throw new Error("Your session has expired. Please sign in again.")
+                    throw new Error(t("mainApp.errorSessionExpired"))
                 }
                 throw new Error(`Server error: ${res.status}`)
             }
@@ -233,41 +236,13 @@ export default function MainApp() {
             {checkoutSuccess && (
                 <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center gap-3 bg-green-500/20 border-b border-green-500/30 backdrop-blur px-4 py-3 text-sm text-green-300">
                     <Sparkles className="h-4 w-4 flex-shrink-0" />
-                    <span>🎉 You're now on Pro! Enjoy unlimited rewrites.</span>
+                    <span>🎉 {t("mainApp.checkoutBanner")}</span>
                     <button onClick={() => setCheckoutSuccess(false)} className="ml-auto opacity-70 hover:opacity-100">
                         <X className="h-4 w-4" />
                     </button>
                 </div>
             )}
-            {/* Floating Navigation */}
-            <header className="floating-nav">
-                <div className="container flex h-14 items-center px-6">
-                    <a href="/" className="flex items-center gap-2.5 font-bold text-lg cursor-pointer hover:opacity-80 transition-opacity">
-                        <img src="/favicon.png" alt="ReAngle" className="h-8 w-8 rounded-lg" />
-                        <span>ReAngle</span>
-                    </a>
-                    <div className="ml-auto flex items-center gap-3">
-                        <span className="text-xs text-muted-foreground">{user?.email}</span>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="cursor-pointer text-muted-foreground hover:text-foreground"
-                            onClick={() => window.location.href = "/profile"}
-                        >
-                            Profile
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="cursor-pointer text-muted-foreground hover:text-foreground"
-                            onClick={signOut}
-                        >
-                            <LogOut className="h-4 w-4 mr-1.5" />
-                            Sign Out
-                        </Button>
-                    </div>
-                </div>
-            </header>
+            <AppHeader />
 
             {/* Main Content */}
             <main className="flex-1 container pt-24 pb-6 flex flex-col lg:flex-row gap-6 min-h-0">
@@ -281,8 +256,8 @@ export default function MainApp() {
                                 <FolderInput className="h-4 w-4 text-primary" />
                             </div>
                             <div>
-                                <h2 className="font-semibold text-sm">Input Sources</h2>
-                                <p className="text-xs text-muted-foreground">Add content to transform</p>
+                                <h2 className="font-semibold text-sm">{t("mainApp.inputSources")}</h2>
+                                <p className="text-xs text-muted-foreground">{t("mainApp.addContentToTransform")}</p>
                             </div>
                         </div>
                         <div className="p-5 space-y-4">
@@ -305,7 +280,7 @@ export default function MainApp() {
                                 <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/5">
                                     {activeInputTab === 'text' && (
                                         <Textarea
-                                            placeholder="Paste your text here..."
+                                            placeholder={t("mainApp.pastePlaceholder")}
                                             className="min-h-[100px] bg-transparent border-white/10 placeholder:text-muted-foreground/50 resize-none"
                                             value={inputText}
                                             onChange={e => setInputText(e.target.value)}
@@ -313,7 +288,7 @@ export default function MainApp() {
                                     )}
                                     {(activeInputTab === 'url' || activeInputTab === 'youtube') && (
                                         <Input
-                                            placeholder={activeInputTab === 'url' ? "https://example.com/article" : "https://youtube.com/watch?v=..."}
+                                            placeholder={activeInputTab === 'url' ? t("mainApp.urlPlaceholder") : t("mainApp.ytPlaceholder")}
                                             value={inputUrl}
                                             onChange={e => setInputUrl(e.target.value)}
                                             className="bg-transparent border-white/10 placeholder:text-muted-foreground/50"
@@ -321,14 +296,14 @@ export default function MainApp() {
                                     )}
                                     {activeInputTab === 'file' && (
                                         <div className="space-y-2">
-                                            <Label htmlFor="file" className="text-xs text-muted-foreground">Upload File</Label>
+                                            <Label htmlFor="file" className="text-xs text-muted-foreground">{t("mainApp.uploadFile")}</Label>
                                             <Input
                                                 id="file"
                                                 type="file"
                                                 onChange={e => setInputFile(e.target.files?.[0] || null)}
                                                 className="bg-transparent border-white/10 file:bg-white/10 file:border-0 file:text-foreground file:text-xs file:mr-3 cursor-pointer"
                                             />
-                                            <p className="text-xs text-muted-foreground/70">Supported: TXT, PDF, DOCX</p>
+                                            <p className="text-xs text-muted-foreground/70">{t("mainApp.supportedFormats")}</p>
                                         </div>
                                     )}
 
@@ -337,7 +312,7 @@ export default function MainApp() {
                                         variant="outline"
                                         onClick={handleAddInput}
                                     >
-                                        Add to Queue
+                                        {t("mainApp.addToQueue")}
                                     </Button>
                                 </div>
                             </Tabs>
@@ -345,7 +320,7 @@ export default function MainApp() {
                             {/* Queue */}
                             <div className="space-y-2">
                                 <Label className="text-xs text-muted-foreground">
-                                    Queue ({inputItems.length})
+                                    {t("mainApp.queue")} ({inputItems.length})
                                 </Label>
                                 <div className="space-y-2 max-h-[140px] overflow-y-auto">
                                     {inputItems.map(item => (
@@ -366,7 +341,7 @@ export default function MainApp() {
                                     ))}
                                     {inputItems.length === 0 && (
                                         <div className="text-xs text-muted-foreground/50 text-center py-6 border border-dashed border-white/10 rounded-lg">
-                                            No items in queue
+                                            {t("mainApp.noItemsInQueue")}
                                         </div>
                                     )}
                                 </div>
@@ -380,40 +355,40 @@ export default function MainApp() {
                             <div className="p-2 rounded-lg bg-violet-500/10">
                                 <Settings2 className="h-4 w-4 text-violet-400" />
                             </div>
-                            <h2 className="font-semibold text-sm">Configuration</h2>
+                            <h2 className="font-semibold text-sm">{t("mainApp.configuration")}</h2>
                         </div>
                         <div className="p-5 space-y-4">
                             <div className="space-y-2">
-                                <Label className="text-xs text-muted-foreground">AI Model</Label>
+                                <Label className="text-xs text-muted-foreground">{t("mainApp.aiModel")}</Label>
                                 <Select value={model} onValueChange={setModel}>
                                     <SelectTrigger className="bg-white/5 border-white/10 cursor-pointer">
-                                        <SelectValue placeholder="Select model" />
+                                        <SelectValue placeholder={t("mainApp.selectModel")} />
                                     </SelectTrigger>
                                     <SelectContent className="bg-[#1e293b] border-white/10">
-                                        <SelectItem value="gpt-5" className="cursor-pointer">GPT-5 (Best Quality)</SelectItem>
-                                        <SelectItem value="gemini-2.5-flash" className="cursor-pointer">Gemini 2.5 Flash</SelectItem>
-                                        <SelectItem value="qwen-flash" className="cursor-pointer">Qwen Flash</SelectItem>
+                                        <SelectItem value="gpt-5" className="cursor-pointer">{t("mainApp.modelGpt")}</SelectItem>
+                                        <SelectItem value="gemini-2.5-flash" className="cursor-pointer">{t("mainApp.modelGemini")}</SelectItem>
+                                        <SelectItem value="qwen-flash" className="cursor-pointer">{t("mainApp.modelQwen")}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
 
                             <div className="space-y-2">
                                 <div className="flex justify-between items-center">
-                                    <Label className="text-xs text-muted-foreground">Style Instructions</Label>
+                                    <Label className="text-xs text-muted-foreground">{t("mainApp.styleInstructions")}</Label>
                                     <Select onValueChange={handlePreset}>
                                         <SelectTrigger className="h-7 w-[100px] text-xs bg-white/5 border-white/10 cursor-pointer">
-                                            <SelectValue placeholder="Presets" />
+                                            <SelectValue placeholder={t("mainApp.presets")} />
                                         </SelectTrigger>
                                         <SelectContent className="bg-[#1e293b] border-white/10">
-                                            <SelectItem value="Humorous Tone" className="cursor-pointer text-xs">Humorous</SelectItem>
-                                            <SelectItem value="Academic Tone" className="cursor-pointer text-xs">Academic</SelectItem>
-                                            <SelectItem value="Journalistic Tone" className="cursor-pointer text-xs">Journalistic</SelectItem>
-                                            <SelectItem value="Blog style" className="cursor-pointer text-xs">Blog Post</SelectItem>
+                                            <SelectItem value="Humorous Tone" className="cursor-pointer text-xs">{t("mainApp.presetHumorous")}</SelectItem>
+                                            <SelectItem value="Academic Tone" className="cursor-pointer text-xs">{t("mainApp.presetAcademic")}</SelectItem>
+                                            <SelectItem value="Journalistic Tone" className="cursor-pointer text-xs">{t("mainApp.presetJournalistic")}</SelectItem>
+                                            <SelectItem value="Blog style" className="cursor-pointer text-xs">{t("mainApp.presetBlog")}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <Textarea
-                                    placeholder="e.g. Make it more professional and concise..."
+                                    placeholder={t("mainApp.promptPlaceholder")}
                                     value={prompt}
                                     onChange={e => setPrompt(e.target.value)}
                                     className="bg-white/5 border-white/10 placeholder:text-muted-foreground/50 resize-none min-h-[80px]"
@@ -427,11 +402,11 @@ export default function MainApp() {
                                 disabled={isLoading || inputItems.length === 0}
                             >
                                 {isLoading ? (
-                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
+                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("mainApp.processing")}</>
                                 ) : (
                                     <>
                                         <Sparkles className="mr-2 h-4 w-4" />
-                                        Transform Content
+                                        {t("mainApp.transformContent")}
                                     </>
                                 )}
                             </Button>
@@ -446,15 +421,15 @@ export default function MainApp() {
                                 <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg space-y-2">
                                     <div className="flex items-center gap-2 text-primary text-xs font-semibold">
                                         <Zap className="h-3.5 w-3.5" />
-                                        Monthly limit reached
+                                        {t("mainApp.monthlyLimitReached")}
                                     </div>
-                                    <p className="text-xs text-muted-foreground">Upgrade to Pro for unlimited rewrites.</p>
+                                    <p className="text-xs text-muted-foreground">{t("mainApp.upgradeProDesc")}</p>
                                     <Button
                                         size="sm"
                                         className="w-full cursor-pointer"
                                         onClick={() => window.location.href = "/pricing"}
                                     >
-                                        Upgrade to Pro
+                                        {t("mainApp.upgradeToPro")}
                                     </Button>
                                 </div>
                             )}
@@ -469,7 +444,7 @@ export default function MainApp() {
                             <div className="p-6 rounded-2xl bg-white/5 mb-6">
                                 <Sparkles className="w-10 h-10 opacity-20" />
                             </div>
-                            <p className="text-sm">Add sources and click "Transform Content" to see results</p>
+                            <p className="text-sm">{t("mainApp.addSourcesHint")}</p>
                         </div>
                     ) : (
                         <Tabs value={activeResultTab} onValueChange={setActiveResultTab} className="flex-1 flex flex-col overflow-hidden">
@@ -479,19 +454,19 @@ export default function MainApp() {
                                         value="summary"
                                         className="data-[state=active]:bg-white/10 data-[state=active]:shadow-none rounded-lg px-4 cursor-pointer"
                                     >
-                                        Summary
+                                        {t("mainApp.summary")}
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="rewritten"
                                         className="data-[state=active]:bg-white/10 data-[state=active]:shadow-none rounded-lg px-4 cursor-pointer"
                                     >
-                                        Rewritten
+                                        {t("mainApp.rewritten")}
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="compare"
                                         className="data-[state=active]:bg-white/10 data-[state=active]:shadow-none rounded-lg px-4 cursor-pointer"
                                     >
-                                        Compare
+                                        {t("mainApp.compare")}
                                     </TabsTrigger>
                                 </TabsList>
                             </div>
@@ -500,7 +475,7 @@ export default function MainApp() {
                                 <TabsContent value="summary" className="mt-0 h-full">
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between">
-                                            <h3 className="text-lg font-semibold">Summary</h3>
+                                            <h3 className="text-lg font-semibold">{t("mainApp.summary")}</h3>
                                             <div className="flex items-center gap-2">
                                                 {audioUrl ? (
                                                     <audio ref={audioRef} controls src={audioUrl} className="h-8" />
@@ -513,7 +488,7 @@ export default function MainApp() {
                                                         className="bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer"
                                                     >
                                                         {ttsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
-                                                        Read Aloud
+                                                        {t("mainApp.readAloud")}
                                                     </Button>
                                                 )}
                                             </div>
@@ -527,7 +502,7 @@ export default function MainApp() {
                                 <TabsContent value="rewritten" className="mt-0 h-full">
                                     <div className="space-y-4 h-full flex flex-col">
                                         <div className="flex items-center justify-between">
-                                            <h3 className="text-lg font-semibold">Rewritten Content</h3>
+                                            <h3 className="text-lg font-semibold">{t("mainApp.rewrittenContent")}</h3>
                                             <Button
                                                 size="sm"
                                                 variant="outline"
@@ -535,7 +510,7 @@ export default function MainApp() {
                                                 className="bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer"
                                             >
                                                 <Download className="w-4 h-4 mr-2" />
-                                                Download
+                                                {t("mainApp.download")}
                                             </Button>
                                         </div>
                                         <div className="flex-1 p-5 rounded-xl bg-white/5 border border-white/5 overflow-auto">

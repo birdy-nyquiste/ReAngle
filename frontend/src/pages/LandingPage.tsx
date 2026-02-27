@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
-import { ArrowRight, LogIn, Layers, Zap, Mic2, Filter, PenTool, Sparkles, LayoutDashboard, BrainCircuit, Users } from "lucide-react"
+import { ArrowRight, Layers, Zap, Mic2, Filter, PenTool, Sparkles, LayoutDashboard, BrainCircuit, Users } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
+import AppHeader from "@/components/AppHeader"
 
 export default function LandingPage() {
     const navigate = useNavigate()
@@ -23,59 +24,7 @@ export default function LandingPage() {
                 />
             </div>
 
-            {/* Navigation */}
-            <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5 backdrop-blur-md">
-                <div className="container flex h-16 items-center px-6 mx-auto max-w-7xl">
-                    <div className="flex items-center gap-3 font-bold text-xl tracking-tight font-heading cursor-pointer" onClick={() => navigate("/")}>
-                        <img src="/favicon.png" alt="ReAngle" className="h-8 w-8 rounded-lg" />
-                        <span>ReAngle</span>
-                    </div>
-                    <nav className="ml-auto flex items-center gap-4">
-                        <Button
-                            variant="ghost"
-                            className="text-sm font-medium hover:bg-white/5"
-                            onClick={() => navigate("/pricing")}
-                        >
-                            Pricing
-                        </Button>
-                        {user ? (
-                            <>
-                                <Button
-                                    variant="ghost"
-                                    className="text-sm font-medium hover:bg-white/5"
-                                    onClick={() => navigate("/profile")}
-                                >
-                                    Profile
-                                </Button>
-                                <Button
-                                    className="text-sm font-medium shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
-                                    onClick={() => navigate("/app")}
-                                >
-                                    Open App
-                                </Button>
-                            </>
-                        ) : (
-                            <>
-                                <Button
-                                    variant="ghost"
-                                    className="text-sm font-medium hover:bg-white/5 hidden sm:flex"
-                                    onClick={() => navigate("/login")}
-                                >
-                                    <LogIn className="mr-2 h-4 w-4" />
-                                    Login
-                                </Button>
-                                <Button
-                                    className="text-sm font-medium shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all group"
-                                    onClick={() => navigate("/register")}
-                                >
-                                    Get Started
-                                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                                </Button>
-                            </>
-                        )}
-                    </nav>
-                </div>
-            </header>
+            <AppHeader />
 
             <main className="flex-1 flex flex-col relative z-10 pt-16">
 

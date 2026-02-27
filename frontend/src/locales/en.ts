@@ -1,0 +1,140 @@
+/**
+ * English locale for UI copy.
+ * Keys are namespaced: nav.*, landing.*, mainApp.*
+ */
+
+export const en = {
+  nav: {
+    pricing: "Pricing",
+    profile: "Profile",
+    openApp: "Open App",
+    login: "Login",
+    getStarted: "Get Started",
+    signOut: "Sign Out",
+  },
+  lang: {
+    en: "English",
+    zh: "中文",
+  },
+  landing: {
+    // Hero
+    heroTitleLine1: "Don't Consume the Narrative.",
+    heroTitleLine2: "ReAngle It.",
+    heroSubheadline:
+      "Events are objective. Narratives are constructed. We take multiple, noisy sources of a single event and reshape them into one unified, perfectly-angled article—in your exact voice and stance.",
+    heroCta: "Start ReAngling Today",
+    // Section 2: The Insight
+    insightTitle1: "Events are objective.",
+    insightTitle2: "Narratives are constructed.",
+    insightSameEventCanBe: "The exact same objective event can be:",
+    insightHeroized: "Heroized",
+    insightMoralized: "Moralized",
+    insightScandalized: "Scandalized",
+    insightInstitutionalized: "Institutionalized",
+    insightIdeologized: "Ideologized",
+    insightEntertained: "Entertained",
+    insightQuote:
+      "Look at a mountain from the front, it's a ridge; from the side, a peak. Near, far, high, or low, no two views are identical.",
+    insightReason:
+      "In the flood of the information explosion, most people are merely passive consumers; they lack the capability to disassemble, reconstruct, or actively design their own narratives. This is the very reason ReAngle was born.",
+    insightSourceA: "Source A: Tech News",
+    insightSourceAQuote: "AI regulation stifles market innovation...",
+    insightSourceB: "Source B: Ethics Daily",
+    insightSourceBQuote: "Unchecked AI poses existential risk...",
+    insightYourNarrative: "Your ReAngled Narrative",
+    insightYourNarrativeQuote:
+      "While sweeping regulations aim to mitigate existential risks, they must be surgical to avoid crushing the rapid innovation cycle that defines our era.",
+    // Section 3: The Narrative Engine
+    engineTitle: "The Narrative Engine",
+    engineIntro:
+      "Not just another AI summarization tool. ReAngle is a purpose-built engine granting you absolute control over how a story is told and distributed.",
+    engineFeature1Title: "Re-tell The Story",
+    engineFeature1Desc:
+      "Refuse to accept pre-packaged viewpoints. Change the angle of observation and re-tell the story yourself.",
+    engineFeature2Title: "Productized Capability",
+    engineFeature2Desc:
+      "Narrative capability is no longer the exclusive privilege of PR giants. We encapsulate it into an accessible service for creators.",
+    engineFeature3Title: "Streamlined Workflow",
+    engineFeature3Desc:
+      "Compress hours of cross-referencing, multi-source research, and drafting into just a few clicks.",
+    // Section 4: How to ReAngle
+    howToTitle: "How to ReAngle",
+    howToIntro:
+      "From the chaotic noise of the internet to a polished masterpiece in three simple steps.",
+    howToStep1Title: "Gather",
+    howToStep1Desc:
+      "Toss in a bunch of URLs, Youtube, PDF, or plain text, throwing the chaos of the internet into the engine.",
+    howToStep2Title: "Set the Angle",
+    howToStep2Desc:
+      "Heroize? Criticize? Analyze? Dial in your parameters and choose the exact stance you want to take.",
+    howToStep3Title: "ReAngle",
+    howToStep3Desc:
+      "Watch the engine spin facts through your unique perspective into a polished, unified long-form article.",
+    // Section 5: Who is ReAngling?
+    whoTitle: "Who is ReAngling?",
+    whoIntro: "Democratizing narrative power across industries.",
+    whoAudience1Title: "Newsletter & Content Creators",
+    whoAudience1Desc:
+      "Synthesize weekly news into sharp, insightful long-form pieces layered with a personal signature tone.",
+    whoAudience2Title: "PR & Digital Marketers",
+    whoAudience2Desc:
+      "Draft rapid, market-ready responses and press releases that vehemently align with and defend brand positioning.",
+    whoAudience3Title: "Analysts & Researchers",
+    whoAudience3Desc:
+      "Filter out industry hysteria to distill multiple data sources into core research perspectives tailored to a specific firm's thesis.",
+    // Section 6: Final CTA
+    finalCtaTitle: "Take back the power of the narrative.",
+    finalCtaButton: "Start using ReAngle",
+    // Footer
+    footerCopy: "© 2026 ReAngle. Let narratives serve you.",
+  },
+  mainApp: {
+    profile: "Profile",
+    signOut: "Sign Out",
+    inputSources: "Input Sources",
+    addContentToTransform: "Add content to transform",
+    pastePlaceholder: "Paste your text here...",
+    urlPlaceholder: "https://example.com/article",
+    ytPlaceholder: "https://youtube.com/watch?v=...",
+    uploadFile: "Upload File",
+    supportedFormats: "Supported: TXT, PDF, DOCX",
+    addToQueue: "Add to Queue",
+    queue: "Queue",
+    noItemsInQueue: "No items in queue",
+    configuration: "Configuration",
+    aiModel: "AI Model",
+    selectModel: "Select model",
+    modelGpt: "GPT-5 (Best Quality)",
+    modelGemini: "Gemini 2.5 Flash",
+    modelQwen: "Qwen Flash",
+    styleInstructions: "Style Instructions",
+    presets: "Presets",
+    presetHumorous: "Humorous",
+    presetAcademic: "Academic",
+    presetJournalistic: "Journalistic",
+    presetBlog: "Blog Post",
+    promptPlaceholder: "e.g. Make it more professional and concise...",
+    processing: "Processing...",
+    transformContent: "Transform Content",
+    checkoutBanner: "You're now on Pro! Enjoy unlimited rewrites.",
+    addSourcesHint: 'Add sources and click "Transform Content" to see results',
+    summary: "Summary",
+    rewritten: "Rewritten",
+    compare: "Compare",
+    readAloud: "Read Aloud",
+    download: "Download",
+    rewrittenContent: "Rewritten Content",
+    errorAddItem: "Please add at least one input item.",
+    errorUsageLimit: "Usage limit reached. Please upgrade your plan.",
+    errorSessionExpired: "Your session has expired. Please sign in again.",
+    monthlyLimitReached: "Monthly limit reached",
+    upgradeProDesc: "Upgrade to Pro for unlimited rewrites.",
+    upgradeToPro: "Upgrade to Pro",
+    textSnippet: "Text Snippet",
+    url: "URL",
+    youtube: "YouTube",
+  },
+}
+
+/** Shape of a locale object (same keys, string values). Used for both en and zh. */
+export type LocaleEn = typeof en

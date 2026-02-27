@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
+import AppHeader from '@/components/AppHeader'
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
@@ -29,15 +30,7 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen flex flex-col bg-background aurora-bg">
-            {/* Header */}
-            <header className="floating-nav">
-                <div className="container flex h-14 items-center px-6">
-                    <Link to="/" className="flex items-center gap-2.5 font-bold text-lg">
-                        <img src="/favicon.png" alt="ReAngle" className="h-8 w-8 rounded-lg" />
-                        <span>ReAngle</span>
-                    </Link>
-                </div>
-            </header>
+            <AppHeader />
 
             {/* Form */}
             <main className="flex-1 flex items-center justify-center pt-24 pb-12">

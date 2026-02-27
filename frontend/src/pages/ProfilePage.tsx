@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { useNavigate, Link } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
 import { LogOut, CreditCard, BarChart3 } from "lucide-react"
+import AppHeader from "@/components/AppHeader"
 
 interface UsageData {
     usage_count: number
@@ -82,20 +83,7 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-screen flex flex-col bg-background aurora-bg">
-            {/* Header */}
-            <header className="floating-nav">
-                <div className="container flex h-14 items-center px-6">
-                    <Link to="/" className="flex items-center gap-2.5 font-bold text-lg">
-                        <img src="/favicon.png" alt="ReAngle" className="h-8 w-8 rounded-lg" />
-                        <span>ReAngle</span>
-                    </Link>
-                    <nav className="ml-auto flex items-center gap-3">
-                        <Button size="sm" className="cursor-pointer" onClick={() => navigate("/app")}>
-                            Open App
-                        </Button>
-                    </nav>
-                </div>
-            </header>
+            <AppHeader />
 
             {/* Content */}
             <main className="flex-1 flex items-start justify-center pt-24 pb-12">

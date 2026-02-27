@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { useNavigate, Link } from "react-router-dom"
 import { Check, Sparkles, ArrowLeft, Loader2 } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
+import AppHeader from "@/components/AppHeader"
 
 export default function PricingPage() {
     const navigate = useNavigate()
@@ -42,31 +43,7 @@ export default function PricingPage() {
 
     return (
         <div className="min-h-screen flex flex-col bg-background aurora-bg">
-            {/* Header */}
-            <header className="floating-nav">
-                <div className="container flex h-14 items-center px-6">
-                    <Link to="/" className="flex items-center gap-2.5 font-bold text-lg">
-                        <img src="/favicon.png" alt="ReAngle" className="h-8 w-8 rounded-lg" />
-                        <span>ReAngle</span>
-                    </Link>
-                    <nav className="ml-auto flex items-center gap-3">
-                        {user ? (
-                            <>
-                                <Button variant="ghost" size="sm" className="cursor-pointer" onClick={() => navigate("/profile")}>
-                                    Profile
-                                </Button>
-                                <Button size="sm" className="cursor-pointer" onClick={() => navigate("/app")}>
-                                    Open App
-                                </Button>
-                            </>
-                        ) : (
-                            <Button variant="ghost" size="sm" className="cursor-pointer" onClick={() => navigate("/login")}>
-                                Login
-                            </Button>
-                        )}
-                    </nav>
-                </div>
-            </header>
+            <AppHeader />
 
             {/* Pricing Cards */}
             <main className="flex-1 flex items-center justify-center pt-24 pb-12">

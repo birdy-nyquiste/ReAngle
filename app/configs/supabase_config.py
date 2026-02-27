@@ -4,12 +4,13 @@ Supabase 和 Stripe 配置
 """
 
 import os
-from pathlib import Path
+#from pathlib import Path
 from dotenv import load_dotenv
 
 # 始终从项目根目录加载 .env，避免因启动目录不同而读不到配置
-_project_root = Path(__file__).resolve().parent.parent.parent
-load_dotenv(_project_root / ".env")
+#_project_root = Path(__file__).resolve().parent.parent.parent
+#load_dotenv(_project_root / ".env")
+load_dotenv()
 
 # Supabase
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
