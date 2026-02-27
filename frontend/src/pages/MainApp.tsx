@@ -43,7 +43,7 @@ export default function MainApp() {
 
     // Settings
     const [prompt, setPrompt] = useState("")
-    const [model, setModel] = useState("gpt-5")
+    const [model, setModel] = useState("gpt-5-mini")
     const [isLoading, setIsLoading] = useState(false)
 
     // Result
