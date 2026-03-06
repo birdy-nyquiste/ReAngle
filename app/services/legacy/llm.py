@@ -5,7 +5,7 @@
 import os
 import requests
 
-from app.configs.settings import OPENAI_BASE_URL, DEFAULT_MODEL
+from app.core.config import OPENAI_BASE_URL, DEFAULT_MODEL
 
 
 from typing import Optional

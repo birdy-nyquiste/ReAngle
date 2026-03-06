@@ -4,7 +4,7 @@
 
 from loguru import logger
 from app.schemas.rewrite_schema import LLMType, LLMResponse
-from app.services.llms import openai_client, gemini_client, qwen_client
+from app.services.re import openai_client, gemini_client, qwen_client
 from app.core.exceptions import LLMProviderError
 
 

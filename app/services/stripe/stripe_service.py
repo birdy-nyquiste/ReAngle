@@ -12,7 +12,7 @@ import stripe
 from loguru import logger
 from supabase import create_client, Client
 
-from app.configs.supabase_config import (
+from app.core.config import (
     SUPABASE_URL,
     SUPABASE_SECRET_KEY,
     STRIPE_SECRET_KEY,

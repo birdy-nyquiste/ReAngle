@@ -8,7 +8,7 @@ import json
 from google import genai
 from loguru import logger
 
-from app.configs.settings import SYSTEM_PROMPTS_DIR
+from app.core.config import SYSTEM_PROMPTS_DIR
 from app.core.exceptions import LLMProviderError
 from app.schemas.rewrite_schema import LLMResponse
 

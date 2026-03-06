@@ -6,7 +6,7 @@ import logging
 import sys
 from pathlib import Path
 from loguru import logger
-from app.configs.settings import BASE_DIR
+from app.core.config import BASE_DIR
 
 # 日志保存路径
 LOG_DIR = Path(BASE_DIR).parent / "logs"

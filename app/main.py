@@ -13,9 +13,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 
-from app.configs.settings import STATIC_DIR
+from app.core.config import STATIC_DIR
 from app.routers import v1_routers
-from app.configs.logger import setup_logging
+from app.core.logging import setup_logging
 from app.middleware.request_logging import RequestLoggingMiddleware
 from app.core.exceptions import AppException
 from app.core.handlers import (

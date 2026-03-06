@@ -10,8 +10,8 @@ from typing import Optional
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
-from app.configs.settings import RESULTS_DIR
-from app.services.llms.llm import call_openai
+from app.core.config import RESULTS_DIR
+from app.services.legacy.llm import call_openai
 
 miniprogram_router = APIRouter(prefix="/miniprogram", tags=["miniprogram"])
 

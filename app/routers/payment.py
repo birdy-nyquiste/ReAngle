@@ -10,14 +10,14 @@ import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from loguru import logger
 
-from app.configs.supabase_config import (
+from app.core.config import (
     STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET,
     SUPABASE_URL,
     SUPABASE_SECRET_KEY as SUPABASE_SECRET,
 )
-from app.core.dependencies import get_current_user
-from app.services.stripe_service import (
+from app.core.supabase_dependencies import get_current_user
+from app.services.stripe.stripe_service import (
     create_checkout_session,
     create_portal_session,
     handle_checkout_completed,
