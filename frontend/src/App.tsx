@@ -1,40 +1,53 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import LandingPage from "./pages/LandingPage";
-import MainApp from "./pages/MainApp";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import PricingPage from "./pages/PricingPage";
-import ProfilePage from "./pages/ProfilePage";
+
+// Route-level code splitting — each page is loaded on demand
+const LandingPage = lazy(() => import("./pages/LandingPage"));
+const MainApp = lazy(() => import("./pages/MainApp"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const RegisterPage = lazy(() => import("./pages/RegisterPage"));
+const PricingPage = lazy(() => import("./pages/PricingPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="animate-pulse text-muted-foreground">Loading…</div>
+    </div>
+  );
+}
 
 function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
+        <BrowserRouter>
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
 
-          {/* Protected Routes */}
-          <Route path="/app" element={
-            <ProtectedRoute>
-              <MainApp />
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          } />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+              {/* Protected Routes */}
+              <Route path="/app" element={
+                <ProtectedRoute>
+                  <MainApp />
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </AuthProvider>
     </LanguageProvider>
   )
 }

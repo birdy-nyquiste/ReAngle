@@ -1,15 +1,15 @@
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DiffView } from "@/components/DiffView"
-import { Loader2, Trash2, FileText, Link as LinkIcon, Youtube, Type, Play, Download, Sparkles, Settings2, FolderInput, Zap, X } from "lucide-react"
-import { useAuth } from "@/context/AuthContext"
+import { Loader2, Trash2, FileText, Link as LinkIcon, Youtube, Type, Sparkles, FolderInput, X, ChevronRight, Triangle, Wand2, PanelLeftClose, PanelLeftOpen } from "lucide-react"
 import { useLanguage } from "@/context/LanguageContext"
 import AppHeader from "@/components/AppHeader"
+import { DeAngleView } from "@/components/DeAngleView"
+import { ReAngleView } from "@/components/ReAngleView"
+import { cn } from "@/lib/utils"
 
 // Types
 interface InputItem {
@@ -22,15 +22,20 @@ interface InputItem {
     }
 }
 
-interface RewriteResult {
-    original: string
-    rewritten: string
-    summary: string
-}
-
 export default function MainApp() {
-    const { session } = useAuth()
     const { t } = useLanguage()
+
+    // Sidebar State
+    const [sidebarExpanded, setSidebarExpanded] = useState(true)
+    const [expandedSections, setExpandedSections] = useState({
+        gather: true,
+        deangle: true,
+        reangle: true
+    })
+
+    const toggleSection = (section: "gather" | "deangle" | "reangle") => {
+        setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }))
+    }
 
     // State
     const [activeInputTab, setActiveInputTab] = useState("text")
@@ -41,14 +46,18 @@ export default function MainApp() {
     const [inputUrl, setInputUrl] = useState("")
     const [inputFile, setInputFile] = useState<File | null>(null)
 
-    // Settings
-    const [prompt, setPrompt] = useState("")
-    const [model, setModel] = useState("gpt-5-mini")
-    const [isLoading, setIsLoading] = useState(false)
+    // DeAngle State
+    const [deAngleLoading, setDeAngleLoading] = useState(false)
+    const [deAngleResult, setDeAngleResult] = useState<any>(null) // Will hold facts and angles
 
-    // Result
-    const [result, setResult] = useState<RewriteResult | null>(null)
-    const [activeResultTab, setActiveResultTab] = useState("summary")
+    // ReAngle State
+    const [prompt, setPrompt] = useState("")
+    const [model, setModel] = useState("GPT-4o")
+    const [reAngleLoading, setReAngleLoading] = useState(false)
+    const [reAngleResult, setReAngleResult] = useState<any>(null) // Will hold summary and rewritten_content
+
+    // Global UI
+    const [activeResultTab, setActiveResultTab] = useState("DeAngle") // 'DeAngle' | 'ReAngle'
     const [error, setError] = useState<string | null>(null)
     const [isUsageLimitError, setIsUsageLimitError] = useState(false)
     const [checkoutSuccess, setCheckoutSuccess] = useState(false)
@@ -56,7 +65,6 @@ export default function MainApp() {
     // TTS State
     const [ttsLoading, setTtsLoading] = useState(false)
     const [audioUrl, setAudioUrl] = useState<string | null>(null)
-    const audioRef = useRef<HTMLAudioElement | null>(null)
 
     // Detect ?checkout=success in URL
     useEffect(() => {
@@ -102,109 +110,105 @@ export default function MainApp() {
         }
 
         if (newItem) {
-            setInputItems([...inputItems, newItem])
+            setInputItems(prev => [...prev, newItem])
         }
     }
 
     const handleRemoveInput = (id: string) => {
-        setInputItems(inputItems.filter(i => i.id !== id))
+        setInputItems(prev => prev.filter(i => i.id !== id))
     }
 
-    const handleProcess = async () => {
+    const handleDeAngleProcess = async () => {
         if (inputItems.length === 0) {
             setError(t("mainApp.errorAddItem"))
             return
         }
 
-        setIsLoading(true)
+        setDeAngleLoading(true)
         setError(null)
         setIsUsageLimitError(false)
-        setResult(null)
-        setAudioUrl(null)
+        setDeAngleResult(null)
+        setReAngleResult(null)
+        setActiveResultTab("DeAngle")
 
         try {
-            const formData = new FormData()
-
-            // Construct payload
-            const payloadItems = inputItems.map(item => {
-                if (item.type === 'file') {
-                    const fileKey = `file_${item.id}`
-                    formData.append(fileKey, item.content as File)
-                    return {
-                        id: item.id,
-                        type: item.type,
-                        contentKey: fileKey,
-                        meta: { filename: (item.content as File).name }
-                    }
-                } else {
-                    return {
-                        id: item.id,
-                        type: item.type,
-                        content: item.content
-                    }
-                }
-            })
-
-            formData.append("inputs", JSON.stringify(payloadItems))
-            formData.append("prompt", prompt)
-            formData.append("llm_type", model)
-
-            const headers: HeadersInit = {}
-            if (session?.access_token) {
-                headers['Authorization'] = `Bearer ${session.access_token}`
+            // Using placeholder logic mapping to new DeAngle API
+            const payload = {
+                inputs: inputItems.map(item => ({ id: item.id, type: item.type, content: item.type !== 'file' ? item.content : 'file_placeholder' }))
             }
 
-            const res = await fetch("/api/v1/rewrite", {
+            const res = await fetch("/api/v1/deangle/process", {
                 method: "POST",
-                headers,
-                body: formData
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
             })
 
-            if (!res.ok) {
-                if (res.status === 402) {
-                    setIsUsageLimitError(true)
-                    throw new Error(t("mainApp.errorUsageLimit"))
-                }
-                if (res.status === 401) {
-                    throw new Error(t("mainApp.errorSessionExpired"))
-                }
-                throw new Error(`Server error: ${res.status}`)
-            }
+            if (!res.ok) throw new Error("DeAngle failed")
 
             const data = await res.json()
-            setResult(data)
-            setActiveResultTab("summary")
+            setDeAngleResult(data)
+
+            // Collapse DeAngle section and ensure ReAngle is open upon successful completion
+            setExpandedSections(prev => ({ ...prev, deangle: false, reangle: true }))
 
         } catch (err: any) {
             console.error(err)
-            setError(err.message || "Failed to process request")
+            setError(err.message || "Failed to DeAngle")
         } finally {
-            setIsLoading(false)
+            setDeAngleLoading(false)
         }
     }
 
-    const handlePreset = (preset: string) => {
-        setPrompt(preset)
+    const handleReAngleProcess = async () => {
+        if (!deAngleResult) {
+            setError("Must perform DeAngle first.")
+            return
+        }
+
+        setReAngleLoading(true)
+        setError(null)
+        setReAngleResult(null)
+        setAudioUrl(null)
+        setActiveResultTab("ReAngle")
+
+        try {
+            const payload = {
+                llm_type: model,
+                prompt: prompt
+            }
+
+            const res = await fetch("/api/v1/reangle/process", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+
+            if (!res.ok) throw new Error("ReAngle failed")
+
+            const data = await res.json()
+            setReAngleResult(data)
+
+            // Collapse ReAngle section upon successful completion
+            setExpandedSections(prev => ({ ...prev, reangle: false }))
+
+        } catch (err: any) {
+            console.error(err)
+            setError(err.message || "Failed to ReAngle")
+        } finally {
+            setReAngleLoading(false)
+        }
     }
 
     const handlePlayTTS = async () => {
-        if (!result?.summary) return
-        if (audioUrl) {
-            audioRef.current?.play()
-            return
-        }
-
-        if (result.summary.length > 600) {
-            alert("Summary is too long for Read Aloud (max 600 characters).")
-            return
-        }
-
+        if (!reAngleResult?.summary) return
+        if (audioUrl) return // already handled by component ref
+        // TTS implementation remains similar but targets new text.
         setTtsLoading(true)
         try {
             const res = await fetch("/api/v1/rewrite/tts", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text: result.summary })
+                body: JSON.stringify({ text: reAngleResult.summary })
             })
 
             if (!res.ok) throw new Error("TTS failed")
@@ -219,12 +223,12 @@ export default function MainApp() {
     }
 
     const handleDownload = () => {
-        if (!result?.rewritten) return
+        if (!reAngleResult?.rewritten_content) return
 
         const element = document.createElement("a")
-        const file = new Blob([result.rewritten], { type: 'text/plain' })
+        const file = new Blob([reAngleResult.rewritten_content], { type: 'text/plain' })
         element.href = URL.createObjectURL(file)
-        element.download = "rewritten_article.txt"
+        element.download = "reangled_article.txt"
         document.body.appendChild(element)
         element.click()
         document.body.removeChild(element)
@@ -233,7 +237,7 @@ export default function MainApp() {
     return (
         <div className="flex h-screen flex-col bg-background aurora-bg">
             {/* Checkout Success Banner */}
-            {checkoutSuccess && (
+            {checkoutSuccess ? (
                 <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center gap-3 bg-green-500/20 border-b border-green-500/30 backdrop-blur px-4 py-3 text-sm text-green-300">
                     <Sparkles className="h-4 w-4 flex-shrink-0" />
                     <span>🎉 {t("mainApp.checkoutBanner")}</span>
@@ -241,292 +245,415 @@ export default function MainApp() {
                         <X className="h-4 w-4" />
                     </button>
                 </div>
-            )}
+            ) : null}
             <AppHeader />
 
             {/* Main Content */}
-            <main className="flex-1 container pt-24 pb-6 flex flex-col lg:flex-row gap-6 min-h-0">
-                {/* Left Pane: Inputs & Settings */}
-                <div className="w-full lg:w-4/12 flex flex-col gap-5 overflow-y-auto pr-2 pb-4 min-h-0 lg:max-h-[calc(100vh-7rem)]">
+            <main className="flex-1 overflow-hidden w-full px-4 flex pt-24 pb-6 gap-6">
 
-                    {/* Input Section */}
-                    <div className="glass rounded-2xl overflow-hidden flex-shrink-0">
-                        <div className="px-5 py-4 border-b border-white/5 flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-primary/10">
-                                <FolderInput className="h-4 w-4 text-primary" />
-                            </div>
-                            <div>
-                                <h2 className="font-semibold text-sm">{t("mainApp.inputSources")}</h2>
-                                <p className="text-xs text-muted-foreground">{t("mainApp.addContentToTransform")}</p>
-                            </div>
+                {/* Expandable Sidebar */}
+                <div
+                    className={cn(
+                        "flex flex-col relative shrink-0 glass rounded-2xl border border-white/5 overflow-hidden transition-all duration-300 ease-in-out",
+                        sidebarExpanded ? "w-[340px]" : "w-[64px]"
+                    )}
+                >
+                    {/* Sidebar Header / Toggle */}
+                    <div className={cn("flex items-center shrink-0 border-b border-white/5 h-[60px]", sidebarExpanded ? "justify-between px-4" : "justify-center px-4")}>
+                        <div className={cn(
+                            "overflow-hidden transition-all duration-300 ease-in-out",
+                            sidebarExpanded ? "w-[200px] opacity-100" : "w-0 opacity-0"
+                        )}>
+                            <span className="font-semibold text-sm text-foreground/90 whitespace-nowrap">Configure Your ReAngle</span>
                         </div>
-                        <div className="p-5 space-y-4">
-                            <Tabs value={activeInputTab} onValueChange={setActiveInputTab} className="w-full">
-                                <TabsList className="grid w-full grid-cols-4 bg-white/5">
-                                    <TabsTrigger value="text" className="data-[state=active]:bg-white/10 cursor-pointer">
-                                        <Type className="w-4 h-4" />
-                                    </TabsTrigger>
-                                    <TabsTrigger value="file" className="data-[state=active]:bg-white/10 cursor-pointer">
-                                        <FileText className="w-4 h-4" />
-                                    </TabsTrigger>
-                                    <TabsTrigger value="url" className="data-[state=active]:bg-white/10 cursor-pointer">
-                                        <LinkIcon className="w-4 h-4" />
-                                    </TabsTrigger>
-                                    <TabsTrigger value="youtube" className="data-[state=active]:bg-white/10 cursor-pointer">
-                                        <Youtube className="w-4 h-4" />
-                                    </TabsTrigger>
-                                </TabsList>
-
-                                <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/5">
-                                    {activeInputTab === 'text' && (
-                                        <Textarea
-                                            placeholder={t("mainApp.pastePlaceholder")}
-                                            className="min-h-[100px] bg-transparent border-white/10 placeholder:text-muted-foreground/50 resize-none"
-                                            value={inputText}
-                                            onChange={e => setInputText(e.target.value)}
-                                        />
-                                    )}
-                                    {(activeInputTab === 'url' || activeInputTab === 'youtube') && (
-                                        <Input
-                                            placeholder={activeInputTab === 'url' ? t("mainApp.urlPlaceholder") : t("mainApp.ytPlaceholder")}
-                                            value={inputUrl}
-                                            onChange={e => setInputUrl(e.target.value)}
-                                            className="bg-transparent border-white/10 placeholder:text-muted-foreground/50"
-                                        />
-                                    )}
-                                    {activeInputTab === 'file' && (
-                                        <div className="space-y-2">
-                                            <Label htmlFor="file" className="text-xs text-muted-foreground">{t("mainApp.uploadFile")}</Label>
-                                            <Input
-                                                id="file"
-                                                type="file"
-                                                onChange={e => setInputFile(e.target.files?.[0] || null)}
-                                                className="bg-transparent border-white/10 file:bg-white/10 file:border-0 file:text-foreground file:text-xs file:mr-3 cursor-pointer"
-                                            />
-                                            <p className="text-xs text-muted-foreground/70">{t("mainApp.supportedFormats")}</p>
-                                        </div>
-                                    )}
-
-                                    <Button
-                                        className="w-full mt-4 bg-white/10 hover:bg-white/15 border-0 cursor-pointer"
-                                        variant="outline"
-                                        onClick={handleAddInput}
-                                    >
-                                        {t("mainApp.addToQueue")}
-                                    </Button>
-                                </div>
-                            </Tabs>
-
-                            {/* Queue */}
-                            <div className="space-y-2">
-                                <Label className="text-xs text-muted-foreground">
-                                    {t("mainApp.queue")} ({inputItems.length})
-                                </Label>
-                                <div className="space-y-2 max-h-[140px] overflow-y-auto">
-                                    {inputItems.map(item => (
-                                        <div key={item.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5 text-sm group">
-                                            <div className="truncate flex-1 pr-2">
-                                                <div className="font-medium truncate text-xs">{item.meta?.title}</div>
-                                                <div className="text-xs text-muted-foreground truncate">{item.meta?.detail}</div>
-                                            </div>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-7 w-7 opacity-50 group-hover:opacity-100 text-red-400 hover:text-red-300 hover:bg-red-500/10 cursor-pointer"
-                                                onClick={() => handleRemoveInput(item.id)}
-                                            >
-                                                <Trash2 className="h-3.5 w-3.5" />
-                                            </Button>
-                                        </div>
-                                    ))}
-                                    {inputItems.length === 0 && (
-                                        <div className="text-xs text-muted-foreground/50 text-center py-6 border border-dashed border-white/10 rounded-lg">
-                                            {t("mainApp.noItemsInQueue")}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+                        <button
+                            onClick={() => setSidebarExpanded(!sidebarExpanded)}
+                            className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        >
+                            {sidebarExpanded ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
+                        </button>
                     </div>
 
-                    {/* Settings Section */}
-                    <div className="glass rounded-2xl flex-shrink-0">
-                        <div className="px-5 py-4 border-b border-white/5 flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-violet-500/10">
-                                <Settings2 className="h-4 w-4 text-violet-400" />
-                            </div>
-                            <h2 className="font-semibold text-sm">{t("mainApp.configuration")}</h2>
-                        </div>
-                        <div className="p-5 space-y-4">
-                            <div className="space-y-2">
-                                <Label className="text-xs text-muted-foreground">{t("mainApp.aiModel")}</Label>
-                                <Select value={model} onValueChange={setModel}>
-                                    <SelectTrigger className="bg-white/5 border-white/10 cursor-pointer">
-                                        <SelectValue placeholder={t("mainApp.selectModel")} />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-[#1e293b] border-white/10">
-                                        <SelectItem value="gpt-5-mini" className="cursor-pointer">{t("mainApp.modelGpt")}</SelectItem>
-                                        <SelectItem value="gemini-3-flash-preview" className="cursor-pointer">{t("mainApp.modelGemini")}</SelectItem>
-                                        <SelectItem value="qwen-flash" className="cursor-pointer">{t("mainApp.modelQwen")}</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 w-[100%] custom-scrollbar">
+                        {/* Unified Sidebar Sections */}
+                        <div className="flex flex-col space-y-4">
 
-                            <div className="space-y-2">
-                                <div className="flex justify-between items-center">
-                                    <Label className="text-xs text-muted-foreground">{t("mainApp.styleInstructions")}</Label>
-                                    <Select onValueChange={handlePreset}>
-                                        <SelectTrigger className="h-7 w-[100px] text-xs bg-white/5 border-white/10 cursor-pointer">
-                                            <SelectValue placeholder={t("mainApp.presets")} />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-[#1e293b] border-white/10">
-                                            <SelectItem value="Humorous Tone" className="cursor-pointer text-xs">{t("mainApp.presetHumorous")}</SelectItem>
-                                            <SelectItem value="Academic Tone" className="cursor-pointer text-xs">{t("mainApp.presetAcademic")}</SelectItem>
-                                            <SelectItem value="Journalistic Tone" className="cursor-pointer text-xs">{t("mainApp.presetJournalistic")}</SelectItem>
-                                            <SelectItem value="Blog style" className="cursor-pointer text-xs">{t("mainApp.presetBlog")}</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <Textarea
-                                    placeholder={t("mainApp.promptPlaceholder")}
-                                    value={prompt}
-                                    onChange={e => setPrompt(e.target.value)}
-                                    className="bg-white/5 border-white/10 placeholder:text-muted-foreground/50 resize-none min-h-[80px]"
-                                />
-                            </div>
-
-                            <Button
-                                size="lg"
-                                className="w-full font-semibold glow-primary hover:glow-primary-sm cursor-pointer"
-                                onClick={handleProcess}
-                                disabled={isLoading || inputItems.length === 0}
-                            >
-                                {isLoading ? (
-                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("mainApp.processing")}</>
-                                ) : (
-                                    <>
-                                        <Sparkles className="mr-2 h-4 w-4" />
-                                        {t("mainApp.transformContent")}
-                                    </>
-                                )}
-                            </Button>
-
-                            {error && !isUsageLimitError && (
-                                <div className="text-xs text-red-400 p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                            {/* Error Displays */}
+                            {error && !isUsageLimitError && sidebarExpanded ? (
+                                <div className="text-xs text-red-400 p-3 bg-red-500/10 rounded-lg border border-red-500/20 mb-4 mx-1">
                                     {error}
                                 </div>
-                            )}
+                            ) : null}
 
-                            {isUsageLimitError && (
-                                <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg space-y-2">
-                                    <div className="flex items-center gap-2 text-primary text-xs font-semibold">
-                                        <Zap className="h-3.5 w-3.5" />
-                                        {t("mainApp.monthlyLimitReached")}
+                            {/* Gather Inputs Section */}
+                            <div className={cn(
+                                "rounded-xl overflow-hidden flex flex-col transition-colors",
+                                (expandedSections.gather && sidebarExpanded) ? "bg-white/5 border border-white/10 shadow-sm" : "border border-transparent hover:bg-white/5"
+                            )}>
+                                <button
+                                    onClick={() => {
+                                        if (!sidebarExpanded) {
+                                            setSidebarExpanded(true)
+                                            setExpandedSections(prev => ({ ...prev, gather: true }))
+                                        } else {
+                                            toggleSection("gather")
+                                        }
+                                    }}
+                                    className="flex items-center w-full h-[40px] px-1 cursor-pointer group outline-none"
+                                    title={!sidebarExpanded ? "Gather Inputs" : undefined}
+                                >
+                                    <div className={cn(
+                                        "flex items-center justify-center shrink-0 border transition-colors w-7 h-7 rounded-full",
+                                        expandedSections.gather ? "bg-white/10 border-white/20 text-foreground" : "bg-white/5 border-white/10 text-muted-foreground group-hover:text-foreground"
+                                    )}>
+                                        <FolderInput className="w-3.5 h-3.5" />
                                     </div>
-                                    <p className="text-xs text-muted-foreground">{t("mainApp.upgradeProDesc")}</p>
-                                    <Button
-                                        size="sm"
-                                        className="w-full cursor-pointer"
-                                        onClick={() => window.location.href = "/pricing"}
-                                    >
-                                        {t("mainApp.upgradeToPro")}
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
+                                    <div className={cn(
+                                        "flex items-center justify-between overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap",
+                                        sidebarExpanded ? "w-[266px] opacity-100 ml-3 pr-2" : "w-0 opacity-0 ml-0 pr-0"
+                                    )}>
+                                        <span className="font-medium text-sm">
+                                            1. Gather Inputs
+                                        </span>
+                                        <ChevronRight className={cn("w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300", expandedSections.gather && "rotate-90")} />
+                                    </div>
+                                </button>
 
-                {/* Right Pane: Results */}
-                <div className="w-full lg:w-8/12 flex flex-col overflow-hidden glass rounded-2xl">
-                    {!result ? (
-                        <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground p-8">
-                            <div className="p-6 rounded-2xl bg-white/5 mb-6">
-                                <Sparkles className="w-10 h-10 opacity-20" />
-                            </div>
-                            <p className="text-sm">{t("mainApp.addSourcesHint")}</p>
-                        </div>
-                    ) : (
-                        <Tabs value={activeResultTab} onValueChange={setActiveResultTab} className="flex-1 flex flex-col overflow-hidden">
-                            <div className="border-b border-white/5 px-5 py-3 flex items-center bg-white/5">
-                                <TabsList className="bg-transparent gap-1">
-                                    <TabsTrigger
-                                        value="summary"
-                                        className="data-[state=active]:bg-white/10 data-[state=active]:shadow-none rounded-lg px-4 cursor-pointer"
-                                    >
-                                        {t("mainApp.summary")}
-                                    </TabsTrigger>
-                                    <TabsTrigger
-                                        value="rewritten"
-                                        className="data-[state=active]:bg-white/10 data-[state=active]:shadow-none rounded-lg px-4 cursor-pointer"
-                                    >
-                                        {t("mainApp.rewritten")}
-                                    </TabsTrigger>
-                                    <TabsTrigger
-                                        value="compare"
-                                        className="data-[state=active]:bg-white/10 data-[state=active]:shadow-none rounded-lg px-4 cursor-pointer"
-                                    >
-                                        {t("mainApp.compare")}
-                                    </TabsTrigger>
-                                </TabsList>
-                            </div>
+                                {sidebarExpanded && expandedSections.gather && (
+                                    <div className="px-4 pb-4 space-y-4 animate-in slide-in-from-top-2 fade-in duration-200">
+                                        <Tabs value={activeInputTab} onValueChange={setActiveInputTab} className="w-full">
+                                            <TabsList className="grid w-full grid-cols-4 bg-black/20 h-9 p-1 rounded-lg">
+                                                <TabsTrigger value="text" className="data-[state=active]:bg-white/10 text-xs py-1 cursor-pointer">
+                                                    <Type className="w-3.5 h-3.5" />
+                                                </TabsTrigger>
+                                                <TabsTrigger value="file" className="data-[state=active]:bg-white/10 text-xs py-1 cursor-pointer">
+                                                    <FileText className="w-3.5 h-3.5" />
+                                                </TabsTrigger>
+                                                <TabsTrigger value="url" className="data-[state=active]:bg-white/10 text-xs py-1 cursor-pointer">
+                                                    <LinkIcon className="w-3.5 h-3.5" />
+                                                </TabsTrigger>
+                                                <TabsTrigger value="youtube" className="data-[state=active]:bg-white/10 text-xs py-1 cursor-pointer">
+                                                    <Youtube className="w-3.5 h-3.5" />
+                                                </TabsTrigger>
+                                            </TabsList>
 
-                            <div className="flex-1 overflow-y-auto p-6">
-                                <TabsContent value="summary" className="mt-0 h-full">
-                                    <div className="space-y-4">
-                                        <div className="flex items-center justify-between">
-                                            <h3 className="text-lg font-semibold">{t("mainApp.summary")}</h3>
-                                            <div className="flex items-center gap-2">
-                                                {audioUrl ? (
-                                                    <audio ref={audioRef} controls src={audioUrl} className="h-8" />
-                                                ) : (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={handlePlayTTS}
-                                                        disabled={ttsLoading}
-                                                        className="bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer"
-                                                    >
-                                                        {ttsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
-                                                        {t("mainApp.readAloud")}
-                                                    </Button>
+                                            <div className="mt-3">
+                                                {activeInputTab === 'text' && (
+                                                    <Textarea
+                                                        placeholder={t("mainApp.pastePlaceholder")}
+                                                        className="min-h-[100px] bg-black/20 border-white/5 text-sm resize-none focus-visible:ring-1"
+                                                        value={inputText}
+                                                        onChange={e => setInputText(e.target.value)}
+                                                    />
+                                                )}
+                                                {(activeInputTab === 'url' || activeInputTab === 'youtube') && (
+                                                    <Input
+                                                        placeholder={activeInputTab === 'url' ? t("mainApp.urlPlaceholder") : t("mainApp.ytPlaceholder")}
+                                                        value={inputUrl}
+                                                        onChange={e => setInputUrl(e.target.value)}
+                                                        className="bg-black/20 border-white/5 text-sm h-9"
+                                                    />
+                                                )}
+                                                {activeInputTab === 'file' && (
+                                                    <div className="space-y-2">
+                                                        <Input
+                                                            id="file"
+                                                            type="file"
+                                                            onChange={e => setInputFile(e.target.files?.[0] || null)}
+                                                            className="bg-black/20 border-white/5 file:text-foreground file:text-xs h-9 text-xs py-1.5 cursor-pointer"
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                <Button
+                                                    className="w-full mt-3 bg-white/5 hover:bg-white/10 border border-white/5 text-xs h-8 cursor-pointer"
+                                                    variant="outline"
+                                                    onClick={handleAddInput}
+                                                >
+                                                    {t("mainApp.addToQueue")}
+                                                </Button>
+                                            </div>
+                                        </Tabs>
+
+                                        {/* Queue section */}
+                                        <div className="pt-2">
+                                            <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                                                QUEUE ({inputItems.length})
+                                            </div>
+                                            <div className="space-y-1.5 max-h-[120px] overflow-y-auto custom-scrollbar">
+                                                {inputItems.map(item => (
+                                                    <div key={item.id} className="flex items-center justify-between p-2 rounded-md bg-black/20 border border-white/5 group">
+                                                        <div className="truncate flex-1 pr-2">
+                                                            <div className="text-xs truncate">{item.meta?.title}</div>
+                                                        </div>
+                                                        <button
+                                                            className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 cursor-pointer p-0.5"
+                                                            onClick={() => handleRemoveInput(item.id)}
+                                                        >
+                                                            <Trash2 className="h-3 w-3" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                                {inputItems.length === 0 && (
+                                                    <div className="text-xs text-muted-foreground/40 text-center py-4 border border-dashed border-white/5 rounded-md">
+                                                        No items in queue
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="p-5 rounded-xl bg-white/5 border border-white/5">
-                                            <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{result.summary}</p>
-                                        </div>
-                                    </div>
-                                </TabsContent>
 
-                                <TabsContent value="rewritten" className="mt-0 h-full">
-                                    <div className="space-y-4 h-full flex flex-col">
-                                        <div className="flex items-center justify-between">
-                                            <h3 className="text-lg font-semibold">{t("mainApp.rewrittenContent")}</h3>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={handleDownload}
-                                                className="bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer"
-                                            >
-                                                <Download className="w-4 h-4 mr-2" />
-                                                {t("mainApp.download")}
-                                            </Button>
-                                        </div>
-                                        <div className="flex-1 p-5 rounded-xl bg-white/5 border border-white/5 overflow-auto">
-                                            <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{result.rewritten}</p>
-                                        </div>
+                                        <Button
+                                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-9 cursor-pointer transition-all"
+                                            onClick={() => setExpandedSections(prev => ({ ...prev, gather: false, deangle: true }))}
+                                        >
+                                            Complete & Continue
+                                        </Button>
                                     </div>
-                                </TabsContent>
-
-                                <TabsContent value="compare" className="mt-0 h-full">
-                                    <DiffView original={result.original} rewritten={result.rewritten} />
-                                </TabsContent>
+                                )}
                             </div>
-                        </Tabs>
-                    )}
+
+                            {/* DeAngle Section */}
+                            <div className={cn(
+                                "rounded-xl overflow-hidden flex flex-col transition-colors",
+                                (expandedSections.deangle && sidebarExpanded) ? "bg-white/5 border border-white/10 shadow-sm" : "border border-transparent hover:bg-white/5"
+                            )}>
+                                <button
+                                    onClick={() => {
+                                        if (!sidebarExpanded) {
+                                            setSidebarExpanded(true)
+                                            setExpandedSections(prev => ({ ...prev, deangle: true }))
+                                        } else {
+                                            toggleSection("deangle")
+                                        }
+                                    }}
+                                    className="flex items-center w-full h-[40px] px-1 cursor-pointer group outline-none"
+                                    title={!sidebarExpanded ? "DeAngle" : undefined}
+                                >
+                                    <div className={cn(
+                                        "flex items-center justify-center shrink-0 border transition-colors w-7 h-7 rounded-full",
+                                        expandedSections.deangle ? "bg-white/10 border-white/20 text-foreground" : "bg-white/5 border-white/10 text-muted-foreground group-hover:text-foreground"
+                                    )}>
+                                        <Triangle className="w-3.5 h-3.5" />
+                                    </div>
+                                    <div className={cn(
+                                        "flex items-center justify-between overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap",
+                                        sidebarExpanded ? "w-[266px] opacity-100 ml-3 pr-2" : "w-0 opacity-0 ml-0 pr-0"
+                                    )}>
+                                        <span className="font-medium text-sm">
+                                            2. DeAngle
+                                        </span>
+                                        <ChevronRight className={cn("w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300", expandedSections.deangle && "rotate-90")} />
+                                    </div>
+                                </button>
+
+                                {sidebarExpanded && expandedSections.deangle && (
+                                    <div className="px-4 pb-4 space-y-4 animate-in slide-in-from-top-2 fade-in duration-200">
+                                        <p className="text-xs text-muted-foreground/80 leading-relaxed">
+                                            Detach Events from original Angles, then fact-check on every Events
+                                        </p>
+                                        <Button
+                                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-9 cursor-pointer transition-all"
+                                            onClick={handleDeAngleProcess}
+                                            disabled={deAngleLoading || inputItems.length === 0}
+                                        >
+                                            {deAngleLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                            Start DeAngle
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* ReAngle Section */}
+                            <div className={cn(
+                                "rounded-xl overflow-hidden flex flex-col transition-colors",
+                                (expandedSections.reangle && sidebarExpanded) ? "bg-white/5 border border-white/10 shadow-sm" : "border border-transparent hover:bg-white/5"
+                            )}>
+                                <button
+                                    onClick={() => {
+                                        if (!sidebarExpanded) {
+                                            setSidebarExpanded(true)
+                                            setExpandedSections(prev => ({ ...prev, reangle: true }))
+                                        } else {
+                                            toggleSection("reangle")
+                                        }
+                                    }}
+                                    className="flex items-center w-full h-[40px] px-1 cursor-pointer group outline-none"
+                                    title={!sidebarExpanded ? "ReAngle" : undefined}
+                                >
+                                    <div className={cn(
+                                        "flex items-center justify-center shrink-0 border transition-colors w-7 h-7 rounded-full",
+                                        expandedSections.reangle ? "bg-white/10 border-white/20 text-foreground" : "bg-white/5 border-white/10 text-muted-foreground group-hover:text-foreground"
+                                    )}>
+                                        <Wand2 className="w-3.5 h-3.5" />
+                                    </div>
+                                    <div className={cn(
+                                        "flex items-center justify-between overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap",
+                                        sidebarExpanded ? "w-[266px] opacity-100 ml-3 pr-2" : "w-0 opacity-0 ml-0 pr-0"
+                                    )}>
+                                        <span className="font-medium text-sm">
+                                            3. ReAngle
+                                        </span>
+                                        <ChevronRight className={cn("w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300", expandedSections.reangle && "rotate-90")} />
+                                    </div>
+                                </button>
+
+                                {sidebarExpanded && expandedSections.reangle && (
+                                    <div className="px-4 pb-4 space-y-4 animate-in slide-in-from-top-2 fade-in duration-200">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-foreground/80">LLM Model Selector</label>
+                                            <Select value={model} onValueChange={setModel}>
+                                                <SelectTrigger className="bg-black/20 border-white/5 h-9 text-xs cursor-pointer">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent className="bg-[#1e293b] border-white/10">
+                                                    <SelectItem value="GPT-4o" className="text-xs cursor-pointer">GPT-4o</SelectItem>
+                                                    <SelectItem value="Claude-3.5-Sonnet" className="text-xs cursor-pointer">Claude-3.5-Sonnet</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-foreground/80">Set New Angle</label>
+                                            <Textarea
+                                                placeholder="Define your desired angle..."
+                                                className="min-h-[100px] bg-black/20 border-white/5 text-sm resize-none focus-visible:ring-1"
+                                                value={prompt}
+                                                onChange={e => setPrompt(e.target.value)}
+                                            />
+                                        </div>
+
+                                        <Button
+                                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-9 cursor-pointer transition-all"
+                                            onClick={handleReAngleProcess}
+                                            disabled={reAngleLoading || !deAngleResult}
+                                        >
+                                            {reAngleLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                            Start ReAngle
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </main>
-        </div>
+
+                {/* Right Pane: Results Area */}
+                <div className="flex-1 flex flex-col min-w-0 bg-transparent">
+                    {/* Collapsed Sidebar Mode (Split View) */}
+                    {!sidebarExpanded ? (
+                        <div className="flex-1 flex flex-row gap-6 h-full min-h-0 overflow-hidden animate-in fade-in zoom-in-[0.99] duration-300 fill-mode-both">
+                            {/* Left: DeAngle Result */}
+                            <div className="flex-1 flex flex-col h-full min-h-0 glass rounded-2xl border border-white/5 overflow-hidden shadow-sm">
+                                <div className="flex items-center justify-center shrink-0 border-b-2 border-blue-500/50 h-[60px] bg-blue-500/5 transition-colors">
+                                    <span className="font-medium text-blue-400">DeAngle</span>
+                                </div>
+                                <div className="flex-1 p-6 overflow-hidden">
+                                    {!deAngleResult && !deAngleLoading ? (
+                                        <div className="h-full flex flex-col items-center justify-center text-muted-foreground rounded-2xl">
+                                            <Triangle className="w-12 h-12 mb-4 opacity-20" />
+                                            <p>Input sources and run DeAngle to populate.</p>
+                                        </div>
+                                    ) : deAngleLoading ? (
+                                        <div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
+                                    ) : (
+                                        <div className="h-full rounded-2xl overflow-hidden">
+                                            <DeAngleView facts={deAngleResult.facts} angles={deAngleResult.angles} />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Right: ReAngle Result */}
+                            <div className="flex-1 flex flex-col h-full min-h-0 glass rounded-2xl border border-white/5 overflow-hidden shadow-sm">
+                                <div className="flex items-center justify-center shrink-0 border-b-2 border-purple-500/50 h-[60px] bg-purple-500/5 transition-colors">
+                                    <span className="font-medium text-purple-400">ReAngle</span>
+                                </div>
+                                <div className="flex-1 p-6 overflow-hidden">
+                                    {!reAngleResult && !reAngleLoading ? (
+                                        <div className="h-full flex flex-col items-center justify-center text-muted-foreground rounded-2xl">
+                                            <Wand2 className="w-12 h-12 mb-4 opacity-20" />
+                                            <p>Define an angle and run ReAngle to generate content.</p>
+                                        </div>
+                                    ) : reAngleLoading ? (
+                                        <div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
+                                    ) : (
+                                        <div className="h-full">
+                                            <ReAngleView
+                                                summary={reAngleResult.summary}
+                                                rewrittenContent={reAngleResult.rewritten_content}
+                                                ttsLoading={ttsLoading}
+                                                audioUrl={audioUrl}
+                                                onPlayTTS={handlePlayTTS}
+                                                onDownload={handleDownload}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        /* Expanded Sidebar Mode (Tabs View) */
+                        <div className="flex-1 flex flex-col h-full min-h-0 glass rounded-2xl border border-white/5 overflow-hidden animate-in fade-in zoom-in-[0.99] duration-300 fill-mode-both shadow-sm">
+                            <Tabs value={activeResultTab} onValueChange={setActiveResultTab} className="h-full flex flex-col">
+                                <TabsList className="bg-transparent border-b border-white/10 w-full rounded-none px-0 h-[60px] p-0 flex">
+                                    <TabsTrigger
+                                        value="DeAngle"
+                                        className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500/50 data-[state=active]:bg-blue-500/5 data-[state=active]:text-blue-400 text-muted-foreground data-[state=active]:shadow-none cursor-pointer transition-all hover:bg-white/5 font-medium"
+                                    >
+                                        DeAngle
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="ReAngle"
+                                        className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500/50 data-[state=active]:bg-purple-500/5 data-[state=active]:text-purple-400 text-muted-foreground data-[state=active]:shadow-none cursor-pointer transition-all hover:bg-white/5 font-medium"
+                                    >
+                                        ReAngle
+                                    </TabsTrigger>
+                                </TabsList>
+
+                                <div className="flex-1 p-6 overflow-hidden">
+                                    <TabsContent value="DeAngle" className="h-full m-0 outline-none">
+                                        {!deAngleResult && !deAngleLoading ? (
+                                            <div className="h-full flex flex-col items-center justify-center text-muted-foreground rounded-2xl">
+                                                <Triangle className="w-12 h-12 mb-4 opacity-20" />
+                                                <p>Input sources and run DeAngle to populate.</p>
+                                            </div>
+                                        ) : deAngleLoading ? (
+                                            <div className="h-full flex items-center justify-center rounded-2xl"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
+                                        ) : (
+                                            <div className="h-full rounded-2xl overflow-hidden">
+                                                <DeAngleView facts={deAngleResult.facts} angles={deAngleResult.angles} />
+                                            </div>
+                                        )}
+                                    </TabsContent>
+
+                                    <TabsContent value="ReAngle" className="h-full m-0 outline-none">
+                                        {!reAngleResult && !reAngleLoading ? (
+                                            <div className="h-full flex flex-col items-center justify-center text-muted-foreground rounded-2xl">
+                                                <Wand2 className="w-12 h-12 mb-4 opacity-20" />
+                                                <p>Define an angle and run ReAngle to generate content.</p>
+                                            </div>
+                                        ) : reAngleLoading ? (
+                                            <div className="h-full flex items-center justify-center rounded-2xl"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
+                                        ) : (
+                                            <div className="h-full">
+                                                <ReAngleView
+                                                    summary={reAngleResult.summary}
+                                                    rewrittenContent={reAngleResult.rewritten_content}
+                                                    ttsLoading={ttsLoading}
+                                                    audioUrl={audioUrl}
+                                                    onPlayTTS={handlePlayTTS}
+                                                    onDownload={handleDownload}
+                                                />
+                                            </div>
+                                        )}
+                                    </TabsContent>
+                                </div>
+                            </Tabs>
+                        </div>
+                    )
+                    }
+                </div >
+            </main >
+        </div >
     )
 }

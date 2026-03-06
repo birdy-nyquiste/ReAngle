@@ -5,6 +5,24 @@ import { useAuth } from "@/context/AuthContext"
 import AppHeader from "@/components/AppHeader"
 import { useLanguage } from "@/context/LanguageContext"
 
+// Static background — hoisted outside component to avoid recreation on every render
+const AtmosphericBackground = (
+    <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-500/10 blur-[140px] mix-blend-screen animate-glow" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-[140px] mix-blend-screen animate-glow" style={{ animationDelay: '2s' }} />
+        <div
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+            }}
+        />
+    </div>
+)
+
+// Preload route on hover for perceived speed
+const preloadRegister = () => import("./RegisterPage")
+const preloadApp = () => import("./MainApp")
+
 export default function LandingPage() {
     const navigate = useNavigate()
     const { user } = useAuth()
@@ -12,19 +30,8 @@ export default function LandingPage() {
 
     return (
         <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/20 overflow-x-hidden font-sans">
-            {/* Atmospheric Background */}
-            <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-500/10 blur-[140px] mix-blend-screen animate-glow" />
-                <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-[140px] mix-blend-screen animate-glow" style={{ animationDelay: '2s' }} />
-
-                {/* Minimal Grid Overlay */}
-                <div
-                    className="absolute inset-0 opacity-[0.03]"
-                    style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-                    }}
-                />
-            </div>
+            {/* Atmospheric Background — hoisted static JSX */}
+            {AtmosphericBackground}
 
             <AppHeader />
 
@@ -51,6 +58,8 @@ export default function LandingPage() {
                                 size="lg"
                                 className="h-14 px-8 text-lg font-semibold rounded-full shadow-[0_0_30px_-5px_var(--tw-shadow-color)] shadow-primary/40 hover:shadow-primary/60 transition-all duration-300 group"
                                 onClick={() => navigate(user ? "/app" : "/register")}
+                                onMouseEnter={user ? preloadApp : preloadRegister}
+                                onFocus={user ? preloadApp : preloadRegister}
                             >
                                 {t("landing.heroCta")}
                                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -152,12 +161,12 @@ export default function LandingPage() {
                                 <div className="mb-6 inline-flex p-3 rounded-2xl bg-orange-500/10 text-orange-400 ring-1 ring-orange-500/20">
                                     <LayoutDashboard className="w-6 h-6" />
                                 </div>
-                                    <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">
-                                        {t("landing.engineFeature1Title")}
-                                    </h3>
-                                    <p className="text-muted-foreground text-sm leading-relaxed">
-                                        {t("landing.engineFeature1Desc")}
-                                    </p>
+                                <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">
+                                    {t("landing.engineFeature1Title")}
+                                </h3>
+                                <p className="text-muted-foreground text-sm leading-relaxed">
+                                    {t("landing.engineFeature1Desc")}
+                                </p>
                             </div>
 
                             {/* Feature 2 */}
@@ -165,12 +174,12 @@ export default function LandingPage() {
                                 <div className="mb-6 inline-flex p-3 rounded-2xl bg-purple-500/10 text-purple-400 ring-1 ring-purple-500/20">
                                     <Mic2 className="w-6 h-6" />
                                 </div>
-                                    <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">
-                                        {t("landing.engineFeature2Title")}
-                                    </h3>
-                                    <p className="text-muted-foreground text-sm leading-relaxed">
-                                        {t("landing.engineFeature2Desc")}
-                                    </p>
+                                <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">
+                                    {t("landing.engineFeature2Title")}
+                                </h3>
+                                <p className="text-muted-foreground text-sm leading-relaxed">
+                                    {t("landing.engineFeature2Desc")}
+                                </p>
                             </div>
 
                             {/* Feature 3 */}
@@ -178,12 +187,12 @@ export default function LandingPage() {
                                 <div className="mb-6 inline-flex p-3 rounded-2xl bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20">
                                     <Zap className="w-6 h-6" />
                                 </div>
-                                    <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">
-                                        {t("landing.engineFeature3Title")}
-                                    </h3>
-                                    <p className="text-muted-foreground text-sm leading-relaxed">
-                                        {t("landing.engineFeature3Desc")}
-                                    </p>
+                                <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">
+                                    {t("landing.engineFeature3Title")}
+                                </h3>
+                                <p className="text-muted-foreground text-sm leading-relaxed">
+                                    {t("landing.engineFeature3Desc")}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -321,6 +330,8 @@ export default function LandingPage() {
                                 size="lg"
                                 className="h-16 px-10 text-xl font-bold rounded-full shadow-[0_0_40px_-5px_var(--tw-shadow-color)] shadow-primary/50 hover:shadow-primary/80 transition-all duration-300"
                                 onClick={() => navigate(user ? "/app" : "/register")}
+                                onMouseEnter={user ? preloadApp : preloadRegister}
+                                onFocus={user ? preloadApp : preloadRegister}
                             >
                                 {t("landing.finalCtaButton")}
                                 <ArrowRight className="ml-3 h-6 w-6" />
