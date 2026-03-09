@@ -294,16 +294,19 @@ export default function MainApp() {
 
         if (!script) return
 
-        // Video Agent 的 prompt/长度要控一下，先做保守限制
-        if (script.length > 3000) {
-            alert("文章内容过长，暂不支持生成数字人播报，请先缩短后再试。")
+        // 前端限制：口播稿超过 800 字时不调用 HeyGen，避免成本和时长失控
+        if (script.length > 800) {
+            console.warn(
+                `[Avatar] Voiceover too long: ${script.length} chars (> 800). Please shorten before generating avatar video.`
+            )
+            alert("口播稿超过 800 字，暂不支持生成数字人播报，请先缩短后再试。")
             return
         }
 
         setAvatarLoading(true)
         setAvatarVideoUrl(null)
         try {
-            const res = await fetch("/api/v1/rewrite/video-agent", {
+            const res = await fetch("/api/v1/rewrite/avatar", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ text: script })
