@@ -4,6 +4,13 @@
 """
 
 import os
+from pathlib import Path
+
+# 最先加载 .env，保证 HEYGEN_API_KEY 等在所有模块（含 video_agent_client）导入前可用
+from dotenv import load_dotenv
+_env_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(_env_path)
+
 import uvicorn
 
 from fastapi import FastAPI

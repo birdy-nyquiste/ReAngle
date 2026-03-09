@@ -78,3 +78,35 @@ class AvatarResponse(BaseModel):
     """
 
     video_url: str = Field(..., description="数字人视频URL")
+
+
+class VideoAgentRequest(BaseModel):
+    """
+    使用 HeyGen Video Agent 生成视频的请求模型。
+    """
+
+    text: str = Field(..., description="用于生成视频的完整稿件文本")
+
+
+class VideoAgentResponse(BaseModel):
+    """
+    使用 HeyGen Video Agent 生成视频的响应模型。
+    """
+
+    video_url: str = Field(..., description="生成的视频URL")
+
+
+class VoiceoverRequest(BaseModel):
+    """
+    生成口播稿的请求模型。
+    """
+
+    text: str = Field(..., description="改写后的完整文章文本")
+
+
+class VoiceoverResponse(BaseModel):
+    """
+    生成口播稿的响应模型。
+    """
+
+    voiceover: str = Field(..., description="生成的口播稿文本")
