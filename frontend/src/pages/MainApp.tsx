@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DiffView } from "@/components/DiffView"
-import { Loader2, Trash2, FileText, Link as LinkIcon, Youtube, Type, Play, Download, Sparkles, Settings2, FolderInput, Zap, X } from "lucide-react"
+import { Loader2, Trash2, FileText, Link as LinkIcon, Youtube, Type, Play, Download, Sparkles, Settings2, FolderInput, Zap, X, Video, Copy } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
 import AppHeader from "@/components/AppHeader"
@@ -57,6 +57,26 @@ export default function MainApp() {
     const [ttsLoading, setTtsLoading] = useState(false)
     const [audioUrl, setAudioUrl] = useState<string | null>(null)
     const audioRef = useRef<HTMLAudioElement | null>(null)
+
+    // Avatar State
+    const [avatarLoading, setAvatarLoading] = useState(false)
+    const [avatarVideoUrl, setAvatarVideoUrl] = useState<string | null>(null)
+    const [voiceoverLoading, setVoiceoverLoading] = useState(false)
+    const [voiceover, setVoiceover] = useState<string | null>(null)
+
+    const voiceoverStats = useMemo(() => {
+        if (!voiceover) return null
+        const text = voiceover.trim()
+        if (!text) return null
+        // 粗略判断是否主要为英文：全部为 ASCII 时按“词”统计，否则按“字”统计
+        const isAscii = /^[\x00-\x7F]+$/.test(text)
+        if (isAscii) {
+            const words = text.split(/\s+/).filter(Boolean).length
+            return { type: "words" as const, count: words }
+        }
+        const chars = text.replace(/\s/g, "").length
+        return { type: "chars" as const, count: chars }
+    }, [voiceover])
 
     // Detect ?checkout=success in URL
     useEffect(() => {
@@ -121,6 +141,8 @@ export default function MainApp() {
         setIsUsageLimitError(false)
         setResult(null)
         setAudioUrl(null)
+        setAvatarVideoUrl(null)
+        setVoiceover(null)
 
         try {
             const formData = new FormData()
@@ -215,6 +237,91 @@ export default function MainApp() {
             console.error("TTS Error:", err)
         } finally {
             setTtsLoading(false)
+        }
+    }
+
+    const generateVoiceoverInternal = async (): Promise<string | null> => {
+        if (!result?.rewritten) return null
+
+        setVoiceoverLoading(true)
+        try {
+            const res = await fetch("/api/v1/rewrite/voiceover", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: result.rewritten })
+            })
+
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) {
+                const msg = data?.error || data?.message || res.statusText || "生成口播稿失败"
+                throw new Error(msg)
+            }
+
+            if (typeof data.voiceover === "string" && data.voiceover.trim()) {
+                setVoiceover(data.voiceover)
+                return data.voiceover as string
+            }
+
+            throw new Error("生成口播稿失败")
+        } catch (err) {
+            console.error("Voiceover Error:", err)
+            const msg = err instanceof Error ? err.message : "生成口播稿失败"
+            alert(msg)
+            return null
+        } finally {
+            setVoiceoverLoading(false)
+        }
+    }
+
+    const handleGenerateVoiceover = async () => {
+        if (!result?.rewritten) return
+
+        setVoiceover(null)
+        await generateVoiceoverInternal()
+    }
+
+    const handleGenerateAvatar = async () => {
+        if (!result?.rewritten && !voiceover) return
+
+        let script = (voiceover || "").trim()
+
+        // 如果还没有口播稿，则先自动生成口播稿，再用生成的口播稿来生成数字人视频
+        if (!script) {
+            const generated = await generateVoiceoverInternal()
+            if (!generated) return
+            script = generated.trim()
+        }
+
+        if (!script) return
+
+        // Video Agent 的 prompt/长度要控一下，先做保守限制
+        if (script.length > 3000) {
+            alert("文章内容过长，暂不支持生成数字人播报，请先缩短后再试。")
+            return
+        }
+
+        setAvatarLoading(true)
+        setAvatarVideoUrl(null)
+        try {
+            const res = await fetch("/api/v1/rewrite/video-agent", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: script })
+            })
+
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) {
+                const msg = data?.error || data?.message || res.statusText || "请求失败"
+                throw new Error(msg)
+            }
+
+            setAvatarVideoUrl(data.video_url)
+        } catch (err) {
+            console.error("Avatar Error:", err)
+            const msg = err instanceof Error ? err.message : "数字人播报生成失败，请稍后重试。"
+            alert(msg)
+        } finally {
+            setAvatarLoading(false)
         }
     }
 
@@ -468,6 +575,12 @@ export default function MainApp() {
                                     >
                                         {t("mainApp.compare")}
                                     </TabsTrigger>
+                                    <TabsTrigger
+                                        value="avatar"
+                                        className="data-[state=active]:bg-white/10 data-[state=active]:shadow-none rounded-lg px-4 cursor-pointer"
+                                    >
+                                        Avatar
+                                    </TabsTrigger>
                                 </TabsList>
                             </div>
 
@@ -521,6 +634,117 @@ export default function MainApp() {
 
                                 <TabsContent value="compare" className="mt-0 h-full">
                                     <DiffView original={result.original} rewritten={result.rewritten} />
+                                </TabsContent>
+
+                                <TabsContent value="avatar" className="mt-0 h-full">
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="text-lg font-semibold">Avatar 播报</h3>
+                                            <div className="flex items-center gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={handleGenerateVoiceover}
+                                                    disabled={voiceoverLoading || !result?.rewritten}
+                                                    className="bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer"
+                                                >
+                                                    {voiceoverLoading ? (
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                    ) : (
+                                                        <Copy className="w-4 h-4 mr-2" />
+                                                    )}
+                                                    生成口播稿
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={handleGenerateAvatar}
+                                                    disabled={avatarLoading || (!result?.rewritten && !voiceover)}
+                                                    className="bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer"
+                                                >
+                                                    {avatarLoading ? (
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                    ) : (
+                                                        <Video className="w-4 h-4 mr-2" />
+                                                    )}
+                                                    生成数字人播报
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-5 rounded-xl bg-white/5 border border-white/5 space-y-2">
+                                            <p className="text-sm text-muted-foreground">
+                                                可以先生成口播稿并根据需要进行编辑，数字人将按照当前口播稿的内容进行播报。
+                                                请尽量将口播稿控制在约 600 字以内，
+                                                以避免视频过长。生成数字人播报通常需要 10–20 分钟，请耐心等待。
+                                            </p>
+
+                                            {voiceover && (
+                                                <div className="pt-2 space-y-2">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2">
+                                                            <h4 className="text-sm font-medium">口播稿</h4>
+                                                            {voiceoverStats && (
+                                                                <span className="text-xs text-muted-foreground">
+                                                                    {voiceoverStats.type === "chars"
+                                                                        ? `${voiceoverStats.count} 字`
+                                                                        : `${voiceoverStats.count} words`}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            className="h-7 px-2 text-xs cursor-pointer"
+                                                            onClick={() => {
+                                                                try {
+                                                                    navigator.clipboard.writeText(voiceover)
+                                                                    alert("口播稿已复制到剪贴板")
+                                                                } catch {
+                                                                    alert("复制失败，请手动选择文本复制")
+                                                                }
+                                                            }}
+                                                        >
+                                                            <Copy className="w-3 h-3 mr-1" />
+                                                            复制
+                                                        </Button>
+                                                    </div>
+                                                    <Textarea
+                                                        value={voiceover}
+                                                        onChange={e => setVoiceover(e.target.value)}
+                                                        className="max-h-64 min-h-[140px] rounded-lg bg-black/10 border border-white/10 text-sm leading-relaxed whitespace-pre-wrap resize-vertical"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {avatarVideoUrl ? (
+                                                <div className="pt-2 space-y-2">
+                                                    <h4 className="text-sm font-medium">视频预览</h4>
+                                                    <video
+                                                        src={avatarVideoUrl}
+                                                        controls
+                                                        className="w-full rounded-xl border border-white/10 bg-black"
+                                                    />
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => {
+                                                            const downloadUrl = `/api/v1/rewrite/video-download?url=${encodeURIComponent(avatarVideoUrl)}`
+                                                            window.open(downloadUrl, "_blank", "noopener,noreferrer")
+                                                        }}
+                                                        className="bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer"
+                                                    >
+                                                        <Download className="w-4 h-4 mr-2" />
+                                                        下载视频
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <div className="text-sm text-muted-foreground/70 pt-2">
+                                                    {avatarLoading ? "视频生成中…" : "还没有生成视频。"}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 </TabsContent>
                             </div>
                         </Tabs>

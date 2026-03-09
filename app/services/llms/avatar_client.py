@@ -9,6 +9,15 @@ class AvatarClient:
     def __init__(self):
         self.api_key = os.getenv("HEYGEN_API_KEY")
         self.base_url = "https://api.heygen.com"
+        # 这些配置通过环境变量可调，方便你在 HeyGen 中更换主播/声音/分辨率
+        self.avatar_id = os.getenv("HEYGEN_AVATAR_ID", "Daisy-hq")
+        self.voice_id = os.getenv(
+            "HEYGEN_VOICE_ID", "2d5b0e6ccf79403280d0926203731d0e"
+        )
+        self.video_width = int(os.getenv("HEYGEN_VIDEO_WIDTH", "1280"))
+        self.video_height = int(os.getenv("HEYGEN_VIDEO_HEIGHT", "720"))
+        # 测试模式：True 时不会消耗正式额度，先用于联调；上线后可以在 .env 里改为 False
+        self.test_mode = os.getenv("HEYGEN_TEST_MODE", "true").lower() == "true"
         self.headers = {
             "X-Api-Key": self.api_key,
             "Content-Type": "application/json",
@@ -40,19 +49,19 @@ class AvatarClient:
                 {
                     "character": {
                         "type": "avatar",
-                        "avatar_id": "Daisy-hq",
+                        "avatar_id": self.avatar_id,
                         "scale": 1.0,
                     },
                     "voice": {
                         "type": "text",
                         "input_text": text,
-                        "voice_id": "2d5b0e6ccf79403280d0926203731d0e",
+                        "voice_id": self.voice_id,
                     },
                     "background": {"type": "color", "value": "#FAFAFA"},
                 }
             ],
-            "dimension": {"width": 1280, "height": 720},
-            "test": True,  # Enable test mode to save credits
+            "dimension": {"width": self.video_width, "height": self.video_height},
+            "test": self.test_mode,
         }
 
         try:

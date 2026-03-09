@@ -6,8 +6,11 @@ from typing import Annotated, List, Dict, Any
 from uuid import uuid4
 import time
 import json
+from urllib.parse import urlparse
 from fastapi import APIRouter, Depends, Form, Request
+from fastapi.responses import StreamingResponse
 from loguru import logger
+import httpx
 
 from app.schemas.rewrite_schema import (
     RewriteRequest,
@@ -16,6 +19,10 @@ from app.schemas.rewrite_schema import (
     TTSResponse,
     AvatarRequest,
     AvatarResponse,
+    VideoAgentRequest,
+    VideoAgentResponse,
+    VoiceoverRequest,
+    VoiceoverResponse,
 )
 from app.services.extractors import (
     extract_text_from_url,
@@ -23,7 +30,13 @@ from app.services.extractors import (
     extract_text_from_pdf,
     extract_text_from_image,
 )
-from app.services.llms import rewriting_client, tts_client, avatar_client
+from app.services.llms import (
+    rewriting_client,
+    tts_client,
+    avatar_client,
+    video_agent_client,
+    voiceover_client,
+)
 from app.core.exceptions import (
     ContentExtractionError,
     LLMProviderError,
@@ -256,3 +269,100 @@ async def get_avatar_result(request: AvatarRequest):
     except Exception as e:
         logger.error(f"Avatar request failed: {e}")
         raise LLMProviderError(f"Avatar generation failed: {str(e)}")
+
+
+@rewrite_router.post("/video-agent", response_model=VideoAgentResponse)
+async def get_video_agent_result(request: VideoAgentRequest):
+    """
+    使用 HeyGen Video Agent 生成数字人播报视频。
+    """
+    text = (request.text or "").strip()
+    logger.info(f"Received Video Agent request for text length: {len(text)}")
+
+    # 基本长度与内容校验，避免传入空文本或过长文本
+    if not text:
+        raise InvalidInputError("Text is empty, cannot generate avatar video.")
+
+    max_len = 4000
+    if len(text) > max_len:
+        raise InvalidInputError(
+            f"Text is too long for avatar video. Max supported length is {max_len} characters."
+        )
+
+    try:
+        video_url = await video_agent_client.get_video_agent_result(text=text)
+        return VideoAgentResponse(video_url=video_url)
+    except Exception as e:
+        logger.error(f"Video Agent request failed: {e}")
+        raise LLMProviderError(f"Video Agent generation failed: {str(e)}")
+
+
+@rewrite_router.post("/voiceover", response_model=VoiceoverResponse)
+async def get_voiceover_script(request: VoiceoverRequest):
+    """
+    使用 OpenAI 将改写后的文章转换为口播稿。
+    """
+    text = (request.text or "").strip()
+    logger.info(f"Received voiceover request for text length: {len(text)}")
+
+    if not text:
+        raise InvalidInputError("Text is empty, cannot generate voiceover script.")
+
+    # 这里不做太严的长度限制，交给系统 prompt 控制与模型自身截断
+
+    try:
+        script = await voiceover_client.get_voiceover_script(text=text)
+        if not script:
+            raise LLMProviderError("Voiceover script is empty.")
+        return VoiceoverResponse(voiceover=script)
+    except Exception as e:
+        logger.error(f"Voiceover request failed: {e}")
+        raise LLMProviderError(f"Voiceover generation failed: {str(e)}")
+
+
+@rewrite_router.get("/video-download")
+async def download_video(url: str):
+    """
+    代理下载视频（解决跨域/Content-Disposition 导致的“打开播放但不下载”问题）。
+    仅允许下载 HeyGen 返回的视频链接，防止 SSRF。
+    """
+    if not url or not url.strip():
+        raise InvalidInputError("Missing url")
+
+    u = url.strip()
+    parsed = urlparse(u)
+    if parsed.scheme != "https":
+        raise InvalidInputError("Only https url is allowed")
+
+    # 只允许 HeyGen 常见的文件域名，避免任意 URL 被服务端请求
+    allowed_hosts = {
+        "files2.heygen.ai",
+        "resource2.heygen.ai",
+        "files.heygen.ai",
+        "resource.heygen.ai",
+    }
+    if (parsed.hostname or "").lower() not in allowed_hosts:
+        raise InvalidInputError("Unsupported download host")
+
+    filename = "reangle-avatar.mp4"
+    max_size = 300 * 1024 * 1024  # 300MB，防止过大导致内存问题
+    try:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=120.0) as client:
+            r = await client.get(u)
+            if r.status_code != 200:
+                raise LLMProviderError(
+                    f"Download failed: HTTP {r.status_code}"
+                )
+            content = r.content
+            if len(content) > max_size:
+                raise LLMProviderError("Video file too large to proxy.")
+            content_type = r.headers.get("content-type") or "video/mp4"
+            headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
+            return StreamingResponse(
+                iter([content]), media_type=content_type, headers=headers
+            )
+    except httpx.TimeoutException:
+        raise LLMProviderError("Video download timed out (source slow or unreachable).")
+    except httpx.RequestError as e:
+        logger.warning(f"Video download request error: {e}")
+        raise LLMProviderError(f"Download network error: {str(e)}")
