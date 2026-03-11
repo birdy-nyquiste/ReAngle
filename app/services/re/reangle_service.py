@@ -28,7 +28,7 @@ async def run_reangle(
     selected_facts: list[dict],
     selected_angles: list[dict],
     prompt: str,
-    model: str = "gemini-3-flash-preview",
+    model: str = "gemini-2.5-flash",
 ) -> ReAngleResponse:
     """
     执行 ReAngle 内容生成流程。

@@ -328,7 +328,9 @@ export default function MainApp() {
 
     const handlePlayTTS = async () => {
         if (!reAngleResult?.summary) return
-        if (audioUrl) return
+        if (ttsLoading || audioUrl) return
+        
+        setError(null)
         setTtsLoading(true)
         try {
             const res = await fetch("/api/v2/media/tts", {
@@ -337,12 +339,17 @@ export default function MainApp() {
                 body: JSON.stringify({ text: reAngleResult.summary })
             })
 
-            if (!res.ok) throw new Error("TTS failed")
+            if (!res.ok) {
+                const errData = await res.json().catch(() => null);
+                throw new Error(errData?.message || errData?.detail || "TTS failed");
+            }
 
             const data = await res.json()
             setAudioUrl(data.audio_url)
-        } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (err: any) {
             console.error("TTS Error:", err)
+            setError(err.message || "Failed to generate TTS audio. Please try again.")
         } finally {
             setTtsLoading(false)
         }

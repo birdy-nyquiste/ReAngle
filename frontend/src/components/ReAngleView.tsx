@@ -1,6 +1,7 @@
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { Download, Loader2, Headphones, Copy, FileText, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { AudioPlayer } from "./AudioPlayer"
 
 interface ReAngleViewProps {
     summary: string
@@ -19,7 +20,6 @@ export function ReAngleView({
     onPlayTTS,
     onDownload
 }: ReAngleViewProps) {
-    const audioRef = useRef<HTMLAudioElement | null>(null)
     const [copiedSummary, setCopiedSummary] = useState(false)
     const [copiedContent, setCopiedContent] = useState(false)
 
@@ -30,11 +30,19 @@ export function ReAngleView({
     }
 
     const handlePlayClick = () => {
-        if (audioUrl) {
-            audioRef.current?.play()
-        } else {
+        if (!audioUrl) {
             onPlayTTS()
         }
+    }
+
+    const handleDownloadAudio = () => {
+        if (!audioUrl) return
+        const element = document.createElement("a")
+        element.href = audioUrl
+        element.download = "reangle_summary_audio.mp3"
+        document.body.appendChild(element)
+        element.click()
+        document.body.removeChild(element)
     }
 
     return (
@@ -51,8 +59,8 @@ export function ReAngleView({
                             size="icon"
                             variant="ghost"
                             onClick={handlePlayClick}
-                            disabled={ttsLoading || !summary}
-                            className="h-8 w-8 hover:bg-white/10 text-muted-foreground hover:text-foreground"
+                            disabled={ttsLoading || !summary || !!audioUrl}
+                            className="h-8 w-8 hover:bg-white/10 text-muted-foreground hover:text-foreground disabled:opacity-50"
                             title="Read Aloud"
                         >
                             {ttsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Headphones className="w-4 h-4" />}
@@ -70,15 +78,17 @@ export function ReAngleView({
                     </div>
                 </div>
                 <div className="p-4 lg:p-5 space-y-3">
-                    <h4 className="text-sm font-semibold">Abstract</h4>
                     {summary ? (
                         <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{summary}</p>
                     ) : (
                         <p className="text-sm text-muted-foreground italic">No summary generated.</p>
                     )}
                 </div>
-                {/* Audio Element Hidden */}
-                {audioUrl ? <audio ref={audioRef} src={audioUrl} className="hidden" /> : null}
+                {audioUrl && (
+                    <div className="px-4 pb-4 lg:px-5 lg:pb-5">
+                        <AudioPlayer audioUrl={audioUrl} onDownload={handleDownloadAudio} />
+                    </div>
+                )}
             </div>
 
             {/* ReAngled Content Block */}
