@@ -61,7 +61,9 @@ describe("ProtectedRoute", () => {
 
     it("renders children for authenticated users", () => {
         mockUseAuth.mockReturnValue({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             user: { id: "123", email: "test@example.com" } as any,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             session: { access_token: "tok" } as any,
             loading: false,
             signIn: vi.fn(), signOut: vi.fn(), signUp: vi.fn(),

@@ -13,17 +13,6 @@ from loguru import logger
 
 from app.core.exceptions import ContentExtractionError
 
-from PIL import Image
-
-# 轻量 OCR（中英混排效果较好）
-try:
-    from rapidocr_onnxruntime import RapidOCR  # type: ignore
-    import numpy as np  # 仅在 RapidOCR 可用时再导入 numpy
-    _rapid_ocr = RapidOCR()  # 初始化一次复用
-except Exception:
-    _rapid_ocr = None
-    np = None  # type: ignore
-    logger.warning("RapidOCR is not available. Image OCR will be disabled.")
 
 async def extract_text_from_url(url: str) -> str:
     """
@@ -133,7 +122,7 @@ async def extract_text_from_image(file: UploadFile) -> str:
         np_img = np.array(image)
         result, _ = _rapid_ocr(np_img)
         lines = []
-        for item in (result or []):
+        for item in result or []:
             # 兼容不同版本 RapidOCR 的返回：
             # 1) [box, text, score]
             # 2) [box, (text, score)]

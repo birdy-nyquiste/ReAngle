@@ -29,6 +29,7 @@ async def get_rewriting_result(
     Returns:
         GenerateContentResponse 对象
     """
+    client = None
     try:
         logger.info(f"Calling Gemini API (model: {model})")
 
@@ -74,3 +75,6 @@ async def get_rewriting_result(
     except Exception as e:
         logger.exception("Gemini API call failed")
         raise LLMProviderError(f"Gemini API error: {str(e)}")
+    finally:
+        if client:
+            client.close()

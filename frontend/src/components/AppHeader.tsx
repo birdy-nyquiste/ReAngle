@@ -25,7 +25,7 @@ export default function AppHeader() {
 
   const headerClassName = "floating-nav"
 
-  const containerClassName = "container flex h-14 items-center px-6 mx-auto max-w-7xl"
+  const containerClassName = "flex h-14 items-center px-6 w-full"
 
   const triggerLabel =
     language === "en"

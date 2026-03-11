@@ -23,6 +23,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     """
     处理 FastAPI 验证异常。
     """
+    logger.error(f"Validation Error Details: {exc.errors()}")
     return JSONResponse(
         status_code=422,
         content=BaseErrorResponse(

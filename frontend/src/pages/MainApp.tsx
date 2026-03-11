@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Loader2, Trash2, FileText, Link as LinkIcon, Youtube, Type, Sparkles, FolderInput, X, ChevronRight, Triangle, Wand2, PanelLeftClose, PanelLeftOpen } from "lucide-react"
 import { useLanguage } from "@/context/LanguageContext"
+import { useAuth } from "@/context/AuthContext"
 import AppHeader from "@/components/AppHeader"
 import { DeAngleView } from "@/components/DeAngleView"
 import { ReAngleView } from "@/components/ReAngleView"
@@ -24,6 +24,24 @@ interface InputItem {
 
 export default function MainApp() {
     const { t } = useLanguage()
+    const { session: authSession } = useAuth()
+
+    // Session ID — generated once per MainApp mount
+    const [sessionId] = useState(() => crypto.randomUUID())
+
+    // Helper: build headers with auth + session
+    const getHeaders = useCallback((json = true) => {
+        const headers: Record<string, string> = {
+            "X-Session-Id": sessionId,
+        }
+        if (authSession?.access_token) {
+            headers["Authorization"] = `Bearer ${authSession.access_token}`
+        }
+        if (json) {
+            headers["Content-Type"] = "application/json"
+        }
+        return headers
+    }, [sessionId, authSession])
 
     // Sidebar State
     const [sidebarExpanded, setSidebarExpanded] = useState(true)
@@ -40,24 +58,54 @@ export default function MainApp() {
     // State
     const [activeInputTab, setActiveInputTab] = useState("text")
     const [inputItems, setInputItems] = useState<InputItem[]>([])
+    const [inputsLocked, setInputsLocked] = useState(false)
 
     // Inputs
     const [inputText, setInputText] = useState("")
     const [inputUrl, setInputUrl] = useState("")
     const [inputFile, setInputFile] = useState<File | null>(null)
+    const [inputsLoading, setInputsLoading] = useState(false)
 
     // DeAngle State
     const [deAngleLoading, setDeAngleLoading] = useState(false)
-    const [deAngleResult, setDeAngleResult] = useState<any>(null) // Will hold facts and angles
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [deAngleResult, setDeAngleResult] = useState<any>(null)
+    const [selectedDeAngleIds, setSelectedDeAngleIds] = useState<Set<string>>(new Set())
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const handleToggleDeAngleSelect = useCallback((id: string, _type: "fact" | "angle") => {
+        setSelectedDeAngleIds(prev => {
+            const next = new Set(prev)
+            if (next.has(id)) {
+                next.delete(id)
+            } else {
+                next.add(id)
+            }
+            return next
+        })
+    }, [])
+
+    // Derived: selected facts & angles for display
+    const selectedFacts = useMemo(() => {
+        if (!deAngleResult?.facts) return []
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return deAngleResult.facts.filter((f: any) => selectedDeAngleIds.has(f.id))
+    }, [deAngleResult, selectedDeAngleIds])
+
+    const selectedAngles = useMemo(() => {
+        if (!deAngleResult?.angles) return []
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return deAngleResult.angles.filter((a: any) => selectedDeAngleIds.has(a.id))
+    }, [deAngleResult, selectedDeAngleIds])
 
     // ReAngle State
     const [prompt, setPrompt] = useState("")
-    const [model, setModel] = useState("GPT-4o")
     const [reAngleLoading, setReAngleLoading] = useState(false)
-    const [reAngleResult, setReAngleResult] = useState<any>(null) // Will hold summary and rewritten_content
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [reAngleResult, setReAngleResult] = useState<any>(null)
 
     // Global UI
-    const [activeResultTab, setActiveResultTab] = useState("DeAngle") // 'DeAngle' | 'ReAngle'
+    const [activeResultTab, setActiveResultTab] = useState("DeAngle")
     const [error, setError] = useState<string | null>(null)
     const [isUsageLimitError, setIsUsageLimitError] = useState(false)
     const [checkoutSuccess, setCheckoutSuccess] = useState(false)
@@ -80,6 +128,11 @@ export default function MainApp() {
 
     // Handlers
     const handleAddInput = () => {
+        if (inputItems.length >= 3) {
+            setError("Maximum 3 inputs allowed.")
+            return
+        }
+
         const id = Math.random().toString(36).substring(7)
         let newItem: InputItem | null = null
 
@@ -118,39 +171,110 @@ export default function MainApp() {
         setInputItems(prev => prev.filter(i => i.id !== id))
     }
 
-    const handleDeAngleProcess = async () => {
+    const handleCompleteInputs = async () => {
         if (inputItems.length === 0) {
             setError(t("mainApp.errorAddItem"))
             return
         }
 
-        setDeAngleLoading(true)
+        setInputsLoading(true)
         setError(null)
         setIsUsageLimitError(false)
+
+        try {
+            const formData = new FormData()
+            let fileIndex = 0
+            
+            const inputsPayload = inputItems.map((item) => {
+                if (item.type === 'file' && item.content instanceof File) {
+                    const key = `files_${fileIndex}`
+                    formData.append("files", item.content)
+                    fileIndex++
+                    return { id: item.id, type: item.type, contentKey: key, meta: item.meta }
+                }
+                return { id: item.id, type: item.type, content: item.content, meta: item.meta }
+            })
+            
+            formData.append("inputs", JSON.stringify(inputsPayload))
+
+            const headers: Record<string, string> = { "X-Session-Id": sessionId }
+            if (authSession?.access_token) {
+                headers["Authorization"] = `Bearer ${authSession.access_token}`
+            }
+
+            const res = await fetch("/api/v2/inputs/", {
+                method: "POST",
+                headers,
+                body: formData
+            })
+
+            if (res.status === 402) {
+                setIsUsageLimitError(true)
+                throw new Error("Usage limit reached")
+            }
+            if (!res.ok) {
+                let errorMsg = "Failed to process inputs"
+                try {
+                    const errData = await res.json()
+                    if (res.status === 503 || errData?.code === "SERVICE_UNAVAILABLE") {
+                        errorMsg = "AI service is currently at peak capacity. Please wait a few seconds and try again."
+                    } else if (errData?.code === "THEME_VALIDATION_ERROR") {
+                        errorMsg = `Theme Validation Failed: ${errData.error}`
+                    } else if (errData?.error) {
+                        errorMsg = errData.error
+                    } else if (errData?.detail?.message) {
+                        errorMsg = errData.detail.message
+                    } else if (errData?.detail && Array.isArray(errData.detail)) {
+                        errorMsg = errData.detail[0].msg
+                    }
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                } catch (e: any) {
+                    console.error("Failed to parse error JSON", e)
+                }
+                throw new Error(errorMsg)
+            }
+
+            setInputsLocked(true)
+            setExpandedSections(prev => ({ ...prev, gather: false, deangle: true }))
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (err: any) {
+            console.error(err)
+            setError(err.message || "Failed to process inputs")
+        } finally {
+            setInputsLoading(false)
+        }
+    }
+
+    const handleDeAngleProcess = async () => {
+        if (!inputsLocked) {
+            setError("Please complete the Inputs step first.")
+            return
+        }
+
+        setDeAngleLoading(true)
+        setError(null)
         setDeAngleResult(null)
         setReAngleResult(null)
         setActiveResultTab("DeAngle")
 
         try {
-            // Using placeholder logic mapping to new DeAngle API
-            const payload = {
-                inputs: inputItems.map(item => ({ id: item.id, type: item.type, content: item.type !== 'file' ? item.content : 'file_placeholder' }))
-            }
-
-            const res = await fetch("/api/v1/deangle/process", {
+            const res = await fetch("/api/v2/deangle/", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+                headers: getHeaders(),
             })
 
-            if (!res.ok) throw new Error("DeAngle failed")
-
             const data = await res.json()
+            
+            if (!res.ok) {
+                if (res.status === 503 || data.code === "SERVICE_UNAVAILABLE") {
+                    throw new Error("AI service is currently at peak capacity. Please wait a few seconds and try again.")
+                }
+                throw new Error(data.message || "DeAngle failed")
+            }
+
             setDeAngleResult(data)
-
-            // Collapse DeAngle section and ensure ReAngle is open upon successful completion
             setExpandedSections(prev => ({ ...prev, deangle: false, reangle: true }))
-
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error(err)
             setError(err.message || "Failed to DeAngle")
@@ -172,25 +296,28 @@ export default function MainApp() {
         setActiveResultTab("ReAngle")
 
         try {
-            const payload = {
-                llm_type: model,
-                prompt: prompt
-            }
-
-            const res = await fetch("/api/v1/reangle/process", {
+            const res = await fetch("/api/v2/reangle/", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+                headers: getHeaders(),
+                body: JSON.stringify({ 
+                    prompt,
+                    selected_facts: selectedFacts,
+                    selected_angles: selectedAngles
+                })
             })
 
-            if (!res.ok) throw new Error("ReAngle failed")
-
             const data = await res.json()
+
+            if (!res.ok) {
+                if (res.status === 503 || data.code === "SERVICE_UNAVAILABLE") {
+                    throw new Error("AI service is currently at peak capacity. Please wait a few seconds and try again.")
+                }
+                throw new Error(data.message || "ReAngle failed")
+            }
+
             setReAngleResult(data)
-
-            // Collapse ReAngle section upon successful completion
             setExpandedSections(prev => ({ ...prev, reangle: false }))
-
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error(err)
             setError(err.message || "Failed to ReAngle")
@@ -201,13 +328,12 @@ export default function MainApp() {
 
     const handlePlayTTS = async () => {
         if (!reAngleResult?.summary) return
-        if (audioUrl) return // already handled by component ref
-        // TTS implementation remains similar but targets new text.
+        if (audioUrl) return
         setTtsLoading(true)
         try {
-            const res = await fetch("/api/v1/rewrite/tts", {
+            const res = await fetch("/api/v2/media/tts", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: getHeaders(),
                 body: JSON.stringify({ text: reAngleResult.summary })
             })
 
@@ -280,7 +406,15 @@ export default function MainApp() {
 
                             {/* Error Displays */}
                             {error && !isUsageLimitError && sidebarExpanded ? (
-                                <div className="text-xs text-red-400 p-3 bg-red-500/10 rounded-lg border border-red-500/20 mb-4 mx-1">
+                                <div className={cn(
+                                    "text-xs p-3 rounded-lg border mb-4 mx-1 transition-all animate-in fade-in zoom-in-95 duration-200",
+                                    error.includes("peak capacity") || error.includes("try again") 
+                                        ? "bg-amber-500/10 text-amber-400 border-amber-500/20" 
+                                        : "bg-red-500/10 text-red-400 border-red-500/20"
+                                )}>
+                                    <div className="font-semibold mb-1 uppercase tracking-wider text-[10px] opacity-70">
+                                        {error.includes("peak capacity") ? "Server Busy" : "Execution Error"}
+                                    </div>
                                     {error}
                                 </div>
                             ) : null}
@@ -299,12 +433,12 @@ export default function MainApp() {
                                             toggleSection("gather")
                                         }
                                     }}
-                                    className="flex items-center w-full h-[40px] px-1 cursor-pointer group outline-none"
+                                    className="flex items-center w-full h-[40px] px-1 group outline-none cursor-pointer"
                                     title={!sidebarExpanded ? "Gather Inputs" : undefined}
                                 >
                                     <div className={cn(
                                         "flex items-center justify-center shrink-0 border transition-colors w-7 h-7 rounded-full",
-                                        expandedSections.gather ? "bg-white/10 border-white/20 text-foreground" : "bg-white/5 border-white/10 text-muted-foreground group-hover:text-foreground"
+                                        "bg-white/5 border-white/10 text-muted-foreground group-hover:border-white/20 group-hover:bg-white/10 group-hover:text-foreground"
                                     )}>
                                         <FolderInput className="w-3.5 h-3.5" />
                                     </div>
@@ -312,10 +446,13 @@ export default function MainApp() {
                                         "flex items-center justify-between overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap",
                                         sidebarExpanded ? "w-[266px] opacity-100 ml-3 pr-2" : "w-0 opacity-0 ml-0 pr-0"
                                     )}>
-                                        <span className="font-medium text-sm">
+                                        <span className="font-medium text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                                             1. Gather Inputs
                                         </span>
-                                        <ChevronRight className={cn("w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300", expandedSections.gather && "rotate-90")} />
+                                        <ChevronRight className={cn(
+                                            "w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300 group-hover:text-foreground",
+                                            expandedSections.gather && "rotate-90"
+                                        )} />
                                     </div>
                                 </button>
 
@@ -403,10 +540,12 @@ export default function MainApp() {
                                         </div>
 
                                         <Button
-                                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-9 cursor-pointer transition-all"
-                                            onClick={() => setExpandedSections(prev => ({ ...prev, gather: false, deangle: true }))}
+                                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-9 cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                            onClick={handleCompleteInputs}
+                                            disabled={inputsLoading || inputsLocked || inputItems.length === 0}
                                         >
-                                            Complete & Continue
+                                            {inputsLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                            {inputsLocked ? "Inputs Locked" : "Complete & Continue"}
                                         </Button>
                                     </div>
                                 )}
@@ -426,12 +565,12 @@ export default function MainApp() {
                                             toggleSection("deangle")
                                         }
                                     }}
-                                    className="flex items-center w-full h-[40px] px-1 cursor-pointer group outline-none"
+                                    className="flex items-center w-full h-[40px] px-1 group outline-none cursor-pointer"
                                     title={!sidebarExpanded ? "DeAngle" : undefined}
                                 >
                                     <div className={cn(
                                         "flex items-center justify-center shrink-0 border transition-colors w-7 h-7 rounded-full",
-                                        expandedSections.deangle ? "bg-white/10 border-white/20 text-foreground" : "bg-white/5 border-white/10 text-muted-foreground group-hover:text-foreground"
+                                        "bg-white/5 border-white/10 text-muted-foreground group-hover:border-white/20 group-hover:bg-white/10 group-hover:text-foreground"
                                     )}>
                                         <Triangle className="w-3.5 h-3.5" />
                                     </div>
@@ -439,10 +578,13 @@ export default function MainApp() {
                                         "flex items-center justify-between overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap",
                                         sidebarExpanded ? "w-[266px] opacity-100 ml-3 pr-2" : "w-0 opacity-0 ml-0 pr-0"
                                     )}>
-                                        <span className="font-medium text-sm">
+                                        <span className="font-medium text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                                             2. DeAngle
                                         </span>
-                                        <ChevronRight className={cn("w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300", expandedSections.deangle && "rotate-90")} />
+                                        <ChevronRight className={cn(
+                                            "w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300 group-hover:text-foreground",
+                                            expandedSections.deangle && "rotate-90"
+                                        )} />
                                     </div>
                                 </button>
 
@@ -452,9 +594,9 @@ export default function MainApp() {
                                             Detach Events from original Angles, then fact-check on every Events
                                         </p>
                                         <Button
-                                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-9 cursor-pointer transition-all"
+                                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-9 cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                             onClick={handleDeAngleProcess}
-                                            disabled={deAngleLoading || inputItems.length === 0}
+                                            disabled={deAngleLoading || !inputsLocked}
                                         >
                                             {deAngleLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                                             Start DeAngle
@@ -477,12 +619,12 @@ export default function MainApp() {
                                             toggleSection("reangle")
                                         }
                                     }}
-                                    className="flex items-center w-full h-[40px] px-1 cursor-pointer group outline-none"
+                                    className="flex items-center w-full h-[40px] px-1 group outline-none cursor-pointer"
                                     title={!sidebarExpanded ? "ReAngle" : undefined}
                                 >
                                     <div className={cn(
                                         "flex items-center justify-center shrink-0 border transition-colors w-7 h-7 rounded-full",
-                                        expandedSections.reangle ? "bg-white/10 border-white/20 text-foreground" : "bg-white/5 border-white/10 text-muted-foreground group-hover:text-foreground"
+                                        "bg-white/5 border-white/10 text-muted-foreground group-hover:border-white/20 group-hover:bg-white/10 group-hover:text-foreground"
                                     )}>
                                         <Wand2 className="w-3.5 h-3.5" />
                                     </div>
@@ -490,30 +632,64 @@ export default function MainApp() {
                                         "flex items-center justify-between overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap",
                                         sidebarExpanded ? "w-[266px] opacity-100 ml-3 pr-2" : "w-0 opacity-0 ml-0 pr-0"
                                     )}>
-                                        <span className="font-medium text-sm">
+                                        <span className="font-medium text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                                             3. ReAngle
                                         </span>
-                                        <ChevronRight className={cn("w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300", expandedSections.reangle && "rotate-90")} />
+                                        <ChevronRight className={cn(
+                                            "w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300 group-hover:text-foreground",
+                                            expandedSections.reangle && "rotate-90"
+                                        )} />
                                     </div>
                                 </button>
 
                                 {sidebarExpanded && expandedSections.reangle && (
                                     <div className="px-4 pb-4 space-y-4 animate-in slide-in-from-top-2 fade-in duration-200">
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-foreground/80">LLM Model Selector</label>
-                                            <Select value={model} onValueChange={setModel}>
-                                                <SelectTrigger className="bg-black/20 border-white/5 h-9 text-xs cursor-pointer">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent className="bg-[#1e293b] border-white/10">
-                                                    <SelectItem value="GPT-4o" className="text-xs cursor-pointer">GPT-4o</SelectItem>
-                                                    <SelectItem value="Claude-3.5-Sonnet" className="text-xs cursor-pointer">Claude-3.5-Sonnet</SelectItem>
-                                                </SelectContent>
-                                            </Select>
+                                        
+                                        {/* Selected Events */}
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Selected Events</label>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {selectedFacts.length > 0 ? selectedFacts.map((f: { id: string, content: string }) => (
+                                                    <span
+                                                        key={f.id}
+                                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/15 text-blue-400 border border-blue-500/20 cursor-pointer hover:bg-blue-500/25 transition-colors"
+                                                        onClick={() => handleToggleDeAngleSelect(f.id, "fact")}
+                                                        title={f.content?.split('\n')[0] || 'Fact'}
+                                                    >
+                                                        <span className="truncate max-w-[140px]">{f.content?.split('\n')[0]?.slice(0, 30) || 'Fact'}...</span>
+                                                        <X className="w-2.5 h-2.5 shrink-0 opacity-60 hover:opacity-100" />
+                                                    </span>
+                                                )) : (
+                                                    <span className="text-xs text-muted-foreground/50 italic py-0.5">No events selected. Select from DeAngle list.</span>
+                                                )}
+                                            </div>
                                         </div>
 
+                                        {/* Selected Angles */}
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Selected Angles</label>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {selectedAngles.length > 0 ? selectedAngles.map((a: { id: string, title: string }) => (
+                                                    <span
+                                                        key={a.id}
+                                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-500/15 text-purple-400 border border-purple-500/20 cursor-pointer hover:bg-purple-500/25 transition-colors"
+                                                        onClick={() => handleToggleDeAngleSelect(a.id, "angle")}
+                                                        title={a.title || 'Angle'}
+                                                    >
+                                                        <span className="truncate max-w-[140px]">{a.title || 'Angle'}</span>
+                                                        <X className="w-2.5 h-2.5 shrink-0 opacity-60 hover:opacity-100" />
+                                                    </span>
+                                                )) : (
+                                                    <span className="text-xs text-muted-foreground/50 italic py-0.5">No angles selected. Select from DeAngle list.</span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Break line to separate from instruction textarea */}
+                                        <div className="border-t border-white/5 my-2"></div>
+
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-foreground/80">Set New Angle</label>
+                                            <label className="text-xs font-medium text-foreground/80">Customize ReAngle Instruction</label>
                                             <Textarea
                                                 placeholder="Define your desired angle..."
                                                 className="min-h-[100px] bg-black/20 border-white/5 text-sm resize-none focus-visible:ring-1"
@@ -523,7 +699,7 @@ export default function MainApp() {
                                         </div>
 
                                         <Button
-                                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-9 cursor-pointer transition-all"
+                                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-9 cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                             onClick={handleReAngleProcess}
                                             disabled={reAngleLoading || !deAngleResult}
                                         >
@@ -547,7 +723,7 @@ export default function MainApp() {
                                 <div className="flex items-center justify-center shrink-0 border-b-2 border-blue-500/50 h-[60px] bg-blue-500/5 transition-colors">
                                     <span className="font-medium text-blue-400">DeAngle</span>
                                 </div>
-                                <div className="flex-1 p-6 overflow-hidden">
+                                <div className="flex-1 overflow-y-auto custom-scrollbar">
                                     {!deAngleResult && !deAngleLoading ? (
                                         <div className="h-full flex flex-col items-center justify-center text-muted-foreground rounded-2xl">
                                             <Triangle className="w-12 h-12 mb-4 opacity-20" />
@@ -556,8 +732,14 @@ export default function MainApp() {
                                     ) : deAngleLoading ? (
                                         <div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
                                     ) : (
-                                        <div className="h-full rounded-2xl overflow-hidden">
-                                            <DeAngleView facts={deAngleResult.facts} angles={deAngleResult.angles} />
+                                        <div className="rounded-2xl shrink-0">
+                                            <DeAngleView 
+                                                facts={deAngleResult.facts} 
+                                                angles={deAngleResult.angles} 
+                                                selectedIds={selectedDeAngleIds} 
+                                                onToggleSelect={handleToggleDeAngleSelect} 
+                                                layout="col"
+                                            />
                                         </div>
                                     )}
                                 </div>
@@ -568,7 +750,7 @@ export default function MainApp() {
                                 <div className="flex items-center justify-center shrink-0 border-b-2 border-purple-500/50 h-[60px] bg-purple-500/5 transition-colors">
                                     <span className="font-medium text-purple-400">ReAngle</span>
                                 </div>
-                                <div className="flex-1 p-6 overflow-hidden">
+                                <div className="flex-1 overflow-y-auto custom-scrollbar">
                                     {!reAngleResult && !reAngleLoading ? (
                                         <div className="h-full flex flex-col items-center justify-center text-muted-foreground rounded-2xl">
                                             <Wand2 className="w-12 h-12 mb-4 opacity-20" />
@@ -610,7 +792,7 @@ export default function MainApp() {
                                     </TabsTrigger>
                                 </TabsList>
 
-                                <div className="flex-1 p-6 overflow-hidden">
+                                <div className="flex-1 overflow-hidden">
                                     <TabsContent value="DeAngle" className="h-full m-0 outline-none">
                                         {!deAngleResult && !deAngleLoading ? (
                                             <div className="h-full flex flex-col items-center justify-center text-muted-foreground rounded-2xl">
@@ -621,7 +803,12 @@ export default function MainApp() {
                                             <div className="h-full flex items-center justify-center rounded-2xl"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
                                         ) : (
                                             <div className="h-full rounded-2xl overflow-hidden">
-                                                <DeAngleView facts={deAngleResult.facts} angles={deAngleResult.angles} />
+                                                <DeAngleView 
+                                                    facts={deAngleResult.facts} 
+                                                    angles={deAngleResult.angles} 
+                                                    selectedIds={selectedDeAngleIds} 
+                                                    onToggleSelect={handleToggleDeAngleSelect} 
+                                                />
                                             </div>
                                         )}
                                     </TabsContent>

@@ -38,10 +38,10 @@ export function ReAngleView({
     }
 
     return (
-        <div className="flex flex-col h-full overflow-y-auto p-6 gap-6">
+        <div className="flex flex-col h-full overflow-y-auto p-4 lg:p-6 gap-4 lg:gap-6 custom-scrollbar">
             {/* Summary Block */}
             <div className="flex-none bg-white/5 border border-white/5 rounded-2xl overflow-hidden">
-                <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+                <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/5 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <FileText className="w-5 h-5 text-blue-400" />
                         <h3 className="font-semibold text-base">Summary</h3>
@@ -69,7 +69,7 @@ export function ReAngleView({
                         </Button>
                     </div>
                 </div>
-                <div className="p-5 space-y-3">
+                <div className="p-4 lg:p-5 space-y-3">
                     <h4 className="text-sm font-semibold">Abstract</h4>
                     {summary ? (
                         <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{summary}</p>
@@ -82,8 +82,8 @@ export function ReAngleView({
             </div>
 
             {/* ReAngled Content Block */}
-            <div className="flex-1 flex flex-col bg-white/5 border border-white/5 rounded-2xl overflow-hidden min-h-[300px]">
-                <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+            <div className="flex-none flex flex-col bg-white/5 border border-white/5 rounded-2xl overflow-hidden min-h-[300px]">
+                <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/5 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <CheckCircle2 className="w-5 h-5 text-green-500" />
                         <h3 className="font-semibold text-base">ReAngled Content</h3>
@@ -112,7 +112,7 @@ export function ReAngleView({
                         </Button>
                     </div>
                 </div>
-                <div className="flex-1 p-5 overflow-y-auto">
+                <div className="p-4 lg:p-5">
                     {rewrittenContent ? (
                         <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{rewrittenContent}</p>
                     ) : (
