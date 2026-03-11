@@ -13,9 +13,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 
-from app.configs.settings import STATIC_DIR
+from app.core.config import STATIC_DIR
 from app.routers import v1_routers
-from app.configs.logger import setup_logging
+from app.routers.v2 import v2_routers
+from app.core.logging import setup_logging
 from app.middleware.request_logging import RequestLoggingMiddleware
 from app.core.exceptions import AppException
 from app.core.handlers import (
@@ -52,6 +53,7 @@ app.add_exception_handler(Exception, global_exception_handler)
 
 # 注册路由
 app.include_router(v1_routers)
+app.include_router(v2_routers)
 
 # 挂载静态文件
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")

@@ -74,7 +74,9 @@ describe("PricingPage", () => {
     })
 
     describe("when authenticated", () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const mockSession = { access_token: "test-token" } as any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const mockUser = { id: "user-1", email: "test@example.com" } as any
 
         beforeEach(() => {

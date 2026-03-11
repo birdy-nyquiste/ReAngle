@@ -35,6 +35,7 @@ export default function PricingPage() {
             if (data.url) {
                 window.location.href = data.url
             }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error("Failed to create checkout session:", err)
             setUpgradeError(t('pricing.upgradeErrorGeneric'))

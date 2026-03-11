@@ -9,7 +9,7 @@ from loguru import logger
 import jwt
 from supabase import create_client, Client
 
-from app.configs.supabase_config import (
+from app.core.config import (
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY,
     SUPABASE_SECRET_KEY,

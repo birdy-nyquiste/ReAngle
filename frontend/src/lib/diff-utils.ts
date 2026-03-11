@@ -15,7 +15,7 @@ export function splitIntoParagraphs(text: string): string[] {
     if (!text) return [];
 
     // Clean text
-    let cleaned = text.replace(/\s+/g, ' ').trim();
+    const cleaned = text.replace(/\s+/g, ' ').trim();
 
     // Split by double newline first
     let paragraphs = cleaned.split(/\n\s*\n/);

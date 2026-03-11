@@ -8,7 +8,7 @@ import json
 from google import genai
 from loguru import logger
 
-from app.configs.settings import SYSTEM_PROMPTS_DIR
+from app.core.config import SYSTEM_PROMPTS_DIR
 from app.core.exceptions import LLMProviderError
 from app.schemas.rewrite_schema import LLMResponse
 
@@ -29,6 +29,7 @@ async def get_rewriting_result(
     Returns:
         GenerateContentResponse 对象
     """
+    client = None
     try:
         logger.info(f"Calling Gemini API (model: {model})")
 
@@ -74,3 +75,6 @@ async def get_rewriting_result(
     except Exception as e:
         logger.exception("Gemini API call failed")
         raise LLMProviderError(f"Gemini API error: {str(e)}")
+    finally:
+        if client:
+            client.close()

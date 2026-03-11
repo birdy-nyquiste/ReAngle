@@ -28,6 +28,7 @@ export default function ProfilePage() {
 
     useEffect(() => {
         fetchUsage()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const fetchUsage = async () => {

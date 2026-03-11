@@ -17,19 +17,20 @@ from app.schemas.rewrite_schema import (
     AvatarRequest,
     AvatarResponse,
 )
-from app.services.extractors import (
+from app.services.inputs.extractors import (
     extract_text_from_url,
     extract_text_from_docx,
     extract_text_from_pdf,
     extract_text_from_image,
 )
-from app.services.llms import rewriting_client, tts_client, avatar_client
+from app.services.re import rewriting_client
+from app.services.media_outputs import tts_client, avatar_client
 from app.core.exceptions import (
     ContentExtractionError,
     LLMProviderError,
     InvalidInputError,
 )
-from app.core.dependencies import get_current_user, check_usage_limit
+from app.core.supabase_dependencies import get_current_user, check_usage_limit
 
 # 设置路由前缀和标签
 rewrite_router = APIRouter(prefix="/rewrite", tags=["rewrite"])

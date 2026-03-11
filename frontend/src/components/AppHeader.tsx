@@ -5,38 +5,34 @@ import { useAuth } from "@/context/AuthContext"
 import { useLanguage, type Language } from "@/context/LanguageContext"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+// Static JSX — hoisted outside component to avoid recreation on every render
+const logoNode = (
+  <>
+    <img src="/favicon.png" alt="ReAngle" className="h-8 w-8 rounded-lg" />
+    <span className="font-bold text-lg font-heading tracking-tight">ReAngle</span>
+  </>
+)
+
 export default function AppHeader() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, signOut } = useAuth()
   const { language, setLanguage, t } = useLanguage()
 
-  const isLanding = location.pathname === "/"
   const isApp = location.pathname.startsWith("/app")
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register"
   const isProfilePage = location.pathname === "/profile"
 
-  const headerClassName = isLanding
-    ? "fixed top-0 left-0 right-0 z-50 glass border-b border-white/5 backdrop-blur-md"
-    : "floating-nav"
+  const headerClassName = "floating-nav"
 
-  const containerClassName = isLanding
-    ? "container flex h-16 items-center px-6 mx-auto max-w-7xl"
-    : "container flex h-14 items-center px-6"
-
-  const logoNode = (
-    <>
-      <img src="/favicon.png" alt="ReAngle" className={isLanding ? "h-8 w-8 rounded-lg" : "h-8 w-8 rounded-lg"} />
-      <span className={isLanding ? "font-bold text-xl tracking-tight font-heading" : "font-bold text-lg"}>ReAngle</span>
-    </>
-  )
+  const containerClassName = "flex h-14 items-center px-6 w-full"
 
   const triggerLabel =
     language === "en"
       ? "Language: EN"
       : language === "zh"
-      ? "语言：中文"
-      : "Idioma: ES"
+        ? "语言：中文"
+        : "Idioma: ES"
 
   const allLanguages: Language[] = ["en", "zh", "es"]
 
@@ -44,7 +40,7 @@ export default function AppHeader() {
     <header className={headerClassName}>
       <div className={containerClassName}>
         <div
-          className={`flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity ${isLanding ? "gap-3" : "gap-2.5"}`}
+          className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
           onClick={() => navigate("/")}
           role="button"
           tabIndex={0}
@@ -84,16 +80,14 @@ export default function AppHeader() {
               <span className="text-xs text-muted-foreground hidden sm:inline">{user.email}</span>
               <Button
                 variant="ghost"
-                size="sm"
-                className="cursor-pointer text-muted-foreground hover:text-foreground text-sm font-medium hover:bg-white/5"
+                className="h-9 px-4 cursor-pointer text-muted-foreground hover:text-foreground text-sm font-medium hover:bg-white/5 transition-colors"
                 onClick={() => window.location.href = "/profile"}
               >
                 {t("nav.profile")}
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
-                className="cursor-pointer text-muted-foreground hover:text-foreground text-sm font-medium hover:bg-white/5"
+                className="h-9 px-4 cursor-pointer text-muted-foreground hover:text-foreground text-sm font-medium hover:bg-white/5 transition-colors"
                 onClick={() => signOut()}
               >
                 <LogOut className="h-4 w-4 mr-1.5" />
@@ -104,7 +98,10 @@ export default function AppHeader() {
 
           {/* Nav: Profile page (Open App only) */}
           {isProfilePage && (
-            <Button size="sm" className="cursor-pointer text-sm font-medium" onClick={() => navigate("/app")}>
+            <Button
+              className="h-9 px-4 text-sm font-medium shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
+              onClick={() => navigate("/app")}
+            >
               {t("nav.openApp")}
             </Button>
           )}
@@ -117,7 +114,7 @@ export default function AppHeader() {
             <>
               <Button
                 variant="ghost"
-                className="text-sm font-medium hover:bg-white/5"
+                className="h-9 px-4 cursor-pointer text-muted-foreground hover:text-foreground text-sm font-medium hover:bg-white/5 transition-colors"
                 onClick={() => navigate("/pricing")}
               >
                 {t("nav.pricing")}
@@ -126,13 +123,13 @@ export default function AppHeader() {
                 <>
                   <Button
                     variant="ghost"
-                    className="text-sm font-medium hover:bg-white/5"
+                    className="h-9 px-4 cursor-pointer text-muted-foreground hover:text-foreground text-sm font-medium hover:bg-white/5 transition-colors"
                     onClick={() => navigate("/profile")}
                   >
                     {t("nav.profile")}
                   </Button>
                   <Button
-                    className="text-sm font-medium shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
+                    className="h-9 px-4 text-sm font-medium shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
                     onClick={() => navigate("/app")}
                   >
                     {t("nav.openApp")}
@@ -142,14 +139,14 @@ export default function AppHeader() {
                 <>
                   <Button
                     variant="ghost"
-                    className="text-sm font-medium hover:bg-white/5 hidden sm:flex"
+                    className="h-9 px-4 cursor-pointer text-muted-foreground hover:text-foreground text-sm font-medium hover:bg-white/5 transition-colors hidden sm:flex"
                     onClick={() => navigate("/login")}
                   >
                     <LogIn className="mr-2 h-4 w-4" />
                     {t("nav.login")}
                   </Button>
                   <Button
-                    className="text-sm font-medium shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all group"
+                    className="h-9 px-4 text-sm font-medium shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all group"
                     onClick={() => navigate("/register")}
                   >
                     {t("nav.getStarted")}

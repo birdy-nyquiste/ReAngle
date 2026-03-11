@@ -1,14 +1,12 @@
 """
-支付相关 API 路由:
-- POST /create-checkout-session  创建 Stripe Checkout
-- POST /create-portal-session    创建 Stripe 管理门户
-- POST /webhook                  Stripe Webhook 接收端点
-- GET  /usage                    获取当前用量信息
+v2 支付相关路由。
+从 v1 payment.py 迁移，逻辑不变。
 """
 
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from loguru import logger
+from supabase import create_client
 
 from app.core.config import (
     STRIPE_SECRET_KEY,
@@ -25,19 +23,18 @@ from app.services.stripe.stripe_service import (
     handle_invoice_paid,
     handle_invoice_failed,
 )
-from supabase import create_client
 
 stripe.api_key = STRIPE_SECRET_KEY
 
-payment_router = APIRouter(prefix="/payment", tags=["payment"])
+payment_router = APIRouter(prefix="/payment", tags=["Payment"])
 
 
 @payment_router.post("/create-checkout-session")
 async def api_create_checkout_session(user: dict = Depends(get_current_user)):
-    """创建 Stripe Checkout Session 或重定向到 Portal（如已有订阅）"""
+    """创建 Stripe Checkout Session 或重定向到 Portal（如已有订阅）。"""
     try:
         result = create_checkout_session(user["id"], user["email"])
-        return result  # {"url": "...", "action": "checkout" | "portal"}
+        return result
     except Exception as e:
         logger.error(f"[payment] Failed to create checkout session: {e}")
         raise HTTPException(
@@ -48,7 +45,7 @@ async def api_create_checkout_session(user: dict = Depends(get_current_user)):
 
 @payment_router.post("/create-portal-session")
 async def api_create_portal_session(user: dict = Depends(get_current_user)):
-    """创建 Stripe Customer Portal Session，返回重定向 URL"""
+    """创建 Stripe Customer Portal Session，返回重定向 URL。"""
     try:
         url = create_portal_session(user["id"], user["email"])
         return {"url": url}
@@ -62,10 +59,7 @@ async def api_create_portal_session(user: dict = Depends(get_current_user)):
 
 @payment_router.post("/webhook")
 async def stripe_webhook(request: Request):
-    """
-    Stripe Webhook 端点。
-    验证签名后，根据事件类型分发处理。
-    """
+    """Stripe Webhook 端点：验证签名后分发处理。"""
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
 
@@ -88,26 +82,20 @@ async def stripe_webhook(request: Request):
     try:
         if event_type == "checkout.session.completed":
             handle_checkout_completed(data)
-
         elif event_type in (
             "customer.subscription.created",
             "customer.subscription.updated",
             "customer.subscription.deleted",
         ):
             handle_subscription_event(data)
-
         elif event_type == "invoice.payment_succeeded":
             handle_invoice_paid(data)
-
         elif event_type == "invoice.payment_failed":
             handle_invoice_failed(data)
-
         else:
             logger.info(f"[webhook] Unhandled event type: {event_type}")
-
     except Exception as e:
         logger.exception(f"[webhook] Error handling {event_type}: {e}")
-        # 返回 500 以便 Stripe 重试（最多 3 天，指数退避）
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error processing {event_type}",
@@ -118,10 +106,9 @@ async def stripe_webhook(request: Request):
 
 @payment_router.get("/usage")
 async def get_usage(user: dict = Depends(get_current_user)):
-    """获取当前用户的用量和订阅信息"""
+    """获取当前用户的用量和订阅信息。"""
     supabase = create_client(SUPABASE_URL, SUPABASE_SECRET)
 
-    # 获取 profile（用量）
     profile_result = (
         supabase.table("profiles")
         .select("usage_count, usage_limit")
@@ -130,7 +117,6 @@ async def get_usage(user: dict = Depends(get_current_user)):
         .execute()
     )
 
-    # 获取 subscription（订阅状态）
     sub_result = (
         supabase.table("subscriptions")
         .select("status, price_id, current_period_end, cancel_at_period_end, cancel_at")
