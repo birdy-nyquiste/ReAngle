@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
-import { ArrowRight, Layers, Zap, Mic2, Filter, PenTool, Sparkles, LayoutDashboard, BrainCircuit, Users } from "lucide-react"
+import { ArrowRight, Zap, Mic2, Filter, PenTool, Sparkles, LayoutDashboard, BrainCircuit, Users, FolderInput, Triangle, Wand2 } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import AppHeader from "@/components/AppHeader"
 import { useLanguage } from "@/context/LanguageContext"
@@ -220,7 +220,7 @@ export default function LandingPage() {
                         <div className="glass-strong p-8 rounded-3xl group hover:-translate-y-1 transition-transform duration-300 relative">
                             <div className="absolute top-8 right-8 text-6xl font-black text-white/[0.03] group-hover:text-white/[0.08] transition-colors pointer-events-none">01</div>
                             <div className="mb-6 inline-flex p-3 rounded-2xl bg-cyan-500/10 text-cyan-400 ring-1 ring-cyan-500/20">
-                                <Layers className="w-6 h-6" />
+                                <FolderInput className="w-6 h-6" />
                             </div>
                             <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">
                                 {t("landing.howToStep1Title")}
@@ -234,7 +234,7 @@ export default function LandingPage() {
                         <div className="glass-strong p-8 rounded-3xl group hover:-translate-y-1 transition-transform duration-300 relative">
                             <div className="absolute top-8 right-8 text-6xl font-black text-white/[0.03] group-hover:text-white/[0.08] transition-colors pointer-events-none">02</div>
                             <div className="mb-6 inline-flex p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 ring-1 ring-indigo-500/20">
-                                <BrainCircuit className="w-6 h-6" />
+                                <Triangle className="w-6 h-6" />
                             </div>
                             <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">
                                 {t("landing.howToStep2Title")}
@@ -248,7 +248,7 @@ export default function LandingPage() {
                         <div className="glass-strong p-8 rounded-3xl group hover:-translate-y-1 transition-transform duration-300 relative">
                             <div className="absolute top-8 right-8 text-6xl font-black text-white/[0.03] group-hover:text-white/[0.08] transition-colors pointer-events-none">03</div>
                             <div className="mb-6 inline-flex p-3 rounded-2xl bg-purple-500/10 text-purple-400 ring-1 ring-purple-500/20">
-                                <Sparkles className="w-6 h-6" />
+                                <Wand2 className="w-6 h-6" />
                             </div>
                             <h3 className="text-xl font-bold mb-3 font-heading text-foreground group-hover:text-primary transition-colors">
                                 {t("landing.howToStep3Title")}

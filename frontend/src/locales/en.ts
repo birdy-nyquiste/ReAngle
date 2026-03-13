@@ -21,12 +21,12 @@ export const en = {
     heroTitleLine1: "Don't Consume the Narrative.",
     heroTitleLine2: "ReAngle It.",
     heroSubheadline:
-      "Events are objective. Narratives are constructed. We take multiple, noisy sources of a single event and reshape them into one unified, perfectly-angled article—in your exact voice and stance.",
+      "Events are objective. Narratives are constructed. ReAngle disassembles any content into its core facts and subjective opinions, then reconstructs them into your exact voice and stance with built-in fact-checking.",
     heroCta: "Start ReAngling Today",
     // Section 2: The Insight
-    insightTitle1: "Events are objective.",
+    insightTitle1: "Facts are objective.",
     insightTitle2: "Narratives are constructed.",
-    insightSameEventCanBe: "The exact same objective event can be:",
+    insightSameEventCanBe: "The exact same objective fact can be:",
     insightHeroized: "Heroized",
     insightMoralized: "Moralized",
     insightScandalized: "Scandalized",
@@ -52,9 +52,9 @@ export const en = {
     engineFeature1Title: "Re-tell The Story",
     engineFeature1Desc:
       "Refuse to accept pre-packaged viewpoints. Change the angle of observation and re-tell the story yourself.",
-    engineFeature2Title: "Productized Capability",
+    engineFeature2Title: "Built-in Verification",
     engineFeature2Desc:
-      "Narrative capability is no longer the exclusive privilege of PR giants. We encapsulate it into an accessible service for creators.",
+      "Narrative capability is now paired with truth. Every claim is cross-referenced and verified during the DeAngle process.",
     engineFeature3Title: "Streamlined Workflow",
     engineFeature3Desc:
       "Compress hours of cross-referencing, multi-source research, and drafting into just a few clicks.",
@@ -65,12 +65,12 @@ export const en = {
     howToStep1Title: "Gather",
     howToStep1Desc:
       "Toss in a bunch of URLs, Youtube, PDF, or plain text, throwing the chaos of the internet into the engine.",
-    howToStep2Title: "Set the Angle",
+    howToStep2Title: "DeAngle",
     howToStep2Desc:
-      "Heroize? Criticize? Analyze? Dial in your parameters and choose the exact stance you want to take.",
+      "Strip away bias and noise. The engine separates objective facts from subjective opinions while verifying every claim for accuracy.",
     howToStep3Title: "ReAngle",
     howToStep3Desc:
-      "Watch the engine spin facts through your unique perspective into a polished, unified long-form article.",
+      "Synthesize the verified facts into a polished narrative that matches your unique perspective and style.",
     // Section 5: Who is ReAngling?
     whoTitle: "Who is ReAngling?",
     whoIntro: "Democratizing narrative power across industries.",
