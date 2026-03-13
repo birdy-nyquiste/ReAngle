@@ -184,7 +184,7 @@ export default function MainApp() {
         try {
             const formData = new FormData()
             let fileIndex = 0
-            
+
             const inputsPayload = inputItems.map((item) => {
                 if (item.type === 'file' && item.content instanceof File) {
                     const key = `files_${fileIndex}`
@@ -194,7 +194,7 @@ export default function MainApp() {
                 }
                 return { id: item.id, type: item.type, content: item.content, meta: item.meta }
             })
-            
+
             formData.append("inputs", JSON.stringify(inputsPayload))
 
             const headers: Record<string, string> = { "X-Session-Id": sessionId }
@@ -227,7 +227,7 @@ export default function MainApp() {
                     } else if (errData?.detail && Array.isArray(errData.detail)) {
                         errorMsg = errData.detail[0].msg
                     }
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } catch (e: any) {
                     console.error("Failed to parse error JSON", e)
                 }
@@ -236,7 +236,7 @@ export default function MainApp() {
 
             setInputsLocked(true)
             setExpandedSections(prev => ({ ...prev, gather: false, deangle: true }))
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error(err)
             setError(err.message || "Failed to process inputs")
@@ -264,7 +264,7 @@ export default function MainApp() {
             })
 
             const data = await res.json()
-            
+
             if (!res.ok) {
                 if (res.status === 503 || data.code === "SERVICE_UNAVAILABLE") {
                     throw new Error("AI service is currently at peak capacity. Please wait a few seconds and try again.")
@@ -274,7 +274,7 @@ export default function MainApp() {
 
             setDeAngleResult(data)
             setExpandedSections(prev => ({ ...prev, deangle: false, reangle: true }))
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error(err)
             setError(err.message || "Failed to DeAngle")
@@ -299,7 +299,7 @@ export default function MainApp() {
             const res = await fetch("/api/v2/reangle/", {
                 method: "POST",
                 headers: getHeaders(),
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     prompt,
                     selected_facts: selectedFacts,
                     selected_angles: selectedAngles
@@ -317,7 +317,7 @@ export default function MainApp() {
 
             setReAngleResult(data)
             setExpandedSections(prev => ({ ...prev, reangle: false }))
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error(err)
             setError(err.message || "Failed to ReAngle")
@@ -329,7 +329,7 @@ export default function MainApp() {
     const handlePlayTTS = async () => {
         if (!reAngleResult?.summary) return
         if (ttsLoading || audioUrl) return
-        
+
         setError(null)
         setTtsLoading(true)
         try {
@@ -346,7 +346,7 @@ export default function MainApp() {
 
             const data = await res.json()
             setAudioUrl(data.audio_url)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error("TTS Error:", err)
             setError(err.message || "Failed to generate TTS audio. Please try again.")
@@ -415,8 +415,8 @@ export default function MainApp() {
                             {error && !isUsageLimitError && sidebarExpanded ? (
                                 <div className={cn(
                                     "text-xs p-3 rounded-lg border mb-4 mx-1 transition-all animate-in fade-in zoom-in-95 duration-200",
-                                    error.includes("peak capacity") || error.includes("try again") 
-                                        ? "bg-amber-500/10 text-amber-400 border-amber-500/20" 
+                                    error.includes("peak capacity") || error.includes("try again")
+                                        ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
                                         : "bg-red-500/10 text-red-400 border-red-500/20"
                                 )}>
                                     <div className="font-semibold mb-1 uppercase tracking-wider text-[10px] opacity-70">
@@ -598,7 +598,7 @@ export default function MainApp() {
                                 {sidebarExpanded && expandedSections.deangle && (
                                     <div className="px-4 pb-4 space-y-4 animate-in slide-in-from-top-2 fade-in duration-200">
                                         <p className="text-xs text-muted-foreground/80 leading-relaxed">
-                                            Detach Events from original Angles, then fact-check on every Events
+                                            DeAngle your inputs, see what's opinion and what's verified facts
                                         </p>
                                         <Button
                                             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-9 cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -651,10 +651,10 @@ export default function MainApp() {
 
                                 {sidebarExpanded && expandedSections.reangle && (
                                     <div className="px-4 pb-4 space-y-4 animate-in slide-in-from-top-2 fade-in duration-200">
-                                        
+
                                         {/* Selected Events */}
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Selected Events</label>
+                                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Selected Facts</label>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {selectedFacts.length > 0 ? selectedFacts.map((f: { id: string, content: string }) => (
                                                     <span
@@ -667,27 +667,27 @@ export default function MainApp() {
                                                         <X className="w-2.5 h-2.5 shrink-0 opacity-60 hover:opacity-100" />
                                                     </span>
                                                 )) : (
-                                                    <span className="text-xs text-muted-foreground/50 italic py-0.5">No events selected. Select from DeAngle list.</span>
+                                                    <span className="text-xs text-muted-foreground/50 italic py-0.5">No events selected.</span>
                                                 )}
                                             </div>
                                         </div>
 
                                         {/* Selected Angles */}
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Selected Angles</label>
+                                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Selected Opinions</label>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {selectedAngles.length > 0 ? selectedAngles.map((a: { id: string, title: string }) => (
                                                     <span
                                                         key={a.id}
                                                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-500/15 text-purple-400 border border-purple-500/20 cursor-pointer hover:bg-purple-500/25 transition-colors"
                                                         onClick={() => handleToggleDeAngleSelect(a.id, "angle")}
-                                                        title={a.title || 'Angle'}
+                                                        title={a.title || 'Opinion'}
                                                     >
-                                                        <span className="truncate max-w-[140px]">{a.title || 'Angle'}</span>
+                                                        <span className="truncate max-w-[140px]">{a.title || 'Opinion'}</span>
                                                         <X className="w-2.5 h-2.5 shrink-0 opacity-60 hover:opacity-100" />
                                                     </span>
                                                 )) : (
-                                                    <span className="text-xs text-muted-foreground/50 italic py-0.5">No angles selected. Select from DeAngle list.</span>
+                                                    <span className="text-xs text-muted-foreground/50 italic py-0.5">No angles selected.</span>
                                                 )}
                                             </div>
                                         </div>
@@ -696,9 +696,9 @@ export default function MainApp() {
                                         <div className="border-t border-white/5 my-2"></div>
 
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-foreground/80">Customize ReAngle Instruction</label>
+                                            <label className="text-xs font-medium text-foreground/80">Customization</label>
                                             <Textarea
-                                                placeholder="Define your desired angle..."
+                                                placeholder="Customize your way of ReAngle..."
                                                 className="min-h-[100px] bg-black/20 border-white/5 text-sm resize-none focus-visible:ring-1"
                                                 value={prompt}
                                                 onChange={e => setPrompt(e.target.value)}
@@ -734,17 +734,17 @@ export default function MainApp() {
                                     {!deAngleResult && !deAngleLoading ? (
                                         <div className="h-full flex flex-col items-center justify-center text-muted-foreground rounded-2xl">
                                             <Triangle className="w-12 h-12 mb-4 opacity-20" />
-                                            <p>Input sources and run DeAngle to populate.</p>
+                                            <p>Run DeAngle to show result.</p>
                                         </div>
                                     ) : deAngleLoading ? (
                                         <div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
                                     ) : (
                                         <div className="rounded-2xl shrink-0">
-                                            <DeAngleView 
-                                                facts={deAngleResult.facts} 
-                                                angles={deAngleResult.angles} 
-                                                selectedIds={selectedDeAngleIds} 
-                                                onToggleSelect={handleToggleDeAngleSelect} 
+                                            <DeAngleView
+                                                facts={deAngleResult.facts}
+                                                angles={deAngleResult.angles}
+                                                selectedIds={selectedDeAngleIds}
+                                                onToggleSelect={handleToggleDeAngleSelect}
                                                 layout="col"
                                             />
                                         </div>
@@ -761,7 +761,7 @@ export default function MainApp() {
                                     {!reAngleResult && !reAngleLoading ? (
                                         <div className="h-full flex flex-col items-center justify-center text-muted-foreground rounded-2xl">
                                             <Wand2 className="w-12 h-12 mb-4 opacity-20" />
-                                            <p>Define an angle and run ReAngle to generate content.</p>
+                                            <p>Run ReAngle to show result.</p>
                                         </div>
                                     ) : reAngleLoading ? (
                                         <div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
@@ -804,17 +804,17 @@ export default function MainApp() {
                                         {!deAngleResult && !deAngleLoading ? (
                                             <div className="h-full flex flex-col items-center justify-center text-muted-foreground rounded-2xl">
                                                 <Triangle className="w-12 h-12 mb-4 opacity-20" />
-                                                <p>Input sources and run DeAngle to populate.</p>
+                                                <p>Run DeAngle to show result.</p>
                                             </div>
                                         ) : deAngleLoading ? (
                                             <div className="h-full flex items-center justify-center rounded-2xl"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
                                         ) : (
                                             <div className="h-full rounded-2xl overflow-hidden">
-                                                <DeAngleView 
-                                                    facts={deAngleResult.facts} 
-                                                    angles={deAngleResult.angles} 
-                                                    selectedIds={selectedDeAngleIds} 
-                                                    onToggleSelect={handleToggleDeAngleSelect} 
+                                                <DeAngleView
+                                                    facts={deAngleResult.facts}
+                                                    angles={deAngleResult.angles}
+                                                    selectedIds={selectedDeAngleIds}
+                                                    onToggleSelect={handleToggleDeAngleSelect}
                                                 />
                                             </div>
                                         )}
@@ -824,7 +824,7 @@ export default function MainApp() {
                                         {!reAngleResult && !reAngleLoading ? (
                                             <div className="h-full flex flex-col items-center justify-center text-muted-foreground rounded-2xl">
                                                 <Wand2 className="w-12 h-12 mb-4 opacity-20" />
-                                                <p>Define an angle and run ReAngle to generate content.</p>
+                                                <p>Run ReAngle to show result.</p>
                                             </div>
                                         ) : reAngleLoading ? (
                                             <div className="h-full flex items-center justify-center rounded-2xl"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
