@@ -8,6 +8,7 @@ import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router-dom"
 import RegisterPage from "@/pages/RegisterPage"
+import { LanguageProvider } from "@/context/LanguageContext"
 
 vi.mock("@/context/AuthContext", () => ({
     useAuth: vi.fn(),
@@ -20,9 +21,11 @@ const mockSignUp = vi.fn()
 
 function renderPage() {
     return render(
-        <MemoryRouter>
-            <RegisterPage />
-        </MemoryRouter>
+        <LanguageProvider>
+            <MemoryRouter>
+                <RegisterPage />
+            </MemoryRouter>
+        </LanguageProvider>
     )
 }
 

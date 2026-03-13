@@ -19,7 +19,40 @@ RESULTS_DIR = os.path.join(os.path.dirname(BASE_DIR), "results")
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
 # system prompts存放地址
+# Keep SYSTEM_PROMPTS_DIR for legacy rewrite clients.
 SYSTEM_PROMPTS_DIR = os.path.join(BASE_DIR, "services", "re", "prompts")
+DE_PROMPTS_DIR = os.path.join(BASE_DIR, "services", "de", "prompts")
+RE_PROMPTS_DIR = os.path.join(BASE_DIR, "services", "re", "prompts")
+
+# ── Settings / Prompt Defaults ───────────────────────
+DEFAULT_DEANGLE_DETACH_PROMPT_PATH = os.path.join(
+    DE_PROMPTS_DIR, "deangle_detach_system_prompt.yaml"
+)
+DEFAULT_DEANGLE_FACT_CHECK_PROMPT_PATH = os.path.join(
+    DE_PROMPTS_DIR, "deangle_fact_check_system_prompt.yaml"
+)
+DEFAULT_REANGLE_PROMPT_PATH = os.path.join(RE_PROMPTS_DIR, "reangle_system_prompt.yaml")
+SETTINGS_PROMPT_MAX_LENGTH = 12000
+
+# ── Model Catalog (config-driven) ───────────────────
+MODEL_CATALOG = [
+    {"id": "gpt-5-mini", "label": "GPT-5 Mini", "provider": "openai"},
+    {
+        "id": "gemini-3-flash-preview",
+        "label": "Gemini 3 Flash Preview",
+        "provider": "gemini",
+    },
+    {"id": "qwen-flash", "label": "Qwen Flash", "provider": "qwen"},
+]
+
+# Placeholder sets for now. Can diverge later via config only.
+DEANGLE_AVAILABLE_MODELS = [m.copy() for m in MODEL_CATALOG]
+REANGLE_AVAILABLE_MODELS = [m.copy() for m in MODEL_CATALOG]
+
+DEANGLE_DEFAULT_MODEL = "gemini-3-flash-preview"
+REANGLE_DEFAULT_MODEL = "gemini-3-flash-preview"
+
+MODEL_PROVIDER_MAP = {m["id"]: m["provider"] for m in MODEL_CATALOG}
 
 # ── Supabase ──────────────────────────────────────────
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
