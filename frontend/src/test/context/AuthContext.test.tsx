@@ -3,7 +3,7 @@
  * Covers: useAuth guard, provider values exposed to consumers
  */
 import { describe, it, expect } from "vitest"
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import { renderHook } from "@testing-library/react"
 import { AuthProvider, useAuth } from "@/context/AuthContext"
 
@@ -36,7 +36,10 @@ describe("useAuth", () => {
             wrapper: AuthProvider,
         })
 
-        // Initially loading while getSession resolves
+        await waitFor(() => {
+            expect(result.current.loading).toBe(false)
+        })
+
         expect(result.current).toMatchObject({
             user: null,
             session: null,
@@ -46,12 +49,14 @@ describe("useAuth", () => {
         expect(typeof result.current.signUp).toBe("function")
     })
 
-    it("renders children without crashing", () => {
+    it("renders children without crashing", async () => {
         render(
             <AuthProvider>
                 <p>child content</p>
             </AuthProvider>
         )
-        expect(screen.getByText("child content")).toBeInTheDocument()
+        await waitFor(() => {
+            expect(screen.getByText("child content")).toBeInTheDocument()
+        })
     })
 })

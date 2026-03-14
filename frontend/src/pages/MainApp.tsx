@@ -371,7 +371,10 @@ export default function MainApp() {
         <div className="flex h-screen flex-col bg-background aurora-bg">
             {/* Checkout Success Banner */}
             {checkoutSuccess ? (
-                <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center gap-3 bg-green-500/20 border-b border-green-500/30 backdrop-blur px-4 py-3 text-sm text-green-300">
+                <div
+                    className="fixed left-0 right-0 z-40 flex items-center justify-center gap-3 border-b border-green-500/30 bg-green-500/20 px-4 py-3 text-sm text-green-300 backdrop-blur"
+                    style={{ top: "var(--app-header-offset)" }}
+                >
                     <Sparkles className="h-4 w-4 flex-shrink-0" />
                     <span>🎉 {t("mainApp.checkoutBanner")}</span>
                     <button onClick={() => setCheckoutSuccess(false)} className="ml-auto opacity-70 hover:opacity-100">
@@ -382,7 +385,7 @@ export default function MainApp() {
             <AppHeader />
 
             {/* Main Content */}
-            <main className="flex-1 overflow-hidden w-full px-4 flex pt-24 pb-6 gap-6">
+            <main className="pt-header-offset flex w-full flex-1 gap-6 overflow-hidden px-4 pb-6">
 
                 {/* Expandable Sidebar */}
                 <div

@@ -6,6 +6,7 @@ import { describe, it, expect, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import { MemoryRouter, Routes, Route } from "react-router-dom"
 import ProtectedRoute from "@/components/ProtectedRoute"
+import { LanguageProvider } from "@/context/LanguageContext"
 
 // Mock AuthContext
 vi.mock("@/context/AuthContext", () => ({
@@ -17,12 +18,14 @@ const mockUseAuth = vi.mocked(useAuth)
 
 function renderWithRouter(ui: React.ReactNode, initialPath = "/app") {
     return render(
-        <MemoryRouter initialEntries={[initialPath]}>
-            <Routes>
-                <Route path="/app" element={ui} />
-                <Route path="/login" element={<div>Login Page</div>} />
-            </Routes>
-        </MemoryRouter>
+        <LanguageProvider>
+            <MemoryRouter initialEntries={[initialPath]}>
+                <Routes>
+                    <Route path="/app" element={ui} />
+                    <Route path="/login" element={<div>Login Page</div>} />
+                </Routes>
+            </MemoryRouter>
+        </LanguageProvider>
     )
 }
 

@@ -49,7 +49,7 @@ export default function PricingPage() {
             <AppHeader />
 
             {/* Pricing Cards */}
-            <main className="flex-1 flex items-center justify-center pt-24 pb-12">
+            <main className="pt-header-offset flex flex-1 items-center justify-center pb-12">
                 <div className="container max-w-4xl px-4">
                     <div className="text-center mb-12">
                         <h1 className="text-3xl sm:text-4xl font-bold mb-3">

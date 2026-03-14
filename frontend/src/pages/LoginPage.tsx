@@ -35,7 +35,7 @@ export default function LoginPage() {
             <AppHeader />
 
             {/* Form */}
-            <main className="flex-1 flex items-center justify-center pt-24 pb-12">
+            <main className="pt-header-offset flex flex-1 items-center justify-center pb-12">
                 <div className="w-full max-w-sm mx-auto px-4">
                     <div className="glass rounded-2xl p-8">
                         <h1 className="text-2xl font-bold text-center mb-2">

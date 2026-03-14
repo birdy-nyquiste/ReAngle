@@ -4,10 +4,11 @@
  *         button disabled during loading
  */
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router-dom"
 import LoginPage from "@/pages/LoginPage"
+import { LanguageProvider } from "@/context/LanguageContext"
 
 const mockNavigate = vi.fn()
 vi.mock("react-router-dom", async () => {
@@ -26,9 +27,11 @@ const mockSignIn = vi.fn()
 
 function renderPage() {
     return render(
-        <MemoryRouter>
-            <LoginPage />
-        </MemoryRouter>
+        <LanguageProvider>
+            <MemoryRouter>
+                <LoginPage />
+            </MemoryRouter>
+        </LanguageProvider>
     )
 }
 
@@ -44,18 +47,20 @@ describe("LoginPage", () => {
 
     it("renders email, password fields and sign-in button", () => {
         renderPage()
+        const main = screen.getByRole("main")
         expect(screen.getByLabelText("Email")).toBeInTheDocument()
         expect(screen.getByLabelText("Password")).toBeInTheDocument()
-        expect(screen.getByRole("button", { name: "Sign In" })).toBeInTheDocument()
+        expect(within(main).getByRole("button", { name: "Sign In" })).toBeInTheDocument()
     })
 
     it("navigates to /app on successful sign-in", async () => {
         mockSignIn.mockResolvedValue({ error: null })
 
         renderPage()
+        const main = screen.getByRole("main")
         await userEvent.type(screen.getByLabelText("Email"), "user@example.com")
         await userEvent.type(screen.getByLabelText("Password"), "password123")
-        await userEvent.click(screen.getByRole("button", { name: "Sign In" }))
+        await userEvent.click(within(main).getByRole("button", { name: "Sign In" }))
 
         await waitFor(() => {
             expect(mockSignIn).toHaveBeenCalledWith("user@example.com", "password123")
@@ -67,9 +72,10 @@ describe("LoginPage", () => {
         mockSignIn.mockResolvedValue({ error: new Error("Invalid credentials") })
 
         renderPage()
+        const main = screen.getByRole("main")
         await userEvent.type(screen.getByLabelText("Email"), "bad@example.com")
         await userEvent.type(screen.getByLabelText("Password"), "wrong")
-        await userEvent.click(screen.getByRole("button", { name: "Sign In" }))
+        await userEvent.click(within(main).getByRole("button", { name: "Sign In" }))
 
         expect(await screen.findByText("Invalid credentials")).toBeInTheDocument()
         expect(mockNavigate).not.toHaveBeenCalled()
@@ -80,11 +86,12 @@ describe("LoginPage", () => {
         mockSignIn.mockReturnValue(new Promise((r) => { resolve = r }))
 
         renderPage()
+        const main = screen.getByRole("main")
         await userEvent.type(screen.getByLabelText("Email"), "user@example.com")
         await userEvent.type(screen.getByLabelText("Password"), "password123")
-        await userEvent.click(screen.getByRole("button", { name: "Sign In" }))
+        await userEvent.click(within(main).getByRole("button", { name: "Sign In" }))
 
-        expect(await screen.findByRole("button", { name: "Signing in..." })).toBeDisabled()
+        expect(await within(main).findByRole("button", { name: "Signing in..." })).toBeDisabled()
 
         // cleanup
         resolve!({ error: null })

@@ -89,7 +89,7 @@ export default function ProfilePage() {
             <AppHeader />
 
             {/* Content */}
-            <main className="flex-1 flex items-start justify-center pt-24 pb-12">
+            <main className="pt-header-offset flex flex-1 items-start justify-center pb-12">
                 <div className="container max-w-lg px-4 space-y-6">
                     {/* Account Card */}
                     <div className="glass rounded-2xl p-6">
