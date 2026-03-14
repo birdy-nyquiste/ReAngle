@@ -8,6 +8,7 @@ import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router-dom"
 import PricingPage from "@/pages/PricingPage"
+import { LanguageProvider } from "@/context/LanguageContext"
 
 // Mock useNavigate so we can spy on it
 const mockNavigate = vi.fn()
@@ -26,9 +27,11 @@ const mockUseAuth = vi.mocked(useAuth)
 
 function renderPage() {
     return render(
-        <MemoryRouter>
-            <PricingPage />
-        </MemoryRouter>
+        <LanguageProvider>
+            <MemoryRouter>
+                <PricingPage />
+            </MemoryRouter>
+        </LanguageProvider>
     )
 }
 
@@ -66,9 +69,9 @@ describe("PricingPage", () => {
             expect(mockNavigate).toHaveBeenCalledWith("/register")
         })
 
-        it("shows Login button in header and navigates to /login", async () => {
+        it("shows Sign In button in header and navigates to /login", async () => {
             renderPage()
-            await userEvent.click(screen.getByRole("button", { name: "Login" }))
+            await userEvent.click(screen.getByRole("button", { name: "Sign In" }))
             expect(mockNavigate).toHaveBeenCalledWith("/login")
         })
     })
@@ -136,6 +139,7 @@ describe("PricingPage", () => {
 
         it("shows error message when API call fails", async () => {
             vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }))
+            const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {})
 
             renderPage()
             await userEvent.click(screen.getByText("Upgrade to Pro"))
@@ -143,6 +147,7 @@ describe("PricingPage", () => {
             expect(
                 await screen.findByText("Something went wrong. Please try again.")
             ).toBeInTheDocument()
+            consoleSpy.mockRestore()
         })
     })
 })

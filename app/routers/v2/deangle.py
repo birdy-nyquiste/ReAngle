@@ -8,6 +8,7 @@ from loguru import logger
 
 from app.schemas.deangle_schema import DeAngleResponse
 from app.services.de import deangle_service
+from app.services.settings import get_settings
 from app.core.session import get_session, SessionData, session_store
 from app.core.supabase_dependencies import get_current_user
 from app.core.exceptions import InvalidInputError
@@ -33,8 +34,15 @@ async def run_deangle(
             details={"session_id": session_id},
         )
 
+    settings = get_settings(user["id"])
+
     # 调用 service
-    result = await deangle_service.run_deangle(clean_text=session.clean_text)
+    result = await deangle_service.run_deangle(
+        clean_text=session.clean_text,
+        model=settings.deangle_model,
+        detach_system_prompt=settings.deangle_detach_system_prompt,
+        fact_check_system_prompt=settings.deangle_fact_check_system_prompt,
+    )
 
     # 存入 session
     session_store.update(

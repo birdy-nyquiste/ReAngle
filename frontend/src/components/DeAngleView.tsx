@@ -93,7 +93,7 @@ export function DeAngleView({ facts, angles, selectedIds, onToggleSelect, layout
             <div className={`flex flex-col bg-white/5 border border-white/5 rounded-2xl overflow-hidden ${layout === "row" ? "flex-1 min-w-0" : "flex-none min-h-[300px] max-h-[500px]"}`}>
                 <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/5 flex items-center gap-2">
                     <ListChecks className="w-5 h-5 text-blue-400" />
-                    <h3 className="font-semibold text-base">Original Events</h3>
+                    <h3 className="font-semibold text-base">Original Facts</h3>
                     <span className="ml-auto text-xs text-muted-foreground">Select facts to use in ReAngle</span>
                 </div>
                 <div className="p-4 lg:p-5 overflow-y-auto flex-1 custom-scrollbar">
@@ -143,8 +143,8 @@ export function DeAngleView({ facts, angles, selectedIds, onToggleSelect, layout
             <div className={`flex flex-col bg-white/5 border border-white/5 rounded-2xl overflow-hidden ${layout === "row" ? "flex-1 min-w-0" : "flex-none min-h-[300px] max-h-[500px]"}`}>
                 <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/5 flex items-center gap-2">
                     <Compass className="w-5 h-5 text-purple-400" />
-                    <h3 className="font-semibold text-base">Original Angles</h3>
-                    <span className="ml-auto text-xs text-muted-foreground">Select angles to use in ReAngle</span>
+                    <h3 className="font-semibold text-base">Original Opinions</h3>
+                    <span className="ml-auto text-xs text-muted-foreground">Select opinions to use in ReAngle</span>
                 </div>
                 <div className="p-4 lg:p-5 overflow-y-auto flex-1 space-y-4 custom-scrollbar">
                     {angles.map(angle => {
@@ -170,7 +170,7 @@ export function DeAngleView({ facts, angles, selectedIds, onToggleSelect, layout
 
                     {angles.length === 0 ? (
                         <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
-                            No angles detected yet.
+                            No opinions detected yet.
                         </div>
                     ) : null}
                 </div>

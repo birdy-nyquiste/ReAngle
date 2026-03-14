@@ -77,6 +77,7 @@
 
   html {
     @apply dark;
+    scrollbar-gutter: stable both-edges;
   }
 
   body {
@@ -130,11 +131,15 @@
 
   /* Floating navigation bar */
   .floating-nav {
-    @apply fixed top-4 left-4 right-4 z-50 glass rounded-2xl;
+    @apply fixed top-4 left-1/2 z-50 min-h-14 -translate-x-1/2 glass rounded-2xl;
+    width: min(calc(100vw - 2rem), 80rem);
   }
 }
 
 @layer utilities {
+  .pt-header-offset {
+    padding-top: var(--app-header-offset);
+  }
 
   /* Animation utilities */
   .animate-fade-in {
@@ -168,6 +173,21 @@
 
   .delay-500 {
     animation-delay: 500ms;
+  }
+}
+
+:root {
+  --app-header-offset: 6rem;
+}
+
+@media (max-width: 639px) {
+  :root {
+    --app-header-offset: 5.25rem;
+  }
+
+  .floating-nav {
+    top: 0.75rem;
+    width: calc(100vw - 1rem);
   }
 }
 

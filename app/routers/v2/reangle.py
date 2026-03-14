@@ -8,6 +8,7 @@ from loguru import logger
 
 from app.schemas.reangle_schema import ReAngleRequest, ReAngleResponse
 from app.services.re import reangle_service
+from app.services.settings import get_settings
 from app.core.session import get_session, SessionData
 from app.core.supabase_dependencies import get_current_user
 from app.core.exceptions import InvalidInputError
@@ -39,12 +40,16 @@ async def run_reangle(
             details={"session_id": session_id},
         )
 
+    settings = get_settings(user["id"])
+
     # 调用 service — 传入原文 + 用户选中的内容 + 用户指令
     result = await reangle_service.run_reangle(
         clean_text=session.clean_text,
         selected_facts=request.selected_facts,
         selected_angles=request.selected_angles,
         prompt=request.prompt,
+        model=settings.reangle_model,
+        system_prompt=settings.reangle_system_prompt,
     )
 
     logger.info(
