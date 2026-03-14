@@ -218,6 +218,7 @@ export const zh: LocaleEn = {
     avatarCheckingQuota: "正在检查数字人额度…",
     avatarProRequired: "需要 Pro 套餐：每计费周期 5 次数字人生成。",
     avatarUnavailableGeneric: "数字人当前不可用。",
+    avatarConfirmScriptFirst: "请先生成并确认口播稿，再生成数字人视频。",
     originalFacts: "原始事实",
     selectFactsHint: "选择将用于 ReAngle 的事实",
     originalOpinions: "原始观点",

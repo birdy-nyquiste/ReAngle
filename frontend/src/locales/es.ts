@@ -228,6 +228,7 @@ export const es: LocaleEn = {
     avatarCheckingQuota: "Comprobando cuota de avatar...",
     avatarProRequired: "Se requiere plan Pro: 5 generaciones de avatar por ciclo.",
     avatarUnavailableGeneric: "El avatar no está disponible en este momento.",
+    avatarConfirmScriptFirst: "Genera y confirma el guion de voz en off antes de generar el video con avatar.",
     originalFacts: "Hechos originales",
     selectFactsHint: "Selecciona hechos para usar en ReAngle",
     originalOpinions: "Opiniones originales",

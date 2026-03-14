@@ -227,7 +227,7 @@ export default function MainApp() {
     // Handlers
     const handleAddInput = () => {
         if (inputItems.length >= 3) {
-            setError("Maximum 3 inputs allowed.")
+            setError(t("mainApp.maxInputsAllowed"))
             return
         }
 
@@ -337,7 +337,7 @@ export default function MainApp() {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error(err)
-            setError(err.message || "Failed to process inputs")
+            setError(err.message || t("mainApp.failedToProcessInputs"))
         } finally {
             setInputsLoading(false)
         }
@@ -410,7 +410,7 @@ export default function MainApp() {
                 if (res.status === 503 || data.code === "SERVICE_UNAVAILABLE") {
                     throw new Error("AI service is currently at peak capacity. Please wait a few seconds and try again.")
                 }
-                throw new Error(data.message || "ReAngle failed")
+                throw new Error(data.message || t("mainApp.reangleFailed"))
             }
 
             setReAngleResult(data)
@@ -487,7 +487,7 @@ export default function MainApp() {
     // 点击 ReAngled Content 右侧视频图标：仅展开并滚动到 Avatar Broadcast 板块
     const handleOpenAvatarPanel = () => {
         if (!avatarFeatureEnabled) {
-            setError(avatarDisabledReason || "Avatar is currently unavailable.")
+            setError(avatarDisabledReason || t("mainApp.avatarUnavailableGeneric"))
             return
         }
         setError(null)
@@ -499,7 +499,7 @@ export default function MainApp() {
 
     const handleGenerateVoiceover = async () => {
         if (!avatarFeatureEnabled) {
-            setError(avatarDisabledReason || "Avatar is currently unavailable.")
+            setError(avatarDisabledReason || t("mainApp.avatarUnavailableGeneric"))
             return
         }
         if (!reAngleResult?.rewritten_content || voiceoverLoading) return
@@ -528,12 +528,12 @@ export default function MainApp() {
 
     const handleGenerateAvatar = async () => {
         if (!avatarFeatureEnabled) {
-            setError(avatarDisabledReason || "Avatar is currently unavailable.")
+            setError(avatarDisabledReason || t("mainApp.avatarUnavailableGeneric"))
             return
         }
         const script = (voiceoverScript ?? "").trim()
         if (!script) {
-            setError("请先生成并确认口播稿，再生成数字人视频。")
+            setError(t("mainApp.avatarConfirmScriptFirst"))
             return
         }
         if (script.length > AVATAR_SCRIPT_MAX_CHARS) {
@@ -623,7 +623,7 @@ export default function MainApp() {
                                         : "bg-red-500/10 text-red-400 border-red-500/20"
                                 )}>
                                     <div className="font-semibold mb-1 uppercase tracking-wider text-[10px] opacity-70">
-                                        {error.includes("peak capacity") ? "Server Busy" : "Execution Error"}
+                                        {error.includes("peak capacity") || error.includes("try again") ? t("mainApp.serverBusy") : t("mainApp.executionError")}
                                     </div>
                                     {error}
                                 </div>
@@ -743,7 +743,7 @@ export default function MainApp() {
                                                 ))}
                                                 {inputItems.length === 0 && (
                                                     <div className="text-xs text-muted-foreground/40 text-center py-4 border border-dashed border-white/5 rounded-md">
-                                                        No items in queue
+                                                        {t("mainApp.noItemsInQueue")}
                                                     </div>
                                                 )}
                                             </div>
@@ -830,7 +830,7 @@ export default function MainApp() {
                                         }
                                     }}
                                     className="flex items-center w-full h-[40px] px-1 group outline-none cursor-pointer"
-                                    title={!sidebarExpanded ? "ReAngle" : undefined}
+                                    title={!sidebarExpanded ? t("mainApp.tabReangle") : undefined}
                                 >
                                     <div className={cn(
                                         "flex items-center justify-center shrink-0 border transition-colors w-7 h-7 rounded-full",
@@ -864,20 +864,20 @@ export default function MainApp() {
                                                         key={f.id}
                                                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/15 text-blue-400 border border-blue-500/20 cursor-pointer hover:bg-blue-500/25 transition-colors"
                                                         onClick={() => handleToggleDeAngleSelect(f.id, "fact")}
-                                                        title={f.content?.split('\n')[0] || 'Fact'}
+                                                        title={f.content?.split('\n')[0] || t("mainApp.fact")}
                                                     >
                                                         <span className="truncate max-w-[140px]">{f.content?.split('\n')[0]?.slice(0, 30) || t("mainApp.fact")}...</span>
                                                         <X className="w-2.5 h-2.5 shrink-0 opacity-60 hover:opacity-100" />
                                                     </span>
                                                 )) : (
-                                                    <span className="text-xs text-muted-foreground/50 italic py-0.5">No events selected.</span>
+                                                    <span className="text-xs text-muted-foreground/50 italic py-0.5">{t("mainApp.noEventsSelected")}</span>
                                                 )}
                                             </div>
                                         </div>
 
                                         {/* Selected Angles */}
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Selected Opinions</label>
+                                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{t("mainApp.selectedOpinions")}</label>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {selectedAngles.length > 0 ? selectedAngles.map((a: { id: string, title: string }) => (
                                                     <span
@@ -890,7 +890,7 @@ export default function MainApp() {
                                                         <X className="w-2.5 h-2.5 shrink-0 opacity-60 hover:opacity-100" />
                                                     </span>
                                                 )) : (
-                                                    <span className="text-xs text-muted-foreground/50 italic py-0.5">No angles selected.</span>
+                                                    <span className="text-xs text-muted-foreground/50 italic py-0.5">{t("mainApp.noAnglesSelected")}</span>
                                                 )}
                                             </div>
                                         </div>
@@ -899,7 +899,7 @@ export default function MainApp() {
                                         <div className="border-t border-white/5 my-2"></div>
 
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-foreground/80">Customization</label>
+                                            <label className="text-xs font-medium text-foreground/80">{t("mainApp.customization")}</label>
                                             <Textarea
                                                 placeholder={t("mainApp.customizationPlaceholder")}
                                                 className="min-h-[100px] bg-black/20 border-white/5 text-sm resize-none focus-visible:ring-1"
@@ -914,7 +914,7 @@ export default function MainApp() {
                                             disabled={reAngleLoading || !deAngleResult}
                                         >
                                             {reAngleLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                            Start ReAngle
+                                            {t("mainApp.startReangle")}
                                         </Button>
                                     </div>
                                 )}
@@ -931,7 +931,7 @@ export default function MainApp() {
                             {/* Left: DeAngle Result */}
                             <div className="flex-1 flex flex-col h-full min-h-0 glass rounded-2xl border border-white/5 overflow-hidden shadow-sm">
                                 <div className="flex items-center justify-center shrink-0 border-b-2 border-blue-500/50 h-[60px] bg-blue-500/5 transition-colors">
-                                    <span className="font-medium text-blue-400">DeAngle</span>
+                                    <span className="font-medium text-blue-400">{t("mainApp.tabDeangle")}</span>
                                 </div>
                                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                                     {!deAngleResult && !deAngleLoading ? (

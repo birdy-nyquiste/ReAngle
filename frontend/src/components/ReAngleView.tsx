@@ -126,7 +126,7 @@ export function ReAngleView({
                             onClick={onDownloadSummary}
                             disabled={!summary || !onDownloadSummary}
                             className={actionButtonClass}
-                            title="Download Summary as TXT"
+                            title={t("mainApp.downloadSummaryTxt")}
                         >
                             <Download className="w-4 h-4" />
                         </Button>
@@ -193,7 +193,7 @@ export function ReAngleView({
                     {rewrittenContent ? (
                         <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{rewrittenContent}</p>
                     ) : (
-                        <p className="text-sm text-muted-foreground italic">No content generated.</p>
+                        <p className="text-sm text-muted-foreground italic">{t("mainApp.noContentGenerated")}</p>
                     )}
                 </div>
             </div>

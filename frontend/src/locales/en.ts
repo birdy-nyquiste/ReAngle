@@ -203,6 +203,7 @@ export const en = {
     avatarCheckingQuota: "Checking Avatar quota...",
     avatarProRequired: "Pro plan required: 5 Avatar generations per billing cycle.",
     avatarUnavailableGeneric: "Avatar is currently unavailable.",
+    avatarConfirmScriptFirst: "Please generate and confirm the voiceover script before generating the avatar video.",
     originalFacts: "Original Facts",
     selectFactsHint: "Select facts to use in ReAngle",
     originalOpinions: "Original Opinions",
