@@ -411,29 +411,6 @@ export default function MainApp() {
         }
     }
 
-    const handleGenerateVoiceover = async () => {
-        if (!reAngleResult?.rewritten_content) return
-        setError(null)
-        setVoiceoverLoading(true)
-        try {
-            const res = await fetch("/api/v2/media/voiceover", {
-                method: "POST",
-                headers: getHeaders(),
-                body: JSON.stringify({ text: reAngleResult.rewritten_content }),
-            })
-            const data = await res.json().catch(() => ({}))
-            if (!res.ok) {
-                throw new Error(data?.error || data?.message || "口播稿生成失败")
-            }
-            setVoiceoverScript(data.script ?? "")
-        } catch (err) {
-            console.error("Voiceover Error:", err)
-            setError(err instanceof Error ? err.message : "口播稿生成失败，请稍后重试")
-        } finally {
-            setVoiceoverLoading(false)
-        }
-    }
-
     const handleGenerateAvatar = async () => {
         let script = (voiceoverScript ?? "").trim()
         if (!script && reAngleResult?.rewritten_content) {
