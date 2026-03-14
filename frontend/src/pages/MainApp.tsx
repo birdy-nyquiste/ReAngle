@@ -23,6 +23,8 @@ interface InputItem {
 }
 
 export default function MainApp() {
+    const AVATAR_SCRIPT_MAX_CHARS = 800
+
     const { t } = useLanguage()
     const { session: authSession } = useAuth()
 
@@ -386,11 +388,24 @@ export default function MainApp() {
         document.body.removeChild(element)
     }
 
-    // 点击 ReAngled Content 右侧视频图标：展开 Avatar Broadcast 板块，若无口播稿则自动生成
-    const handleOpenAvatarPanel = async () => {
+    const scrollToAvatarSection = () => {
+        const section = document.getElementById("avatar-broadcast-section")
+        if (section) {
+            section.scrollIntoView({ behavior: "smooth", block: "start" })
+        }
+    }
+
+    // 点击 ReAngled Content 右侧视频图标：仅展开并滚动到 Avatar Broadcast 板块
+    const handleOpenAvatarPanel = () => {
         setError(null)
         setAvatarPanelVisible(true)
-        if (voiceoverScript != null || !reAngleResult?.rewritten_content) return
+        requestAnimationFrame(() => {
+            requestAnimationFrame(scrollToAvatarSection)
+        })
+    }
+
+    const handleGenerateVoiceover = async () => {
+        if (!reAngleResult?.rewritten_content || voiceoverLoading) return
         setVoiceoverLoading(true)
         try {
             const res = await fetch("/api/v2/media/voiceover", {
@@ -412,31 +427,14 @@ export default function MainApp() {
     }
 
     const handleGenerateAvatar = async () => {
-        let script = (voiceoverScript ?? "").trim()
-        if (!script && reAngleResult?.rewritten_content) {
-            setVoiceoverLoading(true)
-            try {
-                const res = await fetch("/api/v2/media/voiceover", {
-                    method: "POST",
-                    headers: getHeaders(),
-                    body: JSON.stringify({ text: reAngleResult.rewritten_content }),
-                })
-                const data = await res.json().catch(() => ({}))
-                if (!res.ok) throw new Error(data?.error || data?.message || "口播稿生成失败")
-                script = (data.script ?? "").trim()
-                setVoiceoverScript(script)
-            } catch (err) {
-                setVoiceoverLoading(false)
-                console.error("Voiceover Error:", err)
-                setError(err instanceof Error ? err.message : "口播稿生成失败")
-                return
-            }
-            setVoiceoverLoading(false)
+        const script = (voiceoverScript ?? "").trim()
+        if (!script) {
+            setError("请先生成并确认口播稿，再生成数字人视频。")
+            return
         }
-        if (!script) return
-        if (script.length > 800) {
-            console.warn("[Avatar] Voiceover exceeds 800 chars, blocked.")
-            setError("口播稿超过 800 字，请缩短后再生成数字人视频。")
+        if (script.length > AVATAR_SCRIPT_MAX_CHARS) {
+            console.warn(`[Avatar] Voiceover exceeds ${AVATAR_SCRIPT_MAX_CHARS} chars, blocked.`)
+            setError(`口播稿超过 ${AVATAR_SCRIPT_MAX_CHARS} 字，请缩短后再生成数字人视频。`)
             return
         }
         setError(null)
@@ -877,7 +875,9 @@ export default function MainApp() {
                                                 voiceoverLoading={voiceoverLoading}
                                                 avatarVideoUrl={avatarVideoUrl}
                                                 avatarLoading={avatarLoading}
+                                                avatarScriptMaxChars={AVATAR_SCRIPT_MAX_CHARS}
                                                 onOpenAvatarPanel={handleOpenAvatarPanel}
+                                                onGenerateVoiceover={handleGenerateVoiceover}
                                                 onGenerateAvatar={handleGenerateAvatar}
                                                 onVoiceoverChange={setVoiceoverScript}
                                             />
@@ -949,7 +949,9 @@ export default function MainApp() {
                                                     voiceoverLoading={voiceoverLoading}
                                                     avatarVideoUrl={avatarVideoUrl}
                                                     avatarLoading={avatarLoading}
+                                                    avatarScriptMaxChars={AVATAR_SCRIPT_MAX_CHARS}
                                                     onOpenAvatarPanel={handleOpenAvatarPanel}
+                                                    onGenerateVoiceover={handleGenerateVoiceover}
                                                     onGenerateAvatar={handleGenerateAvatar}
                                                     onVoiceoverChange={setVoiceoverScript}
                                                 />

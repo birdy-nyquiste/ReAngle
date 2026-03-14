@@ -17,23 +17,18 @@ interface ReAngleViewProps {
     voiceoverLoading?: boolean
     avatarVideoUrl?: string | null
     avatarLoading?: boolean
+    avatarScriptMaxChars?: number
     onOpenAvatarPanel?: () => void
+    onGenerateVoiceover?: () => void
     onGenerateAvatar?: () => void
     onVoiceoverChange?: (script: string) => void
 }
 
 const actionButtonClass = "h-8 w-8 shrink-0 hover:bg-white/10 text-muted-foreground hover:text-foreground disabled:opacity-50"
 
-/** 字数/词数统计：中文等按字数，英文等按词数，仅返回 count 用于展示 */
-function getTextCount(text: string): number {
-    const t = (text || "").trim()
-    if (!t) return 0
-    const cjk = (t.match(/[\u4e00-\u9fff\u3400-\u4dbf\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g) || []).length
-    const letters = (t.match(/\p{L}/gu) || []).length
-    const totalLetters = letters + cjk
-    if (totalLetters === 0) return t.length
-    if (cjk / totalLetters >= 0.3) return t.length
-    return t.split(/\s+/).filter(Boolean).length
+/** 与后端/生成校验保持一致：使用字符串字符长度（trim 后） */
+function getTextLength(text: string): number {
+    return (text || "").trim().length
 }
 
 export function ReAngleView({
@@ -49,17 +44,18 @@ export function ReAngleView({
     voiceoverLoading = false,
     avatarVideoUrl = null,
     avatarLoading = false,
+    avatarScriptMaxChars = 800,
     onOpenAvatarPanel,
+    onGenerateVoiceover,
     onGenerateAvatar,
     onVoiceoverChange,
 }: ReAngleViewProps) {
     const [copiedSummary, setCopiedSummary] = useState(false)
     const [copiedContent, setCopiedContent] = useState(false)
-    const [copiedVoiceover, setCopiedVoiceover] = useState(false)
 
-    const summaryCount = useMemo(() => getTextCount(summary), [summary])
-    const contentCount = useMemo(() => getTextCount(rewrittenContent), [rewrittenContent])
-    const voiceoverCount = useMemo(() => getTextCount(voiceoverScript ?? ""), [voiceoverScript])
+    const summaryLength = useMemo(() => getTextLength(summary), [summary])
+    const contentLength = useMemo(() => getTextLength(rewrittenContent), [rewrittenContent])
+    const voiceoverLength = useMemo(() => getTextLength(voiceoverScript ?? ""), [voiceoverScript])
 
     const handleCopy = (text: string, setCopied: (v: boolean) => void) => {
         navigator.clipboard.writeText(text)
@@ -92,7 +88,7 @@ export function ReAngleView({
                         <FileText className="w-5 h-5 text-blue-400" />
                         <h3 className="font-semibold text-base">Summary</h3>
                         {summary ? (
-                            <span className="text-xs text-muted-foreground tabular-nums">{summaryCount}</span>
+                            <span className="text-xs text-muted-foreground tabular-nums">Length: {summaryLength} chars</span>
                         ) : null}
                     </div>
                     <div className="min-w-[7.5rem] flex items-center justify-end gap-1">
@@ -149,7 +145,7 @@ export function ReAngleView({
                         <CheckCircle2 className="w-5 h-5 text-green-500" />
                         <h3 className="font-semibold text-base">ReAngled Content</h3>
                         {rewrittenContent ? (
-                            <span className="text-xs text-muted-foreground tabular-nums">{contentCount}</span>
+                            <span className="text-xs text-muted-foreground tabular-nums">Length: {contentLength} chars</span>
                         ) : null}
                     </div>
                     <div className="min-w-[7.5rem] flex items-center justify-end gap-1">
@@ -194,118 +190,101 @@ export function ReAngleView({
                 </div>
             </div>
 
-            {/* Avatar Broadcast: Script + Avatar Video */}
+            {/* Avatar Broadcast */}
             {avatarPanelVisible && (
-                <div className="flex-none flex flex-col gap-4 lg:gap-6">
-                    <h3 className="text-base font-semibold text-foreground/90 flex items-center gap-2">
+                <div id="avatar-broadcast-section" className="flex-none bg-white/5 border border-white/5 rounded-2xl overflow-hidden">
+                    <div className="px-4 py-3 lg:px-5 lg:py-4 flex items-center gap-2">
                         <Video className="w-5 h-5 text-primary" />
-                        Avatar Broadcast
-                    </h3>
+                        <h3 className="font-semibold text-base">Avatar Broadcast</h3>
+                    </div>
+                    <div className="px-4 pb-4 lg:px-5 lg:pb-4">
+                        <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-muted-foreground space-y-1">
+                            <p className="text-foreground/90 font-medium">How to create your avatar video</p>
+                            <p>1. Click &quot;Generate Script&quot; and edit the script (keep it under {avatarScriptMaxChars} characters).</p>
+                            <p>2. Click &quot;Generate Avatar Video&quot;; processing usually takes 5-10 minutes.</p>
+                        </div>
+                    </div>
 
-                    {/* Script */}
-                    <div className="flex-none bg-white/5 border border-white/5 rounded-2xl overflow-hidden">
-                        <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/5 flex items-center justify-between">
+                    {/* Broadcast Script */}
+                    <div className="border-t border-white/5">
+                        <div className="px-4 py-3 lg:px-5 lg:py-4 flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2">
-                                <h4 className="font-medium text-sm">Script</h4>
+                                <h4 className="font-medium text-sm">Broadcast Script</h4>
                                 {voiceoverScript?.trim() ? (
-                                    <span className="text-xs text-muted-foreground tabular-nums">{voiceoverCount}</span>
+                                    <span className="text-xs text-muted-foreground tabular-nums">Length: {voiceoverLength}/{avatarScriptMaxChars} chars</span>
                                 ) : null}
                             </div>
-                            <div className="min-w-[7.5rem] flex items-center justify-end gap-1">
-                                <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    onClick={onGenerateAvatar}
-                                    disabled={avatarLoading || voiceoverLoading || !rewrittenContent || !onGenerateAvatar}
-                                    className={actionButtonClass}
-                                    title="Generate Avatar Video"
-                                >
-                                    {avatarLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
-                                </Button>
-                                <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    onClick={() => handleCopy(voiceoverScript ?? "", setCopiedVoiceover)}
-                                    disabled={!voiceoverScript?.trim()}
-                                    className={actionButtonClass}
-                                    title="Copy Script"
-                                >
-                                    {copiedVoiceover ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                                </Button>
-                                <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    onClick={() => {
-                                        const script = (voiceoverScript ?? "").trim()
-                                        if (!script) return
-                                        const blob = new Blob([script], { type: "text/plain" })
-                                        const a = document.createElement("a")
-                                        a.href = URL.createObjectURL(blob)
-                                        a.download = "voiceover_script.txt"
-                                        document.body.appendChild(a)
-                                        a.click()
-                                        document.body.removeChild(a)
-                                        URL.revokeObjectURL(a.href)
-                                    }}
-                                    disabled={!voiceoverScript?.trim()}
-                                    className={actionButtonClass}
-                                    title="Download Script (TXT)"
-                                >
-                                    <Download className="w-4 h-4" />
-                                </Button>
-                            </div>
+                            <Button
+                                variant="outline"
+                                className="h-8 px-3 border-white/10 bg-white/5 hover:bg-white/10"
+                                onClick={onGenerateVoiceover}
+                                disabled={voiceoverLoading || !rewrittenContent || !onGenerateVoiceover}
+                            >
+                                {voiceoverLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Generate Script"}
+                            </Button>
                         </div>
-                        <div className="p-4 lg:p-5">
+                        <div className="px-4 pb-4 lg:px-5 lg:pb-5 space-y-3">
                             {voiceoverLoading ? (
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                     <Loader2 className="w-4 h-4 animate-spin" />
-                                    Generating script…
+                                    Generating script...
                                 </div>
                             ) : (
                                 <Textarea
                                     value={voiceoverScript ?? ""}
                                     onChange={e => onVoiceoverChange?.(e.target.value)}
-                                    placeholder="Click the video icon above to generate a script first, or edit here then click Generate Avatar."
-                                    className="min-h-[120px] bg-black/20 border-white/5 text-sm resize-none focus-visible:ring-1"
+                                    placeholder="Click Generate Script, then edit the script here before creating the avatar video."
+                                    className="min-h-[240px] lg:min-h-[280px] bg-black/20 border-white/5 text-sm resize-none focus-visible:ring-1"
                                 />
                             )}
                         </div>
                     </div>
 
                     {/* Avatar Video */}
-                    <div className="flex-none bg-white/5 border border-white/5 rounded-2xl overflow-hidden">
-                        <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/5 flex items-center justify-between">
+                    <div className="border-t border-white/5">
+                        <div className="px-4 py-3 lg:px-5 lg:py-4 flex items-center justify-between">
                             <h4 className="font-medium text-sm">Avatar Video</h4>
-                            {avatarVideoUrl && (
+                            <div className="min-w-[7.5rem] flex items-center justify-end gap-1">
                                 <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className={actionButtonClass}
-                                    title="Download Avatar Video"
-                                    onClick={async () => {
-                                        const downloadUrl = `/api/v2/media/avatar/download?url=${encodeURIComponent(avatarVideoUrl!)}`
-                                        try {
-                                            const res = await fetch(downloadUrl, { credentials: "include" })
-                                            if (!res.ok) throw new Error("Download failed")
-                                            const blob = await res.blob()
-                                            const u = URL.createObjectURL(blob)
-                                            const a = document.createElement("a")
-                                            a.href = u
-                                            a.download = "avatar_broadcast.mp4"
-                                            document.body.appendChild(a)
-                                            a.click()
-                                            document.body.removeChild(a)
-                                            URL.revokeObjectURL(u)
-                                        } catch {
-                                            window.open(downloadUrl, "_blank")
-                                        }
-                                    }}
+                                    variant="default"
+                                    className="h-8 px-3"
+                                    onClick={onGenerateAvatar}
+                                    disabled={avatarLoading || voiceoverLoading || !voiceoverScript?.trim() || !onGenerateAvatar}
                                 >
-                                    <Download className="w-4 h-4" />
+                                    {avatarLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                    Generate Avatar Video
                                 </Button>
-                            )}
+                                {avatarVideoUrl && (
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className={actionButtonClass}
+                                        title="Download Avatar Video"
+                                        onClick={async () => {
+                                            const downloadUrl = `/api/v2/media/avatar/download?url=${encodeURIComponent(avatarVideoUrl!)}`
+                                            try {
+                                                const res = await fetch(downloadUrl, { credentials: "include" })
+                                                if (!res.ok) throw new Error("Download failed")
+                                                const blob = await res.blob()
+                                                const u = URL.createObjectURL(blob)
+                                                const a = document.createElement("a")
+                                                a.href = u
+                                                a.download = "avatar_broadcast.mp4"
+                                                document.body.appendChild(a)
+                                                a.click()
+                                                document.body.removeChild(a)
+                                                URL.revokeObjectURL(u)
+                                            } catch {
+                                                window.open(downloadUrl, "_blank")
+                                            }
+                                        }}
+                                    >
+                                        <Download className="w-4 h-4" />
+                                    </Button>
+                                )}
+                            </div>
                         </div>
-                        <div className="p-4 lg:p-5">
+                        <div className="px-4 pb-4 lg:px-5 lg:pb-5">
                             {avatarLoading ? (
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground py-8">
                                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -321,7 +300,7 @@ export function ReAngleView({
                                     />
                                 </div>
                             ) : (
-                                <p className="text-sm text-muted-foreground italic py-4">After generating the voiceover script, you may edit it as needed (recommended within 700 words). Click &quot;Generate Avatar&quot; to create the video, which can then be previewed or downloaded here. Video generation usually takes about 5–10 minutes.</p>
+                                <p className="text-sm text-muted-foreground italic py-4">No avatar video yet. Generate one from the script section above.</p>
                             )}
                         </div>
                     </div>
