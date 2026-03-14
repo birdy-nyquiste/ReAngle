@@ -114,6 +114,13 @@ export default function MainApp() {
     const [ttsLoading, setTtsLoading] = useState(false)
     const [audioUrl, setAudioUrl] = useState<string | null>(null)
 
+    // Avatar Broadcast (数字人播报) State
+    const [avatarPanelVisible, setAvatarPanelVisible] = useState(false)
+    const [voiceoverScript, setVoiceoverScript] = useState<string | null>(null)
+    const [voiceoverLoading, setVoiceoverLoading] = useState(false)
+    const [avatarVideoUrl, setAvatarVideoUrl] = useState<string | null>(null)
+    const [avatarLoading, setAvatarLoading] = useState(false)
+
     // Detect ?checkout=success in URL
     useEffect(() => {
         const params = new URLSearchParams(window.location.search)
@@ -269,7 +276,7 @@ export default function MainApp() {
                 if (res.status === 503 || data.code === "SERVICE_UNAVAILABLE") {
                     throw new Error("AI service is currently at peak capacity. Please wait a few seconds and try again.")
                 }
-                throw new Error(data.message || "DeAngle failed")
+                throw new Error(data.error || data.message || "DeAngle failed")
             }
 
             setDeAngleResult(data)
@@ -365,6 +372,116 @@ export default function MainApp() {
         document.body.appendChild(element)
         element.click()
         document.body.removeChild(element)
+    }
+
+    const handleDownloadSummary = () => {
+        if (!reAngleResult?.summary) return
+
+        const element = document.createElement("a")
+        const file = new Blob([reAngleResult.summary], { type: 'text/plain' })
+        element.href = URL.createObjectURL(file)
+        element.download = "reangle_summary.txt"
+        document.body.appendChild(element)
+        element.click()
+        document.body.removeChild(element)
+    }
+
+    // 点击 ReAngled Content 右侧视频图标：展开 Avatar Broadcast 板块，若无口播稿则自动生成
+    const handleOpenAvatarPanel = async () => {
+        setError(null)
+        setAvatarPanelVisible(true)
+        if (voiceoverScript != null || !reAngleResult?.rewritten_content) return
+        setVoiceoverLoading(true)
+        try {
+            const res = await fetch("/api/v2/media/voiceover", {
+                method: "POST",
+                headers: getHeaders(),
+                body: JSON.stringify({ text: reAngleResult.rewritten_content }),
+            })
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) {
+                throw new Error(data?.error || data?.message || "口播稿生成失败")
+            }
+            setVoiceoverScript(data.script ?? "")
+        } catch (err) {
+            console.error("Voiceover Error:", err)
+            setError(err instanceof Error ? err.message : "口播稿生成失败，请稍后重试")
+        } finally {
+            setVoiceoverLoading(false)
+        }
+    }
+
+    const handleGenerateVoiceover = async () => {
+        if (!reAngleResult?.rewritten_content) return
+        setError(null)
+        setVoiceoverLoading(true)
+        try {
+            const res = await fetch("/api/v2/media/voiceover", {
+                method: "POST",
+                headers: getHeaders(),
+                body: JSON.stringify({ text: reAngleResult.rewritten_content }),
+            })
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) {
+                throw new Error(data?.error || data?.message || "口播稿生成失败")
+            }
+            setVoiceoverScript(data.script ?? "")
+        } catch (err) {
+            console.error("Voiceover Error:", err)
+            setError(err instanceof Error ? err.message : "口播稿生成失败，请稍后重试")
+        } finally {
+            setVoiceoverLoading(false)
+        }
+    }
+
+    const handleGenerateAvatar = async () => {
+        let script = (voiceoverScript ?? "").trim()
+        if (!script && reAngleResult?.rewritten_content) {
+            setVoiceoverLoading(true)
+            try {
+                const res = await fetch("/api/v2/media/voiceover", {
+                    method: "POST",
+                    headers: getHeaders(),
+                    body: JSON.stringify({ text: reAngleResult.rewritten_content }),
+                })
+                const data = await res.json().catch(() => ({}))
+                if (!res.ok) throw new Error(data?.error || data?.message || "口播稿生成失败")
+                script = (data.script ?? "").trim()
+                setVoiceoverScript(script)
+            } catch (err) {
+                setVoiceoverLoading(false)
+                console.error("Voiceover Error:", err)
+                setError(err instanceof Error ? err.message : "口播稿生成失败")
+                return
+            }
+            setVoiceoverLoading(false)
+        }
+        if (!script) return
+        if (script.length > 800) {
+            console.warn("[Avatar] Voiceover exceeds 800 chars, blocked.")
+            setError("口播稿超过 800 字，请缩短后再生成数字人视频。")
+            return
+        }
+        setError(null)
+        setAvatarVideoUrl(null)
+        setAvatarLoading(true)
+        try {
+            const res = await fetch("/api/v2/media/avatar", {
+                method: "POST",
+                headers: getHeaders(),
+                body: JSON.stringify({ text: script }),
+            })
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) {
+                throw new Error(data?.error || data?.message || "数字人视频生成失败")
+            }
+            setAvatarVideoUrl(data.video_url ?? null)
+        } catch (err) {
+            console.error("Avatar Error:", err)
+            setError(err instanceof Error ? err.message : "数字人视频生成失败，请稍后重试")
+        } finally {
+            setAvatarLoading(false)
+        }
     }
 
     return (
@@ -774,6 +891,15 @@ export default function MainApp() {
                                                 audioUrl={audioUrl}
                                                 onPlayTTS={handlePlayTTS}
                                                 onDownload={handleDownload}
+                                                onDownloadSummary={handleDownloadSummary}
+                                                avatarPanelVisible={avatarPanelVisible}
+                                                voiceoverScript={voiceoverScript}
+                                                voiceoverLoading={voiceoverLoading}
+                                                avatarVideoUrl={avatarVideoUrl}
+                                                avatarLoading={avatarLoading}
+                                                onOpenAvatarPanel={handleOpenAvatarPanel}
+                                                onGenerateAvatar={handleGenerateAvatar}
+                                                onVoiceoverChange={setVoiceoverScript}
                                             />
                                         </div>
                                     )}
@@ -837,6 +963,15 @@ export default function MainApp() {
                                                     audioUrl={audioUrl}
                                                     onPlayTTS={handlePlayTTS}
                                                     onDownload={handleDownload}
+                                                    onDownloadSummary={handleDownloadSummary}
+                                                    avatarPanelVisible={avatarPanelVisible}
+                                                    voiceoverScript={voiceoverScript}
+                                                    voiceoverLoading={voiceoverLoading}
+                                                    avatarVideoUrl={avatarVideoUrl}
+                                                    avatarLoading={avatarLoading}
+                                                    onOpenAvatarPanel={handleOpenAvatarPanel}
+                                                    onGenerateAvatar={handleGenerateAvatar}
+                                                    onVoiceoverChange={setVoiceoverScript}
                                                 />
                                             </div>
                                         )}

@@ -20,10 +20,22 @@ class TTSResponse(BaseModel):
     audio_url: str = Field(..., description="音频文件的 URL")
 
 
+class VoiceoverRequest(BaseModel):
+    """口播稿请求模型。"""
+
+    text: str = Field(..., description="改写后的文章全文（ReAngled content）")
+
+
+class VoiceoverResponse(BaseModel):
+    """口播稿响应模型。"""
+
+    script: str = Field(..., description="口播稿正文")
+
+
 class AvatarRequest(BaseModel):
     """数字人请求模型。"""
 
-    text: str = Field(..., description="数字人文本")
+    text: str = Field(..., description="数字人播报文本（口播稿）")
 
 
 class AvatarResponse(BaseModel):

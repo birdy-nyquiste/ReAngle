@@ -6,7 +6,7 @@
 import os
 import asyncio
 from google import genai
-from google.genai.errors import ServerError
+from google.genai.errors import ServerError, ClientError
 from loguru import logger
 from pydantic import BaseModel, Field
 
@@ -101,6 +101,16 @@ async def check_facts(
                         "The AI service is currently taking too long to respond. Please try again later.",
                         details={"original_error": "TimeoutError"},
                     )
+
+            except ClientError as e:
+                if getattr(e, "status_code", None) == 429 or "429" in str(e):
+                    logger.warning(f"[fact_check] Gemini quota exceeded (429): {e}")
+                    raise ServiceUnavailableError(
+                        "Gemini 免费额度已用尽（每日约 20 次请求）。请明日再试，或前往 Google AI Studio 升级 API 计划。",
+                        details={"original_error": "RESOURCE_EXHAUSTED", "code": 429},
+                    )
+                logger.exception("Gemini ClientError during Fact Check")
+                raise LLMProviderError(f"Gemini API error: {type(e).__name__} - {str(e)}")
 
             except ServerError as e:
                 if e.code in [503, 429]:  # 处理 High Demand 和 Rate Limit

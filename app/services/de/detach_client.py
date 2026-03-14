@@ -6,7 +6,7 @@ Event/Angle 拆分客户端。
 import os
 import asyncio
 from google import genai
-from google.genai.errors import ServerError
+from google.genai.errors import ServerError, ClientError
 from loguru import logger
 import uuid
 
@@ -89,6 +89,17 @@ async def detach_events_and_angles(
                         "The AI service is currently taking too long to respond. Please try again later.",
                         details={"original_error": "TimeoutError"},
                     )
+
+            except ClientError as e:
+                # 429 配额/限流：免费 tier 每日 20 次等
+                if getattr(e, "status_code", None) == 429 or "429" in str(e):
+                    logger.warning(f"[detach] Gemini quota exceeded (429): {e}")
+                    raise ServiceUnavailableError(
+                        "Gemini 免费额度已用尽（每日约 20 次请求）。请明日再试，或前往 Google AI Studio 升级 API 计划。",
+                        details={"original_error": "RESOURCE_EXHAUSTED", "code": 429},
+                    )
+                logger.exception("Gemini ClientError during Detach")
+                raise LLMProviderError(f"Gemini API error: {type(e).__name__} - {str(e)}")
 
             except ServerError as e:
                 if e.code in [503, 429]:  # 处理 High Demand 和 Rate Limit
