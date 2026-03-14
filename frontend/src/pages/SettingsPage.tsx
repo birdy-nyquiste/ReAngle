@@ -3,10 +3,10 @@ import AppHeader from "@/components/AppHeader"
 import { useAuth } from "@/context/AuthContext"
 import { useLanguage } from "@/context/LanguageContext"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { ChevronRight } from "lucide-react"
 
 interface ModelOption {
   id: string
@@ -54,8 +54,17 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [expandedSections, setExpandedSections] = useState({
+    deangle: true,
+    reangle: true,
+    avatar: true,
+  })
 
   const canSave = useMemo(() => Boolean(form) && !saving, [form, saving])
+
+  const toggleSection = (section: "deangle" | "reangle" | "avatar") => {
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }))
+  }
 
   const fetchSettings = async () => {
     if (!session?.access_token) return
@@ -178,148 +187,234 @@ export default function SettingsPage() {
       <AppHeader />
       <main className="pt-header-offset flex flex-1 items-start justify-center px-4 pb-12">
         <div className="w-full max-w-4xl space-y-6">
-          <Card className="glass border-white/10">
-            <CardHeader>
-              <CardTitle className="text-xl">{t("settings.title")}</CardTitle>
-              <CardDescription>{t("settings.subtitle")}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {loading && <p className="text-sm text-muted-foreground">{t("common.loading")}</p>}
-              {error && <p className="text-sm text-red-400">{error}</p>}
-              {message && <p className="text-sm text-emerald-400">{message}</p>}
+          <div className="space-y-1 px-1">
+            <h1 className="text-xl font-semibold text-foreground">{t("settings.title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("settings.subtitle")}</p>
+          </div>
 
-              {!loading && form && (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>{t("settings.deangleModel")}</Label>
-                      <Select
-                        value={form.deangle_model}
-                        onValueChange={(value) =>
-                          setForm((prev) =>
-                            prev ? { ...prev, deangle_model: value } : prev
-                          )
-                        }
+          <div className="space-y-6">
+            {loading && <p className="text-sm text-muted-foreground">{t("common.loading")}</p>}
+            {error && <p className="text-sm text-red-400">{error}</p>}
+            {message && <p className="text-sm text-emerald-400">{message}</p>}
+
+            {!loading && form && (
+              <>
+                <div className="space-y-5">
+                  <section className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
+                    <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/10 flex items-center justify-between gap-3">
+                      <h3 className="text-base font-semibold text-foreground/95">DeAngle</h3>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                        onClick={() => toggleSection("deangle")}
+                        aria-expanded={expandedSections.deangle}
+                        aria-controls="settings-deangle-content"
+                        aria-label={expandedSections.deangle ? "Collapse DeAngle section" : "Expand DeAngle section"}
+                        title={expandedSections.deangle ? "Collapse" : "Expand"}
                       >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableModels.deangle.map((model) => (
-                            <SelectItem key={model.id} value={model.id}>
-                              {model.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        <ChevronRight
+                          className={`w-4 h-4 transition-transform ${expandedSections.deangle ? "rotate-90" : ""}`}
+                        />
+                      </Button>
                     </div>
+                    {expandedSections.deangle && (
+                      <div id="settings-deangle-content" className="p-4 lg:p-5 space-y-4">
+                        <div className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-3">
+                          <h4 className="text-sm font-medium text-foreground/90">Model</h4>
+                          <div className="space-y-2">
+                            <Label>{t("settings.deangleModel")}</Label>
+                            <Select
+                              value={form.deangle_model}
+                              onValueChange={(value) =>
+                                setForm((prev) =>
+                                  prev ? { ...prev, deangle_model: value } : prev
+                                )
+                              }
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {availableModels.deangle.map((model) => (
+                                  <SelectItem key={model.id} value={model.id}>
+                                    {model.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
 
-                    <div className="space-y-2">
-                      <Label>{t("settings.reangleModel")}</Label>
-                      <Select
-                        value={form.reangle_model}
-                        onValueChange={(value) =>
-                          setForm((prev) =>
-                            prev ? { ...prev, reangle_model: value } : prev
-                          )
-                        }
+                        <div className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-4">
+                          <h4 className="text-sm font-medium text-foreground/90">Prompt</h4>
+
+                          <div className="space-y-2">
+                            <Label>{t("settings.deangleDetachPrompt")}</Label>
+                            <div className="text-xs text-muted-foreground">
+                              {defaults.deangle_detach_uses_default
+                                ? t("settings.usingDefault")
+                                : t("settings.customized")}
+                            </div>
+                            <Textarea
+                              value={form.deangle_detach_system_prompt}
+                              onChange={(e) =>
+                                setForm((prev) =>
+                                  prev
+                                    ? {
+                                      ...prev,
+                                      deangle_detach_system_prompt: e.target.value,
+                                    }
+                                    : prev
+                                )
+                              }
+                              className="min-h-[180px]"
+                            />
+                          </div>
+
+                          <div className="border-t border-white/10 pt-4 space-y-2">
+                            <Label>{t("settings.deangleFactCheckPrompt")}</Label>
+                            <div className="text-xs text-muted-foreground">
+                              {defaults.deangle_fact_check_uses_default
+                                ? t("settings.usingDefault")
+                                : t("settings.customized")}
+                            </div>
+                            <Textarea
+                              value={form.deangle_fact_check_system_prompt}
+                              onChange={(e) =>
+                                setForm((prev) =>
+                                  prev
+                                    ? {
+                                      ...prev,
+                                      deangle_fact_check_system_prompt: e.target.value,
+                                    }
+                                    : prev
+                                )
+                              }
+                              className="min-h-[180px]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </section>
+
+                  <section className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
+                    <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/10 flex items-center justify-between gap-3">
+                      <h3 className="text-base font-semibold text-foreground/95">ReAngle</h3>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                        onClick={() => toggleSection("reangle")}
+                        aria-expanded={expandedSections.reangle}
+                        aria-controls="settings-reangle-content"
+                        aria-label={expandedSections.reangle ? "Collapse ReAngle section" : "Expand ReAngle section"}
+                        title={expandedSections.reangle ? "Collapse" : "Expand"}
                       >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableModels.reangle.map((model) => (
-                            <SelectItem key={model.id} value={model.id}>
-                              {model.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        <ChevronRight
+                          className={`w-4 h-4 transition-transform ${expandedSections.reangle ? "rotate-90" : ""}`}
+                        />
+                      </Button>
                     </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>{t("settings.deangleDetachPrompt")}</Label>
-                    <div className="text-xs text-muted-foreground">
-                      {defaults.deangle_detach_uses_default
-                        ? t("settings.usingDefault")
-                        : t("settings.customized")}
-                    </div>
-                    <Textarea
-                      value={form.deangle_detach_system_prompt}
-                      onChange={(e) =>
-                        setForm((prev) =>
-                          prev
-                            ? {
-                                ...prev,
-                                deangle_detach_system_prompt: e.target.value,
+                    {expandedSections.reangle && (
+                      <div id="settings-reangle-content" className="p-4 lg:p-5 space-y-4">
+                        <div className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-3">
+                          <h4 className="text-sm font-medium text-foreground/90">Model</h4>
+                          <div className="space-y-2">
+                            <Label>{t("settings.reangleModel")}</Label>
+                            <Select
+                              value={form.reangle_model}
+                              onValueChange={(value) =>
+                                setForm((prev) =>
+                                  prev ? { ...prev, reangle_model: value } : prev
+                                )
                               }
-                            : prev
-                        )
-                      }
-                      className="min-h-[180px]"
-                    />
-                  </div>
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {availableModels.reangle.map((model) => (
+                                  <SelectItem key={model.id} value={model.id}>
+                                    {model.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
 
-                  <div className="space-y-2">
-                    <Label>{t("settings.deangleFactCheckPrompt")}</Label>
-                    <div className="text-xs text-muted-foreground">
-                      {defaults.deangle_fact_check_uses_default
-                        ? t("settings.usingDefault")
-                        : t("settings.customized")}
+                        <div className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-2">
+                          <h4 className="text-sm font-medium text-foreground/90">Prompt</h4>
+                          <Label>{t("settings.reanglePrompt")}</Label>
+                          <div className="text-xs text-muted-foreground">
+                            {defaults.reangle_uses_default
+                              ? t("settings.usingDefault")
+                              : t("settings.customized")}
+                          </div>
+                          <Textarea
+                            value={form.reangle_system_prompt}
+                            onChange={(e) =>
+                              setForm((prev) =>
+                                prev
+                                  ? { ...prev, reangle_system_prompt: e.target.value }
+                                  : prev
+                              )
+                            }
+                            className="min-h-[220px]"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </section>
+
+                  <section className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
+                    <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/10 flex items-center justify-between gap-3">
+                      <h3 className="text-base font-semibold text-foreground/95">Avatar</h3>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                        onClick={() => toggleSection("avatar")}
+                        aria-expanded={expandedSections.avatar}
+                        aria-controls="settings-avatar-content"
+                        aria-label={expandedSections.avatar ? "Collapse Avatar section" : "Expand Avatar section"}
+                        title={expandedSections.avatar ? "Collapse" : "Expand"}
+                      >
+                        <ChevronRight
+                          className={`w-4 h-4 transition-transform ${expandedSections.avatar ? "rotate-90" : ""}`}
+                        />
+                      </Button>
                     </div>
-                    <Textarea
-                      value={form.deangle_fact_check_system_prompt}
-                      onChange={(e) =>
-                        setForm((prev) =>
-                          prev
-                            ? {
-                                ...prev,
-                                deangle_fact_check_system_prompt: e.target.value,
-                              }
-                            : prev
-                        )
-                      }
-                      className="min-h-[180px]"
-                    />
-                  </div>
+                    {expandedSections.avatar && (
+                      <div id="settings-avatar-content" className="p-4 lg:p-5">
+                        <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-6 text-sm text-muted-foreground">
+                          Avatar settings are coming soon. Stay tuned.
+                        </div>
+                      </div>
+                    )}
+                  </section>
+                </div>
 
-                  <div className="space-y-2">
-                    <Label>{t("settings.reanglePrompt")}</Label>
-                    <div className="text-xs text-muted-foreground">
-                      {defaults.reangle_uses_default
-                        ? t("settings.usingDefault")
-                        : t("settings.customized")}
-                    </div>
-                    <Textarea
-                      value={form.reangle_system_prompt}
-                      onChange={(e) =>
-                        setForm((prev) =>
-                          prev
-                            ? { ...prev, reangle_system_prompt: e.target.value }
-                            : prev
-                        )
-                      }
-                      className="min-h-[220px]"
-                    />
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <Button onClick={handleSave} disabled={!canSave}>
-                      {saving ? t("settings.saving") : t("settings.save")}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={handleReset}
-                      disabled={saving}
-                    >
-                      {t("settings.reset")}
-                    </Button>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
+                <div className="flex items-center gap-3">
+                  <Button onClick={handleSave} disabled={!canSave}>
+                    {saving ? t("settings.saving") : t("settings.save")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleReset}
+                    disabled={saving}
+                  >
+                    {t("settings.reset")}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </main>
     </div>
