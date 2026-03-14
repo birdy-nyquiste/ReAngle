@@ -22,11 +22,11 @@ export const en = {
   },
   landing: {
     // Hero
-    heroTitleLine1: "Don't Consume the Narrative.",
-    heroTitleLine2: "ReAngle It.",
+    heroTitleLine1: "Don't just consume narratives.",
+    heroTitleLine2: "ReAngle them.",
     heroSubheadline:
-      "Events are objective. Narratives are constructed. ReAngle disassembles any content into its core facts and subjective opinions, then reconstructs them into your exact voice and stance with built-in fact-checking.",
-    heroCta: "Start ReAngling Today",
+      "Events are objective. Narratives are constructed. ReAngle gives narrative power back to you: understand the event, choose your stance, and express it in your own voice.",
+    heroCta: "Start ReAngling",
     // Section 2: The Insight
     insightTitle1: "Facts are objective.",
     insightTitle2: "Narratives are constructed.",
@@ -50,31 +50,31 @@ export const en = {
     insightYourNarrativeQuote:
       "“While sweeping regulations aim to mitigate existential risks, they must be surgical to avoid crushing the rapid innovation cycle that defines our era.”",
     // Section 3: The Narrative Engine
-    engineTitle: "The Narrative Engine",
+    engineTitle: "The 3-Step Engine",
     engineIntro:
-      "Not just another AI summarization tool. ReAngle is a purpose-built engine granting you absolute control over how a story is told and distributed.",
-    engineFeature1Title: "Re-tell The Story",
+      "From philosophy to execution, ReAngle runs in a clear three-step workflow: Gather, DeAngle, then ReAngle.",
+    engineFeature1Title: "Gather",
     engineFeature1Desc:
-      "Refuse to accept pre-packaged viewpoints. Change the angle of observation and re-tell the story yourself.",
-    engineFeature2Title: "Built-in Verification",
+      "Collect multiple inputs around one topic. ReAngle validates thematic consistency before moving forward.",
+    engineFeature2Title: "DeAngle",
     engineFeature2Desc:
-      "Narrative capability is now paired with truth. Every claim is cross-referenced and verified during the DeAngle process.",
-    engineFeature3Title: "Streamlined Workflow",
+      "Detach objective events from subjective angles, then run fact-checking to build a reliable factual base.",
+    engineFeature3Title: "ReAngle",
     engineFeature3Desc:
-      "Compress hours of cross-referencing, multi-source research, and drafting into just a few clicks.",
+      "Rebuild the final narrative from validated facts and selected angles, aligned to your voice and intent.",
     // Section 4: How to ReAngle
-    howToTitle: "How to ReAngle",
+    howToTitle: "How It Works",
     howToIntro:
-      "From the chaotic noise of the internet to a polished masterpiece in three simple steps.",
-    howToStep1Title: "Gather",
+      "A practical workflow built for narrative control.",
+    howToStep1Title: "Gather (with topic validation)",
     howToStep1Desc:
-      "Toss in a bunch of URLs, Youtube, PDF, or plain text, throwing the chaos of the internet into the engine.",
-    howToStep2Title: "DeAngle",
+      "Add multiple inputs for the same topic. The system checks whether inputs are thematically consistent.",
+    howToStep2Title: "DeAngle (Detach + Fact Check)",
     howToStep2Desc:
-      "Strip away bias and noise. The engine separates objective facts from subjective opinions while verifying every claim for accuracy.",
+      "Split facts and angles first, then fact-check the detached events for reliability.",
     howToStep3Title: "ReAngle",
     howToStep3Desc:
-      "Synthesize the verified facts into a polished narrative that matches your unique perspective and style.",
+      "Generate your final narrative from verified facts and selected angles, in your own style.",
     // Section 5: Who is ReAngling?
     whoTitle: "Who is ReAngling?",
     whoIntro: "Democratizing narrative power across industries.",
@@ -249,24 +249,24 @@ export const en = {
   },
   pricing: {
     title: "Simple pricing",
-    subtitle: "Start free, upgrade when you need more.",
+    subtitle: "USD pricing. Start free, upgrade when you need scale.",
     freeTitle: "Free",
-    freeTagline: "For trying things out",
-    freeFeature1: "5 rewrites per month",
-    freeFeature2: "All AI models",
-    freeFeature3: "All input formats",
-    freeFeature4: "Summary & comparison",
+    freeTagline: "For light monthly usage",
+    freeFeature1: "5 ReAngle generations / month",
+    freeFeature2: "1 TTS generation / month",
+    freeFeature3: "Gather + DeAngle + ReAngle workflow",
+    freeFeature4: "Avatar not included",
     freeCtaGoToApp: "Go to App",
     freeCtaGetStarted: "Get Started",
     proTitle: "Pro",
     proBadge: "Popular",
-    proTagline: "For power users",
-    proFeature1: "Unlimited rewrites",
-    proFeature2: "All AI models",
-    proFeature3: "All input formats",
-    proFeature4: "Summary & comparison",
-    proFeature5: "Priority support",
-    proFeature6: "TTS & Avatar",
+    proTagline: "For continuous creation",
+    proFeature1: "Unlimited ReAngle generations",
+    proFeature2: "20 TTS generations / month",
+    proFeature3: "5 Avatar generations / billing cycle",
+    proFeature4: "Gather + DeAngle + ReAngle workflow",
+    proFeature5: "Stripe subscription management",
+    proFeature6: "Usage dashboard in Profile",
     proCta: "Upgrade to Pro",
     proCtaLoading: "Please wait...",
     upgradeErrorGeneric: "Something went wrong. Please try again.",
@@ -281,6 +281,7 @@ export const en = {
     renewsLabel: "Renews",
     usageTitle: "Usage",
     rewritesUsed: "ReAngle used",
+    ttsUsed: "TTS used",
     avatarUsed: "Avatar used",
     usageLoading: "Loading...",
     subscriptionTitle: "Subscription",

@@ -24,6 +24,7 @@ from app.services.media_outputs import tts_client, voiceover_client, avatar_clie
 from app.core.exceptions import LLMProviderError
 from app.core.supabase_dependencies import (
     require_avatar_feature_access,
+    check_tts_usage_limit,
     check_avatar_usage_limit,
 )
 
@@ -31,7 +32,10 @@ media_router = APIRouter(prefix="/media", tags=["Media"])
 
 
 @media_router.post("/tts", response_model=TTSResponse)
-async def get_tts_result(request: TTSRequest):
+async def get_tts_result(
+    request: TTSRequest,
+    _user: dict = Depends(check_tts_usage_limit),
+):
     """TTS 接口：将文本转换为语音。"""
     logger.info(f"[media] TTS request | text_len={len(request.text)}")
 

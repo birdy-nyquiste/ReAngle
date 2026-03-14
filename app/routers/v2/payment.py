@@ -13,6 +13,9 @@ from app.core.config import (
     STRIPE_WEBHOOK_SECRET,
     SUPABASE_URL,
     SUPABASE_SECRET_KEY as SUPABASE_SECRET,
+    FREE_TIER_LIMIT,
+    TTS_FREE_TIER_LIMIT,
+    AVATAR_FREE_TIER_LIMIT,
 )
 from app.core.supabase_dependencies import get_current_user
 from app.services.stripe.stripe_service import (
@@ -111,7 +114,10 @@ async def get_usage(user: dict = Depends(get_current_user)):
 
     profile_result = (
         supabase.table("profiles")
-        .select("usage_count, usage_limit, avatar_usage_count, avatar_usage_limit")
+        .select(
+            "usage_count, usage_limit, tts_usage_count, tts_usage_limit, "
+            "avatar_usage_count, avatar_usage_limit"
+        )
         .eq("id", user["id"])
         .maybe_single()
         .execute()
@@ -128,15 +134,19 @@ async def get_usage(user: dict = Depends(get_current_user)):
 
     profile = profile_result.data or {
         "usage_count": 0,
-        "usage_limit": 5,
+        "usage_limit": FREE_TIER_LIMIT,
+        "tts_usage_count": 0,
+        "tts_usage_limit": TTS_FREE_TIER_LIMIT,
         "avatar_usage_count": 0,
-        "avatar_usage_limit": 0,
+        "avatar_usage_limit": AVATAR_FREE_TIER_LIMIT,
     }
     subscription = sub_result.data[0] if sub_result.data else None
 
     return {
         "usage_count": profile["usage_count"],
         "usage_limit": profile["usage_limit"],
+        "tts_usage_count": profile["tts_usage_count"],
+        "tts_usage_limit": profile["tts_usage_limit"],
         "avatar_usage_count": profile["avatar_usage_count"],
         "avatar_usage_limit": profile["avatar_usage_limit"],
         "subscription": subscription,

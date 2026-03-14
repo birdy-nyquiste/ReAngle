@@ -26,10 +26,10 @@ export const es: LocaleEn = {
 
   landing: {
     // Hero
-    heroTitleLine1: "No consumas la narrativa.",
-    heroTitleLine2: "ReAngléala.",
+    heroTitleLine1: "No consumas narrativas sin filtro.",
+    heroTitleLine2: "Haz ReAngle.",
     heroSubheadline:
-      "Los hechos son objetivos. Las narrativas se construyen. Tomamos múltiples fuentes dispersas sobre un mismo evento y las reestructuramos en un artículo coherente, con el ángulo preciso y tu propia voz.",
+      "Los hechos son objetivos. Las narrativas se construyen. ReAngle te devuelve el control narrativo: entiende el evento, define tu postura y expresa tu propia voz.",
     heroCta: "Empieza hoy",
 
     // Section 2
@@ -56,32 +56,32 @@ export const es: LocaleEn = {
       "«Si bien la regulación busca mitigar riesgos sistémicos, debe aplicarse con precisión para no sofocar el ciclo de innovación que define nuestra era.»",
 
     // Engine
-    engineTitle: "El Motor Narrativo",
+    engineTitle: "Motor en 3 pasos",
     engineIntro:
-      "No es solo otra herramienta de resumen. ReAngle es un motor diseñado para darte control real sobre cómo se estructura y comunica una historia.",
-    engineFeature1Title: "Reformula la historia",
+      "De la filosofía a la ejecución, ReAngle funciona con un flujo claro: Gather, DeAngle y ReAngle.",
+    engineFeature1Title: "Gather",
     engineFeature1Desc:
-      "No aceptes puntos de vista prefabricados. Cambia el ángulo y cuenta la historia a tu manera.",
-    engineFeature2Title: "Capacidad convertida en herramienta",
+      "Reúne múltiples entradas sobre un mismo tema. El sistema valida coherencia temática antes de continuar.",
+    engineFeature2Title: "DeAngle",
     engineFeature2Desc:
-      "La construcción narrativa ya no es privilegio exclusivo de grandes agencias. La convertimos en un sistema accesible para creadores.",
-    engineFeature3Title: "Flujo simplificado",
+      "Primero detach (hechos vs. ángulos), luego fact-check para construir una base factual confiable.",
+    engineFeature3Title: "ReAngle",
     engineFeature3Desc:
-      "Reduce horas de análisis y redacción a unos pocos pasos claros.",
+      "Reconstruye la narrativa final a partir de hechos validados y ángulos seleccionados, con tu estilo.",
 
     // How To
-    howToTitle: "Cómo usar ReAngle",
+    howToTitle: "Cómo funciona",
     howToIntro:
-      "Del ruido digital a un texto sólido y estructurado en tres pasos.",
-    howToStep1Title: "Reúne",
+      "Un flujo práctico para controlar la narrativa.",
+    howToStep1Title: "Gather (validación temática)",
     howToStep1Desc:
-      "Agrega enlaces, videos de YouTube, PDFs o texto plano y centraliza toda la información en el motor.",
-    howToStep2Title: "Define el ángulo",
+      "Añade múltiples entradas del mismo tema. El sistema verifica consistencia temática.",
+    howToStep2Title: "DeAngle (Detach + Fact Check)",
     howToStep2Desc:
-      "¿Más analítico? ¿Más crítico? Ajusta los parámetros y elige la postura que deseas adoptar.",
+      "Separa hechos y ángulos, y luego verifica los hechos para reducir ruido y distorsión.",
     howToStep3Title: "ReAngle",
     howToStep3Desc:
-      "El motor reorganiza los hechos según tu perspectiva y genera un artículo coherente y consistente.",
+      "Genera la narrativa final a partir de hechos verificados y ángulos seleccionados.",
 
     // Who
     whoTitle: "¿Quién usa ReAngle?",
@@ -284,25 +284,25 @@ export const es: LocaleEn = {
   pricing: {
     title: "Precios simples",
     subtitle:
-      "Empieza gratis y actualiza cuando necesites más.",
+      "Precios en USD. Empieza gratis y actualiza cuando necesites escala.",
     freeTitle: "Gratis",
-    freeTagline: "Para probar la plataforma",
-    freeFeature1: "5 usos al mes",
-    freeFeature2: "Todos los modelos de IA",
-    freeFeature3: "Todos los formatos de entrada",
-    freeFeature4: "Resumen y comparación",
+    freeTagline: "Para uso mensual ligero",
+    freeFeature1: "5 generaciones ReAngle / mes",
+    freeFeature2: "1 generación TTS / mes",
+    freeFeature3: "Flujo Gather + DeAngle + ReAngle",
+    freeFeature4: "Sin Avatar",
     freeCtaGoToApp: "Ir a la app",
     freeCtaGetStarted: "Comenzar",
 
     proTitle: "Pro",
     proBadge: "Popular",
-    proTagline: "Para usuarios frecuentes",
-    proFeature1: "Usos ilimitados",
-    proFeature2: "Todos los modelos de IA",
-    proFeature3: "Todos los formatos",
-    proFeature4: "Resumen y comparación",
-    proFeature5: "Soporte prioritario",
-    proFeature6: "TTS y avatar digital",
+    proTagline: "Para creación continua",
+    proFeature1: "Generaciones ReAngle ilimitadas",
+    proFeature2: "20 generaciones TTS / mes",
+    proFeature3: "5 generaciones Avatar / ciclo de facturación",
+    proFeature4: "Flujo Gather + DeAngle + ReAngle",
+    proFeature5: "Gestión de suscripción en Stripe",
+    proFeature6: "Panel de uso en Perfil",
     proCta: "Actualizar a Pro",
     proCtaLoading: "Espera...",
     upgradeErrorGeneric:
@@ -320,6 +320,7 @@ export const es: LocaleEn = {
 
     usageTitle: "Uso",
     rewritesUsed: "ReAngle usados",
+    ttsUsed: "TTS usados",
     avatarUsed: "Avatar usados",
     usageLoading: "Cargando...",
 
