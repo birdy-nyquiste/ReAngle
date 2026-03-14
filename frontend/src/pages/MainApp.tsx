@@ -203,9 +203,10 @@ export default function MainApp() {
         if (avatarUsageLoading) return t("mainApp.avatarCheckingQuota")
         if (!avatarAccessKnown) return null
         if (!avatarIsPro) return t("mainApp.avatarProRequired")
-        if (avatarUsageLimit === -1) return `Avatar usage this cycle: ${avatarUsageCount} used (unlimited).`
-        return `Avatar usage this cycle: ${avatarUsageCount}/${avatarUsageLimit} used.`
+        if (avatarUsageLimit === -1) return t("mainApp.avatarUsageCycleUnlimited").replace("{n}", String(avatarUsageCount))
+        return t("mainApp.avatarUsageCycleUsed").replace("{used}", String(avatarUsageCount)).replace("{limit}", String(avatarUsageLimit))
     }, [
+        t,
         authSession?.access_token,
         avatarUsageLoading,
         avatarAccessKnown,

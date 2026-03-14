@@ -229,6 +229,8 @@ export const es: LocaleEn = {
     avatarProRequired: "Se requiere plan Pro: 5 generaciones de avatar por ciclo.",
     avatarUnavailableGeneric: "El avatar no está disponible en este momento.",
     avatarConfirmScriptFirst: "Genera y confirma el guion de voz en off antes de generar el video con avatar.",
+    avatarUsageCycleUnlimited: "Uso de avatar este ciclo: {n} usado (ilimitado).",
+    avatarUsageCycleUsed: "Uso de avatar este ciclo: {used}/{limit} usado.",
     originalFacts: "Hechos originales",
     selectFactsHint: "Selecciona hechos para usar en ReAngle",
     originalOpinions: "Opiniones originales",

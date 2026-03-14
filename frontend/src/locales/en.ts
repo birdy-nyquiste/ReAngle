@@ -204,6 +204,8 @@ export const en = {
     avatarProRequired: "Pro plan required: 5 Avatar generations per billing cycle.",
     avatarUnavailableGeneric: "Avatar is currently unavailable.",
     avatarConfirmScriptFirst: "Please generate and confirm the voiceover script before generating the avatar video.",
+    avatarUsageCycleUnlimited: "Avatar usage this cycle: {n} used (unlimited).",
+    avatarUsageCycleUsed: "Avatar usage this cycle: {used}/{limit} used.",
     originalFacts: "Original Facts",
     selectFactsHint: "Select facts to use in ReAngle",
     originalOpinions: "Original Opinions",

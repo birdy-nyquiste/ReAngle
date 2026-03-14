@@ -151,9 +151,9 @@ export function ReAngleView({
                 <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/5 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <CheckCircle2 className="w-5 h-5 text-green-500" />
-                        <h3 className="font-semibold text-base">ReAngled Content</h3>
+                        <h3 className="font-semibold text-base">{t("mainApp.reangledContent")}</h3>
                         {rewrittenContent ? (
-                            <span className="text-xs text-muted-foreground tabular-nums">Length: {contentLength} chars</span>
+                            <span className="text-xs text-muted-foreground tabular-nums">{t("mainApp.summaryLengthChars").replace("{n}", String(contentLength))}</span>
                         ) : null}
                     </div>
                     <div className="min-w-[7.5rem] flex items-center justify-end gap-1">
@@ -271,7 +271,7 @@ export function ReAngleView({
                                     disabled={avatarLoading || voiceoverLoading || !voiceoverScript?.trim() || !onGenerateAvatar || !avatarEnabled}
                                 >
                                     {avatarLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                    Generate Avatar Video
+                                    {t("mainApp.generateAvatarVideo")}
                                 </Button>
                                 {avatarVideoUrl && (
                                     <Button
