@@ -224,7 +224,8 @@ export const zh: LocaleEn = {
     renewsLabel: "续费时间",
 
     usageTitle: "用量",
-    rewritesUsed: "已用次数",
+    rewritesUsed: "ReAngle 已用次数",
+    avatarUsed: "Avatar 已用次数",
     usageLoading: "加载中…",
 
     subscriptionTitle: "订阅",

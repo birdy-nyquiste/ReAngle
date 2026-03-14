@@ -75,6 +75,8 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 # ── Usage Limits ──────────────────────────────────────
 FREE_TIER_LIMIT = 5
 PRO_TIER_LIMIT = -1  # -1 = unlimited
+AVATAR_FREE_TIER_LIMIT = 0
+AVATAR_PRO_TIER_LIMIT = 5
 
 # ── 准备弃用：旧版大模型调用 ─────────────────────────
 OPENAI_BASE_URL = "https://api.openai.com/v1"

@@ -18,6 +18,9 @@ interface ReAngleViewProps {
     avatarVideoUrl?: string | null
     avatarLoading?: boolean
     avatarScriptMaxChars?: number
+    avatarEnabled?: boolean
+    avatarDisabledReason?: string | null
+    avatarQuotaText?: string | null
     onOpenAvatarPanel?: () => void
     onGenerateVoiceover?: () => void
     onGenerateAvatar?: () => void
@@ -45,6 +48,9 @@ export function ReAngleView({
     avatarVideoUrl = null,
     avatarLoading = false,
     avatarScriptMaxChars = 800,
+    avatarEnabled = true,
+    avatarDisabledReason = null,
+    avatarQuotaText = null,
     onOpenAvatarPanel,
     onGenerateVoiceover,
     onGenerateAvatar,
@@ -153,9 +159,9 @@ export function ReAngleView({
                             size="icon"
                             variant="ghost"
                             onClick={onOpenAvatarPanel}
-                            disabled={!rewrittenContent || !onOpenAvatarPanel}
+                            disabled={!rewrittenContent || !onOpenAvatarPanel || !avatarEnabled}
                             className={actionButtonClass}
-                            title="Avatar Broadcast"
+                            title={avatarEnabled ? "Avatar Broadcast" : (avatarDisabledReason || "Avatar unavailable")}
                         >
                             <Video className="w-4 h-4" />
                         </Button>
@@ -202,8 +208,18 @@ export function ReAngleView({
                             <p className="text-foreground/90 font-medium">How to create your avatar video</p>
                             <p>1. Click &quot;Generate Script&quot; and edit the script (keep it under {avatarScriptMaxChars} characters).</p>
                             <p>2. Click &quot;Generate Avatar Video&quot;; processing usually takes 5-10 minutes.</p>
+                            {avatarQuotaText ? (
+                                <p className="pt-1 text-xs text-foreground/80">{avatarQuotaText}</p>
+                            ) : null}
                         </div>
                     </div>
+                    {!avatarEnabled && avatarDisabledReason ? (
+                        <div className="px-4 pb-4 lg:px-5">
+                            <div className="text-sm rounded-lg border border-amber-500/25 bg-amber-500/10 text-amber-300 px-3 py-2">
+                                {avatarDisabledReason}
+                            </div>
+                        </div>
+                    ) : null}
 
                     {/* Broadcast Script */}
                     <div className="border-t border-white/5">
@@ -218,7 +234,7 @@ export function ReAngleView({
                                 variant="outline"
                                 className="h-8 px-3 border-white/10 bg-white/5 hover:bg-white/10"
                                 onClick={onGenerateVoiceover}
-                                disabled={voiceoverLoading || !rewrittenContent || !onGenerateVoiceover}
+                                disabled={voiceoverLoading || !rewrittenContent || !onGenerateVoiceover || !avatarEnabled}
                             >
                                 {voiceoverLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Generate Script"}
                             </Button>
@@ -235,6 +251,7 @@ export function ReAngleView({
                                     onChange={e => onVoiceoverChange?.(e.target.value)}
                                     placeholder="Click Generate Script, then edit the script here before creating the avatar video."
                                     className="min-h-[240px] lg:min-h-[280px] bg-black/20 border-white/5 text-sm resize-none focus-visible:ring-1"
+                                    disabled={!avatarEnabled}
                                 />
                             )}
                         </div>
@@ -249,7 +266,7 @@ export function ReAngleView({
                                     variant="default"
                                     className="h-8 px-3"
                                     onClick={onGenerateAvatar}
-                                    disabled={avatarLoading || voiceoverLoading || !voiceoverScript?.trim() || !onGenerateAvatar}
+                                    disabled={avatarLoading || voiceoverLoading || !voiceoverScript?.trim() || !onGenerateAvatar || !avatarEnabled}
                                 >
                                     {avatarLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                                     Generate Avatar Video

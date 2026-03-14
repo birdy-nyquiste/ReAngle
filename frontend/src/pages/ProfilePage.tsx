@@ -9,6 +9,8 @@ import { useLanguage } from "@/context/LanguageContext"
 interface UsageData {
     usage_count: number
     usage_limit: number
+    avatar_usage_count: number
+    avatar_usage_limit: number
     subscription: {
         status: string
         price_id: string
@@ -34,7 +36,7 @@ export default function ProfilePage() {
     const fetchUsage = async () => {
         if (!session) return
         try {
-            const res = await fetch("/api/v1/payment/usage", {
+            const res = await fetch("/api/v2/payment/usage", {
                 headers: { "Authorization": `Bearer ${session.access_token}` },
             })
             if (res.ok) {
@@ -52,7 +54,7 @@ export default function ProfilePage() {
         if (!session) return
         setPortalLoading(true)
         try {
-            const res = await fetch("/api/v1/payment/create-portal-session", {
+            const res = await fetch("/api/v2/payment/create-portal-session", {
                 method: "POST",
                 headers: { "Authorization": `Bearer ${session.access_token}` },
             })
@@ -83,6 +85,7 @@ export default function ProfilePage() {
     })()
     const usageLimitDisplay = usage?.usage_limit === -1 ? "∞" : usage?.usage_limit ?? 5
     const usagePercent = usage?.usage_limit === -1 ? 0 : ((usage?.usage_count ?? 0) / (usage?.usage_limit ?? 5)) * 100
+    const avatarUsageLimitDisplay = usage?.avatar_usage_limit === -1 ? "∞" : usage?.avatar_usage_limit ?? 0
 
     return (
         <div className="min-h-screen flex flex-col bg-background aurora-bg">
@@ -145,6 +148,12 @@ export default function ProfilePage() {
                                         {t('profile.rewritesUsed')}
                                     </span>
                                     <span className="font-medium">{usage?.usage_count ?? 0} / {usageLimitDisplay}</span>
+                                </div>
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-muted-foreground">
+                                        {t('profile.avatarUsed')}
+                                    </span>
+                                    <span className="font-medium">{usage?.avatar_usage_count ?? 0} / {avatarUsageLimitDisplay}</span>
                                 </div>
 
                                 {usage?.usage_limit !== -1 && (

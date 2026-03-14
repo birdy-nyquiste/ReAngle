@@ -22,6 +22,16 @@ interface InputItem {
     }
 }
 
+interface PaymentUsage {
+    usage_count: number
+    usage_limit: number
+    avatar_usage_count: number
+    avatar_usage_limit: number
+    subscription: {
+        status: string
+    } | null
+}
+
 export default function MainApp() {
     const AVATAR_SCRIPT_MAX_CHARS = 800
 
@@ -111,6 +121,8 @@ export default function MainApp() {
     const [error, setError] = useState<string | null>(null)
     const [isUsageLimitError, setIsUsageLimitError] = useState(false)
     const [checkoutSuccess, setCheckoutSuccess] = useState(false)
+    const [avatarUsage, setAvatarUsage] = useState<PaymentUsage | null>(null)
+    const [avatarUsageLoading, setAvatarUsageLoading] = useState(false)
 
     // TTS State
     const [ttsLoading, setTtsLoading] = useState(false)
@@ -122,6 +134,83 @@ export default function MainApp() {
     const [voiceoverLoading, setVoiceoverLoading] = useState(false)
     const [avatarVideoUrl, setAvatarVideoUrl] = useState<string | null>(null)
     const [avatarLoading, setAvatarLoading] = useState(false)
+
+    const fetchAvatarUsage = useCallback(async () => {
+        if (!authSession?.access_token) {
+            setAvatarUsage(null)
+            setAvatarUsageLoading(false)
+            return
+        }
+        setAvatarUsageLoading(true)
+        try {
+            const res = await fetch("/api/v2/payment/usage", {
+                headers: {
+                    Authorization: `Bearer ${authSession.access_token}`,
+                },
+            })
+            if (!res.ok) throw new Error("Failed to load avatar usage")
+            const data = (await res.json()) as PaymentUsage
+            setAvatarUsage(data)
+        } catch (err) {
+            console.error("Failed to fetch avatar usage:", err)
+            setAvatarUsage(null)
+        } finally {
+            setAvatarUsageLoading(false)
+        }
+    }, [authSession?.access_token])
+
+    useEffect(() => {
+        fetchAvatarUsage()
+    }, [fetchAvatarUsage])
+
+    const avatarAccessKnown = avatarUsage !== null
+    const avatarSubStatus = avatarUsage?.subscription?.status ?? null
+    const avatarIsPro = avatarSubStatus === "active" || avatarSubStatus === "trialing"
+    const avatarUsageCount = avatarUsage?.avatar_usage_count ?? 0
+    const avatarUsageLimit = avatarUsage?.avatar_usage_limit ?? 0
+    const avatarRemaining = avatarUsageLimit === -1
+        ? Number.POSITIVE_INFINITY
+        : Math.max(0, avatarUsageLimit - avatarUsageCount)
+    const avatarFeatureEnabled = !authSession?.access_token
+        ? false
+        : !avatarAccessKnown
+            ? true
+            : avatarIsPro && (avatarUsageLimit === -1 || avatarRemaining > 0)
+
+    const avatarDisabledReason = useMemo(() => {
+        if (!authSession?.access_token) return "Please sign in to use Avatar."
+        if (avatarUsageLoading) return "Checking Avatar access..."
+        if (!avatarAccessKnown) return null
+        if (!avatarIsPro) return "Avatar is available for Pro users only."
+        if (avatarUsageLimit !== -1 && avatarRemaining <= 0) {
+            return `Avatar usage limit reached for this billing cycle (${avatarUsageCount}/${avatarUsageLimit}).`
+        }
+        return null
+    }, [
+        authSession?.access_token,
+        avatarUsageLoading,
+        avatarAccessKnown,
+        avatarIsPro,
+        avatarUsageLimit,
+        avatarRemaining,
+        avatarUsageCount,
+    ])
+
+    const avatarQuotaText = useMemo(() => {
+        if (!authSession?.access_token) return "Sign in required."
+        if (avatarUsageLoading) return "Checking Avatar quota..."
+        if (!avatarAccessKnown) return null
+        if (!avatarIsPro) return "Pro plan required: 5 Avatar generations per billing cycle."
+        if (avatarUsageLimit === -1) return `Avatar usage this cycle: ${avatarUsageCount} used (unlimited).`
+        return `Avatar usage this cycle: ${avatarUsageCount}/${avatarUsageLimit} used.`
+    }, [
+        authSession?.access_token,
+        avatarUsageLoading,
+        avatarAccessKnown,
+        avatarIsPro,
+        avatarUsageLimit,
+        avatarUsageCount,
+    ])
 
     // Detect ?checkout=success in URL
     useEffect(() => {
@@ -397,6 +486,10 @@ export default function MainApp() {
 
     // 点击 ReAngled Content 右侧视频图标：仅展开并滚动到 Avatar Broadcast 板块
     const handleOpenAvatarPanel = () => {
+        if (!avatarFeatureEnabled) {
+            setError(avatarDisabledReason || "Avatar is currently unavailable.")
+            return
+        }
         setError(null)
         setAvatarPanelVisible(true)
         requestAnimationFrame(() => {
@@ -405,6 +498,10 @@ export default function MainApp() {
     }
 
     const handleGenerateVoiceover = async () => {
+        if (!avatarFeatureEnabled) {
+            setError(avatarDisabledReason || "Avatar is currently unavailable.")
+            return
+        }
         if (!reAngleResult?.rewritten_content || voiceoverLoading) return
         setVoiceoverLoading(true)
         try {
@@ -415,7 +512,10 @@ export default function MainApp() {
             })
             const data = await res.json().catch(() => ({}))
             if (!res.ok) {
-                throw new Error(data?.error || data?.message || "口播稿生成失败")
+                if (res.status === 402) {
+                    fetchAvatarUsage()
+                }
+                throw new Error(data?.error || data?.message || data?.detail || "口播稿生成失败")
             }
             setVoiceoverScript(data.script ?? "")
         } catch (err) {
@@ -427,6 +527,10 @@ export default function MainApp() {
     }
 
     const handleGenerateAvatar = async () => {
+        if (!avatarFeatureEnabled) {
+            setError(avatarDisabledReason || "Avatar is currently unavailable.")
+            return
+        }
         const script = (voiceoverScript ?? "").trim()
         if (!script) {
             setError("请先生成并确认口播稿，再生成数字人视频。")
@@ -448,9 +552,13 @@ export default function MainApp() {
             })
             const data = await res.json().catch(() => ({}))
             if (!res.ok) {
-                throw new Error(data?.error || data?.message || "数字人视频生成失败")
+                if (res.status === 402) {
+                    fetchAvatarUsage()
+                }
+                throw new Error(data?.error || data?.message || data?.detail || "数字人视频生成失败")
             }
             setAvatarVideoUrl(data.video_url ?? null)
+            fetchAvatarUsage()
         } catch (err) {
             console.error("Avatar Error:", err)
             setError(err instanceof Error ? err.message : "数字人视频生成失败，请稍后重试")
@@ -876,6 +984,9 @@ export default function MainApp() {
                                                 avatarVideoUrl={avatarVideoUrl}
                                                 avatarLoading={avatarLoading}
                                                 avatarScriptMaxChars={AVATAR_SCRIPT_MAX_CHARS}
+                                                avatarEnabled={avatarFeatureEnabled}
+                                                avatarDisabledReason={avatarDisabledReason}
+                                                avatarQuotaText={avatarQuotaText}
                                                 onOpenAvatarPanel={handleOpenAvatarPanel}
                                                 onGenerateVoiceover={handleGenerateVoiceover}
                                                 onGenerateAvatar={handleGenerateAvatar}
@@ -950,6 +1061,9 @@ export default function MainApp() {
                                                     avatarVideoUrl={avatarVideoUrl}
                                                     avatarLoading={avatarLoading}
                                                     avatarScriptMaxChars={AVATAR_SCRIPT_MAX_CHARS}
+                                                    avatarEnabled={avatarFeatureEnabled}
+                                                    avatarDisabledReason={avatarDisabledReason}
+                                                    avatarQuotaText={avatarQuotaText}
                                                     onOpenAvatarPanel={handleOpenAvatarPanel}
                                                     onGenerateVoiceover={handleGenerateVoiceover}
                                                     onGenerateAvatar={handleGenerateAvatar}

@@ -14,7 +14,6 @@ from fastapi.responses import FileResponse
 
 
 from app.core.config import STATIC_DIR
-from app.routers import v1_routers
 from app.routers.v2 import v2_routers
 from app.core.logging import setup_logging
 from app.middleware.request_logging import RequestLoggingMiddleware
@@ -51,8 +50,7 @@ app.add_exception_handler(AppException, app_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(Exception, global_exception_handler)
 
-# 注册路由
-app.include_router(v1_routers)
+# 注册路由（仅保留 v2）
 app.include_router(v2_routers)
 
 # 挂载静态文件

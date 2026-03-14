@@ -7,7 +7,7 @@ GET  /api/v2/media/avatar/download → 代理下载 HeyGen 视频（避免跨域
 """
 
 import httpx
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import Response
 from loguru import logger
 from urllib.parse import urlparse
@@ -22,6 +22,10 @@ from app.schemas.media_schema import (
 )
 from app.services.media_outputs import tts_client, voiceover_client, avatar_client
 from app.core.exceptions import LLMProviderError
+from app.core.supabase_dependencies import (
+    require_avatar_feature_access,
+    check_avatar_usage_limit,
+)
 
 media_router = APIRouter(prefix="/media", tags=["Media"])
 
@@ -44,7 +48,10 @@ async def get_tts_result(request: TTSRequest):
 
 
 @media_router.post("/voiceover", response_model=VoiceoverResponse)
-async def get_voiceover_script(request: VoiceoverRequest):
+async def get_voiceover_script(
+    request: VoiceoverRequest,
+    _user: dict = Depends(require_avatar_feature_access),
+):
     """口播稿接口：将改写后的文章转换为适合数字人朗读的口播稿。"""
     logger.info(f"[media] Voiceover request | text_len={len(request.text)}")
 
@@ -98,7 +105,10 @@ async def download_avatar_video(url: str = Query(..., description="HeyGen 视频
 
 
 @media_router.post("/avatar", response_model=AvatarResponse)
-async def get_avatar_result(request: AvatarRequest):
+async def get_avatar_result(
+    request: AvatarRequest,
+    _user: dict = Depends(check_avatar_usage_limit),
+):
     """数字人接口：生成数字人视频。"""
     logger.info(f"[media] Avatar request | text_len={len(request.text)}")
 

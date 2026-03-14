@@ -239,7 +239,8 @@ export const es: LocaleEn = {
     renewsLabel: "Renueva",
 
     usageTitle: "Uso",
-    rewritesUsed: "Usos realizados",
+    rewritesUsed: "ReAngle usados",
+    avatarUsed: "Avatar usados",
     usageLoading: "Cargando...",
 
     subscriptionTitle: "Suscripción",

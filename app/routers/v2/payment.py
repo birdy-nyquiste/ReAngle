@@ -111,7 +111,7 @@ async def get_usage(user: dict = Depends(get_current_user)):
 
     profile_result = (
         supabase.table("profiles")
-        .select("usage_count, usage_limit")
+        .select("usage_count, usage_limit, avatar_usage_count, avatar_usage_limit")
         .eq("id", user["id"])
         .maybe_single()
         .execute()
@@ -126,11 +126,18 @@ async def get_usage(user: dict = Depends(get_current_user)):
         .execute()
     )
 
-    profile = profile_result.data or {"usage_count": 0, "usage_limit": 5}
+    profile = profile_result.data or {
+        "usage_count": 0,
+        "usage_limit": 5,
+        "avatar_usage_count": 0,
+        "avatar_usage_limit": 0,
+    }
     subscription = sub_result.data[0] if sub_result.data else None
 
     return {
         "usage_count": profile["usage_count"],
         "usage_limit": profile["usage_limit"],
+        "avatar_usage_count": profile["avatar_usage_count"],
+        "avatar_usage_limit": profile["avatar_usage_limit"],
         "subscription": subscription,
     }

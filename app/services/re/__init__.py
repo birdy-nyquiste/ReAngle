@@ -1,3 +1,3 @@
 """
-洗稿（Rewriting）相关的大模型客户端。
+ReAngle
 """

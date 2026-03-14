@@ -24,7 +24,7 @@ export default function PricingPage() {
         setUpgradeError(null)
         setUpgradeLoading(true)
         try {
-            const res = await fetch("/api/v1/payment/create-checkout-session", {
+            const res = await fetch("/api/v2/payment/create-checkout-session", {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${session.access_token}`,

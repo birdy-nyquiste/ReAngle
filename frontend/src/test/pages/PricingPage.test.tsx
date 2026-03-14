@@ -110,7 +110,7 @@ describe("PricingPage", () => {
 
             await waitFor(() => {
                 expect(mockFetch).toHaveBeenCalledWith(
-                    "/api/v1/payment/create-checkout-session",
+                    "/api/v2/payment/create-checkout-session",
                     expect.objectContaining({
                         method: "POST",
                         headers: expect.objectContaining({
