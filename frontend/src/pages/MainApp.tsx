@@ -25,6 +25,8 @@ interface InputItem {
 interface PaymentUsage {
     usage_count: number
     usage_limit: number
+    tts_usage_count: number
+    tts_usage_limit: number
     avatar_usage_count: number
     avatar_usage_limit: number
     subscription: {
@@ -439,6 +441,9 @@ export default function MainApp() {
 
             if (!res.ok) {
                 const errData = await res.json().catch(() => null);
+                if (res.status === 402) {
+                    fetchAvatarUsage()
+                }
                 throw new Error(errData?.message || errData?.detail || "TTS failed");
             }
 

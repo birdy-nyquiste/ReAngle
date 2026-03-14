@@ -75,6 +75,8 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 # ── Usage Limits ──────────────────────────────────────
 FREE_TIER_LIMIT = 5
 PRO_TIER_LIMIT = -1  # -1 = unlimited
+TTS_FREE_TIER_LIMIT = 1
+TTS_PRO_TIER_LIMIT = 20
 AVATAR_FREE_TIER_LIMIT = 0
 AVATAR_PRO_TIER_LIMIT = 5
 

@@ -2,6 +2,7 @@
 FastAPI 依赖项:
 - get_current_user: 验证 Supabase JWT，返回用户信息
 - check_usage_limit: 原子检查并递增用量
+- check_tts_usage_limit: 原子检查并递增 TTS 用量
 """
 
 from fastapi import Depends, HTTPException, Request, status
@@ -13,6 +14,7 @@ from app.core.config import (
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY,
     SUPABASE_SECRET_KEY,
+    TTS_FREE_TIER_LIMIT,
 )
 
 
@@ -115,6 +117,24 @@ def _get_avatar_usage_state(supabase: Client, user_id: str) -> tuple[int, int]:
     return usage_count, usage_limit
 
 
+def _get_tts_usage_state(supabase: Client, user_id: str) -> tuple[int, int]:
+    """
+    获取 TTS 用量状态：(usage_count, usage_limit)。
+    当字段不存在或用户无记录时，默认返回 (0, TTS_FREE_TIER_LIMIT)。
+    """
+    profile_result = (
+        supabase.table("profiles")
+        .select("tts_usage_count, tts_usage_limit")
+        .eq("id", user_id)
+        .maybe_single()
+        .execute()
+    )
+    profile = profile_result.data or {}
+    usage_count = int(profile.get("tts_usage_count") or 0)
+    usage_limit = int(profile.get("tts_usage_limit") or TTS_FREE_TIER_LIMIT)
+    return usage_count, usage_limit
+
+
 async def require_avatar_feature_access(user: dict = Depends(get_current_user)) -> dict:
     """
     仅检查 Avatar 功能是否可用（不扣减次数）。
@@ -173,4 +193,34 @@ async def check_avatar_usage_limit(user: dict = Depends(get_current_user)) -> di
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to check avatar usage limit",
+        )
+
+
+async def check_tts_usage_limit(user: dict = Depends(get_current_user)) -> dict:
+    """
+    原子检查并递增 TTS 用量。
+    调用数据库函数 increment_tts_usage(row_id)。
+    """
+    user_id = user["id"]
+    supabase = _get_supabase_admin()
+
+    try:
+        result = supabase.rpc("increment_tts_usage", {"row_id": user_id}).execute()
+
+        if result.data is False:
+            usage_count, usage_limit = _get_tts_usage_state(supabase, user_id)
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail=f"TTS usage limit reached ({usage_count}/{usage_limit}) for current period.",
+            )
+
+        return user
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[tts] Failed to check tts usage limit for user {user_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to check tts usage limit",
         )

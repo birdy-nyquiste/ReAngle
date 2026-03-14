@@ -20,6 +20,8 @@ from app.core.config import (
     FRONTEND_URL,
     FREE_TIER_LIMIT,
     PRO_TIER_LIMIT,
+    TTS_FREE_TIER_LIMIT,
+    TTS_PRO_TIER_LIMIT,
     AVATAR_FREE_TIER_LIMIT,
     AVATAR_PRO_TIER_LIMIT,
 )
@@ -197,19 +199,24 @@ def sync_subscription_from_stripe(subscription_id: str) -> None:
 
     supabase.table("subscriptions").upsert(sub_data).execute()
 
-    # 更新 profiles 的 usage_limit / avatar_usage_limit
+    # 更新 profiles 的 usage_limit / tts_usage_limit / avatar_usage_limit
     is_active = sub.status in ("active", "trialing")
     new_limit = PRO_TIER_LIMIT if is_active else FREE_TIER_LIMIT
+    new_tts_limit = TTS_PRO_TIER_LIMIT if is_active else TTS_FREE_TIER_LIMIT
     new_avatar_limit = AVATAR_PRO_TIER_LIMIT if is_active else AVATAR_FREE_TIER_LIMIT
 
     supabase.table("profiles").update(
-        {"usage_limit": new_limit, "avatar_usage_limit": new_avatar_limit}
+        {
+            "usage_limit": new_limit,
+            "tts_usage_limit": new_tts_limit,
+            "avatar_usage_limit": new_avatar_limit,
+        }
     ).eq("id", user_id).execute()
 
     logger.info(
         f"[stripe] Synced subscription {sub.id} for user {user_id} | "
         f"status={sub.status} | cancel_at={_ts_to_iso(sub.cancel_at)} | "
-        f"limit={new_limit} | avatar_limit={new_avatar_limit}"
+        f"limit={new_limit} | tts_limit={new_tts_limit} | avatar_limit={new_avatar_limit}"
     )
 
 
@@ -283,12 +290,15 @@ def handle_invoice_paid(invoice_data: dict) -> None:
 
     user_id = customer_result.data["user_id"]
 
-    # 重置用量（ReAngle + Avatar）
+    # 重置用量（ReAngle + TTS + Avatar）
     supabase.table("profiles").update(
-        {"usage_count": 0, "avatar_usage_count": 0}
+        {"usage_count": 0, "tts_usage_count": 0, "avatar_usage_count": 0}
     ).eq("id", user_id).execute()
 
-    logger.info(f"[stripe] Reset usage_count/avatar_usage_count for user {user_id} on renewal")
+    logger.info(
+        f"[stripe] Reset usage_count/tts_usage_count/avatar_usage_count "
+        f"for user {user_id} on renewal"
+    )
 
     # 同步 subscription 状态
     if subscription_id:

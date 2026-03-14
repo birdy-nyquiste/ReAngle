@@ -23,10 +23,10 @@ export const zh: LocaleEn = {
   },
   landing: {
     // Hero
-    heroTitleLine1: "别只看别人怎么讲",
-    heroTitleLine2: "用 ReAngle 换个讲法",
+    heroTitleLine1: "别只消费别人的叙事",
+    heroTitleLine2: "把它 ReAngle",
     heroSubheadline:
-      "事实是客观的，叙事是被塑造的。我们把同一事件来自多方、嘈杂的材料整合重构为一篇逻辑统一、角度清晰的文章——保持你的语气与立场。",
+      "事实是客观的，叙事是被塑造的。ReAngle 把叙事主动权还给你：先看清事件，再选择立场，最后用你的语气完成表达。",
     heroCta: "立即开始",
 
     // Section 2: The Insight
@@ -52,31 +52,31 @@ export const zh: LocaleEn = {
       "「全面监管固然意在降低生存级风险，但政策应更精准，避免扼杀推动时代向前的快速创新周期。」",
 
     // Section 3: The Narrative Engine
-    engineTitle: "叙事引擎",
+    engineTitle: "三阶段引擎",
     engineIntro:
-      "这不只是另一个 AI 摘要工具。ReAngle 是专为“怎么讲、怎么呈现”打造的引擎，让你对文章的视角、结构与语气拥有更高的掌控度。",
-    engineFeature1Title: "重塑讲法",
+      "从理念到执行，ReAngle 用清晰的三段流程工作：Gather、DeAngle、ReAngle。",
+    engineFeature1Title: "Gather",
     engineFeature1Desc:
-      "不照单全收现成观点。换个观察角度，把同一件事讲得更清楚、更有力量。",
-    engineFeature2Title: "把能力做成工具",
+      "围绕同一主题收集多个输入，系统会先做主题一致性验证，再进入后续处理。",
+    engineFeature2Title: "DeAngle",
     engineFeature2Desc:
-      "叙事能力不再只是大媒体或 PR 团队的专利。我们把它做成创作者随手可用的工作流。",
-    engineFeature3Title: "流程更省心",
+      "先做 Detach，拆出事实与观点；再做 Fact Check，为后续生成建立可信事实底座。",
+    engineFeature3Title: "ReAngle",
     engineFeature3Desc:
-      "把原本需要数小时的资料比对、信息整合与写作，压缩成几次操作完成。",
+      "基于已验证事实和你选择的观点，重组出符合你风格和目标的最终叙事。",
 
     // Section 4: How to ReAngle
-    howToTitle: "如何使用 ReAngle",
-    howToIntro: "从信息噪音到一篇完整文章，只需三步。",
-    howToStep1Title: "收集",
+    howToTitle: "流程说明",
+    howToIntro: "面向叙事控制的可执行流程。",
+    howToStep1Title: "Gather（主题验证）",
     howToStep1Desc:
-      "把链接、YouTube、PDF 或纯文本丢进来，把分散的信息一次性集中到引擎里。",
-    howToStep2Title: "设定角度",
+      "为同一主题添加多个输入，系统会自动检查输入是否主题一致。",
+    howToStep2Title: "DeAngle（Detach + Fact Check）",
     howToStep2Desc:
-      "想要更客观？更尖锐？更偏分析？调好参数，选定你要的表达方向。",
+      "先拆分事实与观点，再对拆出的事实进行核查，降低噪音和失真。",
     howToStep3Title: "ReAngle",
     howToStep3Desc:
-      "引擎会按你的视角重组事实与结构，生成一篇逻辑统一、语气一致的长文。",
+      "把核查后的事实与选定观点重组为你的表达版本。",
 
     // Section 5: Who is ReAngling?
     whoTitle: "谁在用 ReAngle？",
@@ -190,25 +190,25 @@ export const zh: LocaleEn = {
 
   pricing: {
     title: "简单定价",
-    subtitle: "先免费使用，需要更多时再升级。",
+    subtitle: "美元计价。先免费使用，需要规模化时再升级。",
     freeTitle: "免费版",
-    freeTagline: "适合试用体验",
-    freeFeature1: "每月 5 次",
-    freeFeature2: "支持所有 AI 模型",
-    freeFeature3: "支持所有输入格式",
-    freeFeature4: "摘要 + 对比视图",
+    freeTagline: "适合轻度使用",
+    freeFeature1: "每月 5 次 ReAngle 生成",
+    freeFeature2: "每月 1 次 TTS",
+    freeFeature3: "Gather + DeAngle + ReAngle 流程",
+    freeFeature4: "不包含 Avatar",
     freeCtaGoToApp: "进入应用",
     freeCtaGetStarted: "免费开始",
 
     proTitle: "Pro 版",
     proBadge: "热门选择",
-    proTagline: "适合高频使用",
-    proFeature1: "无限次",
-    proFeature2: "支持所有 AI 模型",
-    proFeature3: "支持所有输入格式",
-    proFeature4: "摘要 + 对比视图",
-    proFeature5: "优先支持",
-    proFeature6: "TTS + 数字人头像",
+    proTagline: "适合持续创作",
+    proFeature1: "无限次 ReAngle 生成",
+    proFeature2: "每月 20 次 TTS",
+    proFeature3: "每账期 5 次 Avatar",
+    proFeature4: "Gather + DeAngle + ReAngle 流程",
+    proFeature5: "Stripe 订阅管理",
+    proFeature6: "个人中心用量看板",
     proCta: "升级到 Pro",
     proCtaLoading: "处理中…",
     upgradeErrorGeneric: "出错了，请稍后重试。",
@@ -225,6 +225,7 @@ export const zh: LocaleEn = {
 
     usageTitle: "用量",
     rewritesUsed: "ReAngle 已用次数",
+    ttsUsed: "TTS 已用次数",
     avatarUsed: "Avatar 已用次数",
     usageLoading: "加载中…",
 

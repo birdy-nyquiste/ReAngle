@@ -106,7 +106,7 @@ export default function PricingPage() {
                             </p>
 
                             <ul className="space-y-3 mb-8 flex-1">
-                                {[t('pricing.proFeature1'), t('pricing.proFeature2'), t('pricing.proFeature3'), t('pricing.proFeature4'), t('pricing.proFeature5'), t('pricing.proFeature6')].map(f => (
+                                {[t('pricing.proFeature1'), t('pricing.proFeature2'), t('pricing.proFeature3'), t('pricing.proFeature4')].map(f => (
                                     <li key={f} className="flex items-center gap-2 text-sm">
                                         <Check className="h-4 w-4 text-primary flex-shrink-0" />
                                         {f}
