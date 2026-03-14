@@ -202,7 +202,7 @@ export default function SettingsPage() {
                 <div className="space-y-5">
                   <section className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
                     <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/10 flex items-center justify-between gap-3">
-                      <h3 className="text-base font-semibold text-foreground/95">DeAngle</h3>
+                      <h3 className="text-base font-semibold text-foreground/95">{t("settings.sectionDeangle")}</h3>
                       <Button
                         type="button"
                         variant="ghost"
@@ -211,8 +211,8 @@ export default function SettingsPage() {
                         onClick={() => toggleSection("deangle")}
                         aria-expanded={expandedSections.deangle}
                         aria-controls="settings-deangle-content"
-                        aria-label={expandedSections.deangle ? "Collapse DeAngle section" : "Expand DeAngle section"}
-                        title={expandedSections.deangle ? "Collapse" : "Expand"}
+                        aria-label={expandedSections.deangle ? t("settings.collapseDeangle") : t("settings.expandDeangle")}
+                        title={expandedSections.deangle ? t("settings.collapse") : t("settings.expand")}
                       >
                         <ChevronRight
                           className={`w-4 h-4 transition-transform ${expandedSections.deangle ? "rotate-90" : ""}`}
@@ -222,7 +222,7 @@ export default function SettingsPage() {
                     {expandedSections.deangle && (
                       <div id="settings-deangle-content" className="p-4 lg:p-5 space-y-4">
                         <div className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-3">
-                          <h4 className="text-sm font-medium text-foreground/90">Model</h4>
+                          <h4 className="text-sm font-medium text-foreground/90">{t("settings.modelLabel")}</h4>
                           <div className="space-y-2">
                             <Label>{t("settings.deangleModel")}</Label>
                             <Select
@@ -302,7 +302,7 @@ export default function SettingsPage() {
 
                   <section className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
                     <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/10 flex items-center justify-between gap-3">
-                      <h3 className="text-base font-semibold text-foreground/95">ReAngle</h3>
+                      <h3 className="text-base font-semibold text-foreground/95">{t("settings.sectionReangle")}</h3>
                       <Button
                         type="button"
                         variant="ghost"
@@ -311,8 +311,8 @@ export default function SettingsPage() {
                         onClick={() => toggleSection("reangle")}
                         aria-expanded={expandedSections.reangle}
                         aria-controls="settings-reangle-content"
-                        aria-label={expandedSections.reangle ? "Collapse ReAngle section" : "Expand ReAngle section"}
-                        title={expandedSections.reangle ? "Collapse" : "Expand"}
+                        aria-label={expandedSections.reangle ? t("settings.collapseReangle") : t("settings.expandReangle")}
+                        title={expandedSections.reangle ? t("settings.collapse") : t("settings.expand")}
                       >
                         <ChevronRight
                           className={`w-4 h-4 transition-transform ${expandedSections.reangle ? "rotate-90" : ""}`}
@@ -322,7 +322,7 @@ export default function SettingsPage() {
                     {expandedSections.reangle && (
                       <div id="settings-reangle-content" className="p-4 lg:p-5 space-y-4">
                         <div className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-3">
-                          <h4 className="text-sm font-medium text-foreground/90">Model</h4>
+                          <h4 className="text-sm font-medium text-foreground/90">{t("settings.modelLabel")}</h4>
                           <div className="space-y-2">
                             <Label>{t("settings.reangleModel")}</Label>
                             <Select
@@ -382,8 +382,8 @@ export default function SettingsPage() {
                         onClick={() => toggleSection("avatar")}
                         aria-expanded={expandedSections.avatar}
                         aria-controls="settings-avatar-content"
-                        aria-label={expandedSections.avatar ? "Collapse Avatar section" : "Expand Avatar section"}
-                        title={expandedSections.avatar ? "Collapse" : "Expand"}
+                        aria-label={expandedSections.avatar ? t("settings.collapseAvatar") : t("settings.expandAvatar")}
+                        title={expandedSections.avatar ? t("settings.collapse") : t("settings.expand")}
                       >
                         <ChevronRight
                           className={`w-4 h-4 transition-transform ${expandedSections.avatar ? "rotate-90" : ""}`}
@@ -393,7 +393,7 @@ export default function SettingsPage() {
                     {expandedSections.avatar && (
                       <div id="settings-avatar-content" className="p-4 lg:p-5">
                         <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-6 text-sm text-muted-foreground">
-                          Avatar settings are coming soon. Stay tuned.
+                          {t("settings.avatarComingSoon")}
                         </div>
                       </div>
                     )}
