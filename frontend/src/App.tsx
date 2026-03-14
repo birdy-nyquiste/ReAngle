@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-import { LanguageProvider } from "./context/LanguageContext";
+import { LanguageProvider, useLanguage } from "./context/LanguageContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Route-level code splitting — each page is loaded on demand
@@ -14,9 +14,10 @@ const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 
 function LoadingFallback() {
+  const { t } = useLanguage();
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="animate-pulse text-muted-foreground">Loading…</div>
+      <div className="animate-pulse text-muted-foreground">{t("common.loading")}</div>
     </div>
   );
 }

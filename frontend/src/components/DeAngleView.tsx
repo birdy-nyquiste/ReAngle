@@ -1,5 +1,6 @@
 import { useMemo } from "react"
 import { CheckCircle2, XCircle, HelpCircle, Compass, ListChecks, AlertTriangle, Info } from "lucide-react"
+import { useLanguage } from "@/context/LanguageContext"
 
 export interface Fact {
     id: string
@@ -67,15 +68,16 @@ const angleColorConfig: Record<string, { color: string, bg: string, border: stri
 
 // Statuses to render in order
 const FACT_STATUSES = ["SUPPORTED", "MOSTLY_SUPPORTED", "PARTIALLY_SUPPORTED", "CONTRADICTED", "UNVERIFIABLE"] as const
-const FACT_LABELS: Record<string, string> = { 
-    SUPPORTED: "SUPPORTED", 
-    MOSTLY_SUPPORTED: "MOSTLY SUPPORTED", 
-    PARTIALLY_SUPPORTED: "PARTIALLY SUPPORTED", 
-    CONTRADICTED: "CONTRADICTED", 
-    UNVERIFIABLE: "UNVERIFIABLE" 
-}
 
 export function DeAngleView({ facts, angles, selectedIds, onToggleSelect, layout = "row" }: DeAngleViewProps) {
+    const { t } = useLanguage()
+    const factLabels: Record<string, string> = useMemo(() => ({
+        SUPPORTED: t("mainApp.factSupported"),
+        MOSTLY_SUPPORTED: t("mainApp.factMostlySupported"),
+        PARTIALLY_SUPPORTED: t("mainApp.factPartiallySupported"),
+        CONTRADICTED: t("mainApp.factContradicted"),
+        UNVERIFIABLE: t("mainApp.factUnverifiable"),
+    }), [t])
     // Single-pass grouping
     const groupedFacts = useMemo(() => {
         const groups: Record<string, Fact[]> = { 
@@ -93,8 +95,8 @@ export function DeAngleView({ facts, angles, selectedIds, onToggleSelect, layout
             <div className={`flex flex-col bg-white/5 border border-white/5 rounded-2xl overflow-hidden ${layout === "row" ? "flex-1 min-w-0" : "flex-none min-h-[300px] max-h-[500px]"}`}>
                 <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/5 flex items-center gap-2">
                     <ListChecks className="w-5 h-5 text-blue-400" />
-                    <h3 className="font-semibold text-base">Original Facts</h3>
-                    <span className="ml-auto text-xs text-muted-foreground">Select facts to use in ReAngle</span>
+                    <h3 className="font-semibold text-base">{t("mainApp.originalFacts")}</h3>
+                    <span className="ml-auto text-xs text-muted-foreground">{t("mainApp.selectFactsHint")}</span>
                 </div>
                 <div className="p-4 lg:p-5 overflow-y-auto flex-1 custom-scrollbar">
                     {FACT_STATUSES.map(status => {
@@ -106,7 +108,7 @@ export function DeAngleView({ facts, angles, selectedIds, onToggleSelect, layout
                             <div key={status} className="space-y-3 mb-6">
                                 <div className={`flex items-center gap-2 text-xs font-bold ${Config.color}`}>
                                     <Icon className="w-4 h-4" />
-                                    {FACT_LABELS[status]}
+                                    {factLabels[status]}
                                 </div>
                                 {group.map(fact => {
                                     const isSelected = selectedIds.has(fact.id)
@@ -120,7 +122,7 @@ export function DeAngleView({ facts, angles, selectedIds, onToggleSelect, layout
                                             {/* Process content to safely split out [Analysis] if it was appended by backend */}
                                             {fact.content.split('\n\n[Analysis]:').map((part, i) => (
                                                 <div key={i} className={i === 1 ? "mt-3 pt-3 border-t border-white/10 text-xs text-muted-foreground" : ""}>
-                                                    {i === 1 && <strong className="block mb-1 text-white/70">Analysis:</strong>}
+                                                    {i === 1 && <strong className="block mb-1 text-white/70">{t("mainApp.analysisLabel")}</strong>}
                                                     {part}
                                                 </div>
                                             ))}
@@ -133,7 +135,7 @@ export function DeAngleView({ facts, angles, selectedIds, onToggleSelect, layout
 
                     {facts.length === 0 ? (
                         <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
-                            No facts extracted yet.
+                            {t("mainApp.noFactsYet")}
                         </div>
                     ) : null}
                 </div>
@@ -143,8 +145,8 @@ export function DeAngleView({ facts, angles, selectedIds, onToggleSelect, layout
             <div className={`flex flex-col bg-white/5 border border-white/5 rounded-2xl overflow-hidden ${layout === "row" ? "flex-1 min-w-0" : "flex-none min-h-[300px] max-h-[500px]"}`}>
                 <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/5 flex items-center gap-2">
                     <Compass className="w-5 h-5 text-purple-400" />
-                    <h3 className="font-semibold text-base">Original Opinions</h3>
-                    <span className="ml-auto text-xs text-muted-foreground">Select opinions to use in ReAngle</span>
+                    <h3 className="font-semibold text-base">{t("mainApp.originalOpinions")}</h3>
+                    <span className="ml-auto text-xs text-muted-foreground">{t("mainApp.selectOpinionsHint")}</span>
                 </div>
                 <div className="p-4 lg:p-5 overflow-y-auto flex-1 space-y-4 custom-scrollbar">
                     {angles.map(angle => {
@@ -161,7 +163,7 @@ export function DeAngleView({ facts, angles, selectedIds, onToggleSelect, layout
                                     {angle.title}
                                 </div>
                                 <div className="mt-3 pt-3 border-t border-white/10 text-xs text-muted-foreground">
-                                    <strong className="block mb-1 text-white/70">Description:</strong>
+                                    <strong className="block mb-1 text-white/70">{t("mainApp.descriptionLabel")}</strong>
                                     {angle.description}
                                 </div>
                             </div>
@@ -170,7 +172,7 @@ export function DeAngleView({ facts, angles, selectedIds, onToggleSelect, layout
 
                     {angles.length === 0 ? (
                         <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
-                            No opinions detected yet.
+                            {t("mainApp.noOpinionsYet")}
                         </div>
                     ) : null}
                 </div>

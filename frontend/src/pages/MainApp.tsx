@@ -180,10 +180,10 @@ export default function MainApp() {
             : avatarIsPro && (avatarUsageLimit === -1 || avatarRemaining > 0)
 
     const avatarDisabledReason = useMemo(() => {
-        if (!authSession?.access_token) return "Please sign in to use Avatar."
-        if (avatarUsageLoading) return "Checking Avatar access..."
+        if (!authSession?.access_token) return t("mainApp.avatarSignInRequired")
+        if (avatarUsageLoading) return t("mainApp.avatarCheckingAccess")
         if (!avatarAccessKnown) return null
-        if (!avatarIsPro) return "Avatar is available for Pro users only."
+        if (!avatarIsPro) return t("mainApp.avatarProOnly")
         if (avatarUsageLimit !== -1 && avatarRemaining <= 0) {
             return `Avatar usage limit reached for this billing cycle (${avatarUsageCount}/${avatarUsageLimit}).`
         }
@@ -199,13 +199,14 @@ export default function MainApp() {
     ])
 
     const avatarQuotaText = useMemo(() => {
-        if (!authSession?.access_token) return "Sign in required."
-        if (avatarUsageLoading) return "Checking Avatar quota..."
+        if (!authSession?.access_token) return t("mainApp.avatarSignInRequiredQuota")
+        if (avatarUsageLoading) return t("mainApp.avatarCheckingQuota")
         if (!avatarAccessKnown) return null
-        if (!avatarIsPro) return "Pro plan required: 5 Avatar generations per billing cycle."
-        if (avatarUsageLimit === -1) return `Avatar usage this cycle: ${avatarUsageCount} used (unlimited).`
-        return `Avatar usage this cycle: ${avatarUsageCount}/${avatarUsageLimit} used.`
+        if (!avatarIsPro) return t("mainApp.avatarProRequired")
+        if (avatarUsageLimit === -1) return t("mainApp.avatarUsageCycleUnlimited").replace("{n}", String(avatarUsageCount))
+        return t("mainApp.avatarUsageCycleUsed").replace("{used}", String(avatarUsageCount)).replace("{limit}", String(avatarUsageLimit))
     }, [
+        t,
         authSession?.access_token,
         avatarUsageLoading,
         avatarAccessKnown,
@@ -229,7 +230,7 @@ export default function MainApp() {
     // Handlers
     const handleAddInput = () => {
         if (inputItems.length >= 3) {
-            setError("Maximum 3 inputs allowed.")
+            setError(t("mainApp.maxInputsAllowed"))
             return
         }
 
@@ -310,16 +311,16 @@ export default function MainApp() {
 
             if (res.status === 402) {
                 setIsUsageLimitError(true)
-                throw new Error("Usage limit reached")
+                throw new Error(t("mainApp.usageLimitReached"))
             }
             if (!res.ok) {
-                let errorMsg = "Failed to process inputs"
+                let errorMsg = t("mainApp.failedToProcessInputs")
                 try {
                     const errData = await res.json()
                     if (res.status === 503 || errData?.code === "SERVICE_UNAVAILABLE") {
-                        errorMsg = "AI service is currently at peak capacity. Please wait a few seconds and try again."
+                        errorMsg = t("mainApp.peakCapacity")
                     } else if (errData?.code === "THEME_VALIDATION_ERROR") {
-                        errorMsg = `Theme Validation Failed: ${errData.error}`
+                        errorMsg = `${t("mainApp.themeValidationFailed")}: ${errData.error}`
                     } else if (errData?.error) {
                         errorMsg = errData.error
                     } else if (errData?.detail?.message) {
@@ -339,7 +340,7 @@ export default function MainApp() {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error(err)
-            setError(err.message || "Failed to process inputs")
+            setError(err.message || t("mainApp.failedToProcessInputs"))
         } finally {
             setInputsLoading(false)
         }
@@ -347,7 +348,7 @@ export default function MainApp() {
 
     const handleDeAngleProcess = async () => {
         if (!inputsLocked) {
-            setError("Please complete the Inputs step first.")
+            setError(t("mainApp.completeInputsFirst"))
             return
         }
 
@@ -369,7 +370,7 @@ export default function MainApp() {
                 if (res.status === 503 || data.code === "SERVICE_UNAVAILABLE") {
                     throw new Error("AI service is currently at peak capacity. Please wait a few seconds and try again.")
                 }
-                throw new Error(data.error || data.message || "DeAngle failed")
+                throw new Error(data.error || data.message || t("mainApp.deangleFailed"))
             }
 
             setDeAngleResult(data)
@@ -385,7 +386,7 @@ export default function MainApp() {
 
     const handleReAngleProcess = async () => {
         if (!deAngleResult) {
-            setError("Must perform DeAngle first.")
+            setError(t("mainApp.mustDeangleFirst"))
             return
         }
 
@@ -412,7 +413,7 @@ export default function MainApp() {
                 if (res.status === 503 || data.code === "SERVICE_UNAVAILABLE") {
                     throw new Error("AI service is currently at peak capacity. Please wait a few seconds and try again.")
                 }
-                throw new Error(data.message || "ReAngle failed")
+                throw new Error(data.message || t("mainApp.reangleFailed"))
             }
 
             setReAngleResult(data)
@@ -420,7 +421,7 @@ export default function MainApp() {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error(err)
-            setError(err.message || "Failed to ReAngle")
+            setError(err.message || t("mainApp.reangleFailed"))
         } finally {
             setReAngleLoading(false)
         }
@@ -452,7 +453,7 @@ export default function MainApp() {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error("TTS Error:", err)
-            setError(err.message || "Failed to generate TTS audio. Please try again.")
+            setError(err.message || t("mainApp.failedToGenerateTTS"))
         } finally {
             setTtsLoading(false)
         }
@@ -492,7 +493,7 @@ export default function MainApp() {
     // 点击 ReAngled Content 右侧视频图标：仅展开并滚动到 Avatar Broadcast 板块
     const handleOpenAvatarPanel = () => {
         if (!avatarFeatureEnabled) {
-            setError(avatarDisabledReason || "Avatar is currently unavailable.")
+            setError(avatarDisabledReason || t("mainApp.avatarUnavailableGeneric"))
             return
         }
         setError(null)
@@ -504,7 +505,7 @@ export default function MainApp() {
 
     const handleGenerateVoiceover = async () => {
         if (!avatarFeatureEnabled) {
-            setError(avatarDisabledReason || "Avatar is currently unavailable.")
+            setError(avatarDisabledReason || t("mainApp.avatarUnavailableGeneric"))
             return
         }
         if (!reAngleResult?.rewritten_content || voiceoverLoading) return
@@ -533,12 +534,12 @@ export default function MainApp() {
 
     const handleGenerateAvatar = async () => {
         if (!avatarFeatureEnabled) {
-            setError(avatarDisabledReason || "Avatar is currently unavailable.")
+            setError(avatarDisabledReason || t("mainApp.avatarUnavailableGeneric"))
             return
         }
         const script = (voiceoverScript ?? "").trim()
         if (!script) {
-            setError("请先生成并确认口播稿，再生成数字人视频。")
+            setError(t("mainApp.avatarConfirmScriptFirst"))
             return
         }
         if (script.length > AVATAR_SCRIPT_MAX_CHARS) {
@@ -605,7 +606,7 @@ export default function MainApp() {
                             "overflow-hidden transition-all duration-300 ease-in-out",
                             sidebarExpanded ? "w-[200px] opacity-100" : "w-0 opacity-0"
                         )}>
-                            <span className="font-semibold text-sm text-foreground/90 whitespace-nowrap">Configure Your ReAngle</span>
+                            <span className="font-semibold text-sm text-foreground/90 whitespace-nowrap">{t("mainApp.configureReAngle")}</span>
                         </div>
                         <button
                             onClick={() => setSidebarExpanded(!sidebarExpanded)}
@@ -628,7 +629,7 @@ export default function MainApp() {
                                         : "bg-red-500/10 text-red-400 border-red-500/20"
                                 )}>
                                     <div className="font-semibold mb-1 uppercase tracking-wider text-[10px] opacity-70">
-                                        {error.includes("peak capacity") ? "Server Busy" : "Execution Error"}
+                                        {error.includes("peak capacity") || error.includes("try again") ? t("mainApp.serverBusy") : t("mainApp.executionError")}
                                     </div>
                                     {error}
                                 </div>
@@ -649,7 +650,7 @@ export default function MainApp() {
                                         }
                                     }}
                                     className="flex items-center w-full h-[40px] px-1 group outline-none cursor-pointer"
-                                    title={!sidebarExpanded ? "Gather Inputs" : undefined}
+                                    title={!sidebarExpanded ? t("mainApp.gatherInputs") : undefined}
                                 >
                                     <div className={cn(
                                         "flex items-center justify-center shrink-0 border transition-colors w-7 h-7 rounded-full",
@@ -662,7 +663,7 @@ export default function MainApp() {
                                         sidebarExpanded ? "w-[266px] opacity-100 ml-3 pr-2" : "w-0 opacity-0 ml-0 pr-0"
                                     )}>
                                         <span className="font-medium text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                                            1. Gather Inputs
+                                            {t("mainApp.step1Gather")}
                                         </span>
                                         <ChevronRight className={cn(
                                             "w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300 group-hover:text-foreground",
@@ -730,7 +731,7 @@ export default function MainApp() {
                                         {/* Queue section */}
                                         <div className="pt-2">
                                             <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                                                QUEUE ({inputItems.length})
+                                                {t("mainApp.queue")} ({inputItems.length})
                                             </div>
                                             <div className="space-y-1.5 max-h-[120px] overflow-y-auto custom-scrollbar">
                                                 {inputItems.map(item => (
@@ -748,7 +749,7 @@ export default function MainApp() {
                                                 ))}
                                                 {inputItems.length === 0 && (
                                                     <div className="text-xs text-muted-foreground/40 text-center py-4 border border-dashed border-white/5 rounded-md">
-                                                        No items in queue
+                                                        {t("mainApp.noItemsInQueue")}
                                                     </div>
                                                 )}
                                             </div>
@@ -760,7 +761,7 @@ export default function MainApp() {
                                             disabled={inputsLoading || inputsLocked || inputItems.length === 0}
                                         >
                                             {inputsLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                            {inputsLocked ? "Inputs Locked" : "Complete & Continue"}
+                                            {inputsLocked ? t("mainApp.inputsLocked") : t("mainApp.completeAndContinue")}
                                         </Button>
                                     </div>
                                 )}
@@ -781,7 +782,7 @@ export default function MainApp() {
                                         }
                                     }}
                                     className="flex items-center w-full h-[40px] px-1 group outline-none cursor-pointer"
-                                    title={!sidebarExpanded ? "DeAngle" : undefined}
+                                    title={!sidebarExpanded ? t("mainApp.tabDeangle") : undefined}
                                 >
                                     <div className={cn(
                                         "flex items-center justify-center shrink-0 border transition-colors w-7 h-7 rounded-full",
@@ -794,7 +795,7 @@ export default function MainApp() {
                                         sidebarExpanded ? "w-[266px] opacity-100 ml-3 pr-2" : "w-0 opacity-0 ml-0 pr-0"
                                     )}>
                                         <span className="font-medium text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                                            2. DeAngle
+                                            {t("mainApp.step2Deangle")}
                                         </span>
                                         <ChevronRight className={cn(
                                             "w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300 group-hover:text-foreground",
@@ -806,7 +807,7 @@ export default function MainApp() {
                                 {sidebarExpanded && expandedSections.deangle && (
                                     <div className="px-4 pb-4 space-y-4 animate-in slide-in-from-top-2 fade-in duration-200">
                                         <p className="text-xs text-muted-foreground/80 leading-relaxed">
-                                            DeAngle your inputs, see what's opinion and what's verified facts
+                                            {t("mainApp.deangleDescription")}
                                         </p>
                                         <Button
                                             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-9 cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -814,7 +815,7 @@ export default function MainApp() {
                                             disabled={deAngleLoading || !inputsLocked}
                                         >
                                             {deAngleLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                            Start DeAngle
+                                            {t("mainApp.startDeangle")}
                                         </Button>
                                     </div>
                                 )}
@@ -835,7 +836,7 @@ export default function MainApp() {
                                         }
                                     }}
                                     className="flex items-center w-full h-[40px] px-1 group outline-none cursor-pointer"
-                                    title={!sidebarExpanded ? "ReAngle" : undefined}
+                                    title={!sidebarExpanded ? t("mainApp.tabReangle") : undefined}
                                 >
                                     <div className={cn(
                                         "flex items-center justify-center shrink-0 border transition-colors w-7 h-7 rounded-full",
@@ -848,7 +849,7 @@ export default function MainApp() {
                                         sidebarExpanded ? "w-[266px] opacity-100 ml-3 pr-2" : "w-0 opacity-0 ml-0 pr-0"
                                     )}>
                                         <span className="font-medium text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                                            3. ReAngle
+                                            {t("mainApp.step3Reangle")}
                                         </span>
                                         <ChevronRight className={cn(
                                             "w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300 group-hover:text-foreground",
@@ -862,40 +863,40 @@ export default function MainApp() {
 
                                         {/* Selected Events */}
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Selected Facts</label>
+                                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{t("mainApp.selectedFacts")}</label>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {selectedFacts.length > 0 ? selectedFacts.map((f: { id: string, content: string }) => (
                                                     <span
                                                         key={f.id}
                                                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/15 text-blue-400 border border-blue-500/20 cursor-pointer hover:bg-blue-500/25 transition-colors"
                                                         onClick={() => handleToggleDeAngleSelect(f.id, "fact")}
-                                                        title={f.content?.split('\n')[0] || 'Fact'}
+                                                        title={f.content?.split('\n')[0] || t("mainApp.fact")}
                                                     >
-                                                        <span className="truncate max-w-[140px]">{f.content?.split('\n')[0]?.slice(0, 30) || 'Fact'}...</span>
+                                                        <span className="truncate max-w-[140px]">{f.content?.split('\n')[0]?.slice(0, 30) || t("mainApp.fact")}...</span>
                                                         <X className="w-2.5 h-2.5 shrink-0 opacity-60 hover:opacity-100" />
                                                     </span>
                                                 )) : (
-                                                    <span className="text-xs text-muted-foreground/50 italic py-0.5">No events selected.</span>
+                                                    <span className="text-xs text-muted-foreground/50 italic py-0.5">{t("mainApp.noEventsSelected")}</span>
                                                 )}
                                             </div>
                                         </div>
 
                                         {/* Selected Angles */}
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Selected Opinions</label>
+                                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{t("mainApp.selectedOpinions")}</label>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {selectedAngles.length > 0 ? selectedAngles.map((a: { id: string, title: string }) => (
                                                     <span
                                                         key={a.id}
                                                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-500/15 text-purple-400 border border-purple-500/20 cursor-pointer hover:bg-purple-500/25 transition-colors"
                                                         onClick={() => handleToggleDeAngleSelect(a.id, "angle")}
-                                                        title={a.title || 'Opinion'}
+                                                        title={a.title || t("mainApp.opinion")}
                                                     >
-                                                        <span className="truncate max-w-[140px]">{a.title || 'Opinion'}</span>
+                                                        <span className="truncate max-w-[140px]">{a.title || t("mainApp.opinion")}</span>
                                                         <X className="w-2.5 h-2.5 shrink-0 opacity-60 hover:opacity-100" />
                                                     </span>
                                                 )) : (
-                                                    <span className="text-xs text-muted-foreground/50 italic py-0.5">No angles selected.</span>
+                                                    <span className="text-xs text-muted-foreground/50 italic py-0.5">{t("mainApp.noAnglesSelected")}</span>
                                                 )}
                                             </div>
                                         </div>
@@ -904,9 +905,9 @@ export default function MainApp() {
                                         <div className="border-t border-white/5 my-2"></div>
 
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-foreground/80">Customization</label>
+                                            <label className="text-xs font-medium text-foreground/80">{t("mainApp.customization")}</label>
                                             <Textarea
-                                                placeholder="Customize your way of ReAngle..."
+                                                placeholder={t("mainApp.customizationPlaceholder")}
                                                 className="min-h-[100px] bg-black/20 border-white/5 text-sm resize-none focus-visible:ring-1"
                                                 value={prompt}
                                                 onChange={e => setPrompt(e.target.value)}
@@ -919,7 +920,7 @@ export default function MainApp() {
                                             disabled={reAngleLoading || !deAngleResult}
                                         >
                                             {reAngleLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                            Start ReAngle
+                                            {t("mainApp.startReangle")}
                                         </Button>
                                     </div>
                                 )}
@@ -936,13 +937,13 @@ export default function MainApp() {
                             {/* Left: DeAngle Result */}
                             <div className="flex-1 flex flex-col h-full min-h-0 glass rounded-2xl border border-white/5 overflow-hidden shadow-sm">
                                 <div className="flex items-center justify-center shrink-0 border-b-2 border-blue-500/50 h-[60px] bg-blue-500/5 transition-colors">
-                                    <span className="font-medium text-blue-400">DeAngle</span>
+                                    <span className="font-medium text-blue-400">{t("mainApp.tabDeangle")}</span>
                                 </div>
                                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                                     {!deAngleResult && !deAngleLoading ? (
                                         <div className="h-full flex flex-col items-center justify-center text-muted-foreground rounded-2xl">
                                             <Triangle className="w-12 h-12 mb-4 opacity-20" />
-                                            <p>Run DeAngle to show result.</p>
+                                            <p>{t("mainApp.runDeangleToShowResult")}</p>
                                         </div>
                                     ) : deAngleLoading ? (
                                         <div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
@@ -963,13 +964,13 @@ export default function MainApp() {
                             {/* Right: ReAngle Result */}
                             <div className="flex-1 flex flex-col h-full min-h-0 glass rounded-2xl border border-white/5 overflow-hidden shadow-sm">
                                 <div className="flex items-center justify-center shrink-0 border-b-2 border-purple-500/50 h-[60px] bg-purple-500/5 transition-colors">
-                                    <span className="font-medium text-purple-400">ReAngle</span>
+                                    <span className="font-medium text-purple-400">{t("mainApp.tabReangle")}</span>
                                 </div>
                                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                                     {!reAngleResult && !reAngleLoading ? (
                                         <div className="h-full flex flex-col items-center justify-center text-muted-foreground rounded-2xl">
                                             <Wand2 className="w-12 h-12 mb-4 opacity-20" />
-                                            <p>Run ReAngle to show result.</p>
+                                            <p>{t("mainApp.runReangleToShowResult")}</p>
                                         </div>
                                     ) : reAngleLoading ? (
                                         <div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
@@ -1011,13 +1012,13 @@ export default function MainApp() {
                                         value="DeAngle"
                                         className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500/50 data-[state=active]:bg-blue-500/5 data-[state=active]:text-blue-400 text-muted-foreground data-[state=active]:shadow-none cursor-pointer transition-all hover:bg-white/5 font-medium"
                                     >
-                                        DeAngle
+                                        {t("mainApp.tabDeangle")}
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="ReAngle"
                                         className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500/50 data-[state=active]:bg-purple-500/5 data-[state=active]:text-purple-400 text-muted-foreground data-[state=active]:shadow-none cursor-pointer transition-all hover:bg-white/5 font-medium"
                                     >
-                                        ReAngle
+                                        {t("mainApp.tabReangle")}
                                     </TabsTrigger>
                                 </TabsList>
 
@@ -1026,7 +1027,7 @@ export default function MainApp() {
                                         {!deAngleResult && !deAngleLoading ? (
                                             <div className="h-full flex flex-col items-center justify-center text-muted-foreground rounded-2xl">
                                                 <Triangle className="w-12 h-12 mb-4 opacity-20" />
-                                                <p>Run DeAngle to show result.</p>
+                                                <p>{t("mainApp.runDeangleToShowResult")}</p>
                                             </div>
                                         ) : deAngleLoading ? (
                                             <div className="h-full flex items-center justify-center rounded-2xl"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
@@ -1046,7 +1047,7 @@ export default function MainApp() {
                                         {!reAngleResult && !reAngleLoading ? (
                                             <div className="h-full flex flex-col items-center justify-center text-muted-foreground rounded-2xl">
                                                 <Wand2 className="w-12 h-12 mb-4 opacity-20" />
-                                                <p>Run ReAngle to show result.</p>
+                                                <p>{t("mainApp.runReangleToShowResult")}</p>
                                             </div>
                                         ) : reAngleLoading ? (
                                             <div className="h-full flex items-center justify-center rounded-2xl"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>

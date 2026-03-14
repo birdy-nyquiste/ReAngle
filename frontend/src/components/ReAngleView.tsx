@@ -2,6 +2,7 @@ import { useState, useMemo } from "react"
 import { Download, Loader2, Headphones, Copy, FileText, CheckCircle2, Video } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { useLanguage } from "@/context/LanguageContext"
 import { AudioPlayer } from "./AudioPlayer"
 
 interface ReAngleViewProps {
@@ -56,6 +57,7 @@ export function ReAngleView({
     onGenerateAvatar,
     onVoiceoverChange,
 }: ReAngleViewProps) {
+    const { t } = useLanguage()
     const [copiedSummary, setCopiedSummary] = useState(false)
     const [copiedContent, setCopiedContent] = useState(false)
 
@@ -92,9 +94,9 @@ export function ReAngleView({
                 <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/5 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <FileText className="w-5 h-5 text-blue-400" />
-                        <h3 className="font-semibold text-base">Summary</h3>
+                        <h3 className="font-semibold text-base">{t("mainApp.summary")}</h3>
                         {summary ? (
-                            <span className="text-xs text-muted-foreground tabular-nums">Length: {summaryLength} chars</span>
+                            <span className="text-xs text-muted-foreground tabular-nums">{t("mainApp.summaryLengthChars").replace("{n}", String(summaryLength))}</span>
                         ) : null}
                     </div>
                     <div className="min-w-[7.5rem] flex items-center justify-end gap-1">
@@ -104,7 +106,7 @@ export function ReAngleView({
                             onClick={handlePlayClick}
                             disabled={ttsLoading || !summary || !!audioUrl}
                             className={actionButtonClass}
-                            title="Read Aloud"
+                            title={t("mainApp.readAloud")}
                         >
                             {ttsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Headphones className="w-4 h-4" />}
                         </Button>
@@ -114,7 +116,7 @@ export function ReAngleView({
                             onClick={() => handleCopy(summary, setCopiedSummary)}
                             disabled={!summary}
                             className={actionButtonClass}
-                            title="Copy Summary"
+                            title={t("mainApp.copySummary")}
                         >
                             {copiedSummary ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                         </Button>
@@ -124,7 +126,7 @@ export function ReAngleView({
                             onClick={onDownloadSummary}
                             disabled={!summary || !onDownloadSummary}
                             className={actionButtonClass}
-                            title="Download Summary as TXT"
+                            title={t("mainApp.downloadSummaryTxt")}
                         >
                             <Download className="w-4 h-4" />
                         </Button>
@@ -134,7 +136,7 @@ export function ReAngleView({
                     {summary ? (
                         <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{summary}</p>
                     ) : (
-                        <p className="text-sm text-muted-foreground italic">No summary generated.</p>
+                        <p className="text-sm text-muted-foreground italic">{t("mainApp.noSummaryGenerated")}</p>
                     )}
                 </div>
                 {audioUrl && (
@@ -149,9 +151,9 @@ export function ReAngleView({
                 <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/5 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <CheckCircle2 className="w-5 h-5 text-green-500" />
-                        <h3 className="font-semibold text-base">ReAngled Content</h3>
+                        <h3 className="font-semibold text-base">{t("mainApp.reangledContent")}</h3>
                         {rewrittenContent ? (
-                            <span className="text-xs text-muted-foreground tabular-nums">Length: {contentLength} chars</span>
+                            <span className="text-xs text-muted-foreground tabular-nums">{t("mainApp.summaryLengthChars").replace("{n}", String(contentLength))}</span>
                         ) : null}
                     </div>
                     <div className="min-w-[7.5rem] flex items-center justify-end gap-1">
@@ -161,7 +163,7 @@ export function ReAngleView({
                             onClick={onOpenAvatarPanel}
                             disabled={!rewrittenContent || !onOpenAvatarPanel || !avatarEnabled}
                             className={actionButtonClass}
-                            title={avatarEnabled ? "Avatar Broadcast" : (avatarDisabledReason || "Avatar unavailable")}
+                            title={avatarEnabled ? t("mainApp.avatarBroadcast") : (avatarDisabledReason || t("mainApp.avatarUnavailable"))}
                         >
                             <Video className="w-4 h-4" />
                         </Button>
@@ -181,7 +183,7 @@ export function ReAngleView({
                             onClick={onDownload}
                             disabled={!rewrittenContent}
                             className={actionButtonClass}
-                            title="Download as TXT"
+                            title={t("mainApp.downloadAsTxt")}
                         >
                             <Download className="w-4 h-4" />
                         </Button>
@@ -191,7 +193,7 @@ export function ReAngleView({
                     {rewrittenContent ? (
                         <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{rewrittenContent}</p>
                     ) : (
-                        <p className="text-sm text-muted-foreground italic">No content generated.</p>
+                        <p className="text-sm text-muted-foreground italic">{t("mainApp.noContentGenerated")}</p>
                     )}
                 </div>
             </div>
@@ -201,13 +203,13 @@ export function ReAngleView({
                 <div id="avatar-broadcast-section" className="flex-none bg-white/5 border border-white/5 rounded-2xl overflow-hidden">
                     <div className="px-4 py-3 lg:px-5 lg:py-4 flex items-center gap-2">
                         <Video className="w-5 h-5 text-primary" />
-                        <h3 className="font-semibold text-base">Avatar Broadcast</h3>
+                        <h3 className="font-semibold text-base">{t("mainApp.avatarBroadcast")}</h3>
                     </div>
                     <div className="px-4 pb-4 lg:px-5 lg:pb-4">
                         <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-muted-foreground space-y-1">
-                            <p className="text-foreground/90 font-medium">How to create your avatar video</p>
-                            <p>1. Click &quot;Generate Script&quot; and edit the script (keep it under {avatarScriptMaxChars} characters).</p>
-                            <p>2. Click &quot;Generate Avatar Video&quot;; processing usually takes 5-10 minutes.</p>
+                            <p className="text-foreground/90 font-medium">{t("mainApp.howToCreateAvatarVideo")}</p>
+                            <p>{t("mainApp.avatarStep1").replace("{n}", String(avatarScriptMaxChars))}</p>
+                            <p>{t("mainApp.avatarStep2")}</p>
                             {avatarQuotaText ? (
                                 <p className="pt-1 text-xs text-foreground/80">{avatarQuotaText}</p>
                             ) : null}
@@ -225,9 +227,9 @@ export function ReAngleView({
                     <div className="border-t border-white/5">
                         <div className="px-4 py-3 lg:px-5 lg:py-4 flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2">
-                                <h4 className="font-medium text-sm">Broadcast Script</h4>
+                                <h4 className="font-medium text-sm">{t("mainApp.broadcastScript")}</h4>
                                 {voiceoverScript?.trim() ? (
-                                    <span className="text-xs text-muted-foreground tabular-nums">Length: {voiceoverLength}/{avatarScriptMaxChars} chars</span>
+                                    <span className="text-xs text-muted-foreground tabular-nums">{t("mainApp.summaryLengthChars").replace("{n}", `${voiceoverLength}/${avatarScriptMaxChars}`)}</span>
                                 ) : null}
                             </div>
                             <Button
@@ -236,7 +238,7 @@ export function ReAngleView({
                                 onClick={onGenerateVoiceover}
                                 disabled={voiceoverLoading || !rewrittenContent || !onGenerateVoiceover || !avatarEnabled}
                             >
-                                {voiceoverLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Generate Script"}
+                                {voiceoverLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("mainApp.generateScript")}
                             </Button>
                         </div>
                         <div className="px-4 pb-4 lg:px-5 lg:pb-5 space-y-3">
@@ -249,7 +251,7 @@ export function ReAngleView({
                                 <Textarea
                                     value={voiceoverScript ?? ""}
                                     onChange={e => onVoiceoverChange?.(e.target.value)}
-                                    placeholder="Click Generate Script, then edit the script here before creating the avatar video."
+                                    placeholder={t("mainApp.voiceoverPlaceholder")}
                                     className="min-h-[240px] lg:min-h-[280px] bg-black/20 border-white/5 text-sm resize-none focus-visible:ring-1"
                                     disabled={!avatarEnabled}
                                 />
@@ -260,7 +262,7 @@ export function ReAngleView({
                     {/* Avatar Video */}
                     <div className="border-t border-white/5">
                         <div className="px-4 py-3 lg:px-5 lg:py-4 flex items-center justify-between">
-                            <h4 className="font-medium text-sm">Avatar Video</h4>
+                            <h4 className="font-medium text-sm">{t("mainApp.avatarVideo")}</h4>
                             <div className="min-w-[7.5rem] flex items-center justify-end gap-1">
                                 <Button
                                     variant="default"
@@ -269,14 +271,14 @@ export function ReAngleView({
                                     disabled={avatarLoading || voiceoverLoading || !voiceoverScript?.trim() || !onGenerateAvatar || !avatarEnabled}
                                 >
                                     {avatarLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                    Generate Avatar Video
+                                    {t("mainApp.generateAvatarVideo")}
                                 </Button>
                                 {avatarVideoUrl && (
                                     <Button
                                         size="icon"
                                         variant="ghost"
                                         className={actionButtonClass}
-                                        title="Download Avatar Video"
+                                        title={t("mainApp.downloadAvatarVideo")}
                                         onClick={async () => {
                                             const downloadUrl = `/api/v2/media/avatar/download?url=${encodeURIComponent(avatarVideoUrl!)}`
                                             try {
@@ -305,7 +307,7 @@ export function ReAngleView({
                             {avatarLoading ? (
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground py-8">
                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                    Generating avatar video, please wait…
+                                    {t("mainApp.generatingAvatarVideo")}
                                 </div>
                             ) : avatarVideoUrl ? (
                                 <div className="space-y-3">
@@ -317,7 +319,7 @@ export function ReAngleView({
                                     />
                                 </div>
                             ) : (
-                                <p className="text-sm text-muted-foreground italic py-4">No avatar video yet. Generate one from the script section above.</p>
+                                <p className="text-sm text-muted-foreground italic py-4">{t("mainApp.noAvatarVideoYet")}</p>
                             )}
                         </div>
                     </div>
