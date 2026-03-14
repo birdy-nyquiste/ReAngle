@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useNavigate, useLocation } from "react-router-dom"
-import { ArrowRight, ChevronDown, LogOut } from "lucide-react"
+import { ArrowRight, Check, ChevronDown, LogOut } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import { useLanguage, type Language } from "@/context/LanguageContext"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const logoNode = (
   <>
@@ -19,7 +18,9 @@ export default function AppHeader() {
   const { user, signOut } = useAuth()
   const { language, setLanguage, t } = useLanguage()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [languageMenuOpen, setLanguageMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement | null>(null)
+  const languageMenuRef = useRef<HTMLDivElement | null>(null)
 
   const isApp = location.pathname.startsWith("/app")
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register"
@@ -34,21 +35,30 @@ export default function AppHeader() {
         : "Idioma: ES"
 
   const allLanguages: Language[] = ["en", "zh", "es"]
+  const languageLabelMap: Record<Language, string> = {
+    en: "English",
+    zh: "中文",
+    es: "Español",
+  }
 
   const showPricing = !isApp && !isAuthPage && !isProfilePage && !isSettingsPage
   const showOpenApp = Boolean(user) && !isApp
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
-      if (!menuRef.current) return
-      if (!menuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node
+      if (menuRef.current && !menuRef.current.contains(target)) {
         setMenuOpen(false)
+      }
+      if (languageMenuRef.current && !languageMenuRef.current.contains(target)) {
+        setLanguageMenuOpen(false)
       }
     }
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setMenuOpen(false)
+        setLanguageMenuOpen(false)
       }
     }
 
@@ -61,10 +71,10 @@ export default function AppHeader() {
   }, [])
 
   return (
-    <header className="floating-nav">
-      <div className="flex h-14 items-center px-6 w-full">
+    <header className="floating-nav" data-testid="app-header-shell">
+      <div className="flex h-14 min-h-14 w-full items-center gap-2 px-3 sm:px-5" data-testid="app-header-inner">
         <div
-          className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
+          className="flex shrink-0 items-center gap-2 cursor-pointer transition-opacity hover:opacity-80"
           onClick={() => navigate("/")}
           role="button"
           tabIndex={0}
@@ -73,31 +83,50 @@ export default function AppHeader() {
           {logoNode}
         </div>
 
-        <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
-          <SelectTrigger className="ml-2 h-8 w-[9rem] bg-transparent border-0 text-sm font-medium hover:bg-white/5">
-            <SelectValue placeholder={triggerLabel}>
-              <span className="truncate">{triggerLabel}</span>
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent className="bg-background border-white/10">
-            {allLanguages.map((lang) => (
-              <SelectItem
-                key={lang}
-                value={lang}
-                disabled={lang === language}
-                className="cursor-pointer text-sm"
-              >
-                {lang === "en" ? "English" : lang === "zh" ? "中文" : "Español"}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="relative ml-1 shrink-0 sm:ml-2" ref={languageMenuRef}>
+          <button
+            type="button"
+            data-testid="app-header-language-trigger"
+            className="flex h-9 w-[7.25rem] items-center justify-between rounded-md border border-white/10 bg-white/5 px-2 text-xs font-medium hover:bg-white/10 sm:w-[9rem] sm:text-sm"
+            onClick={() => setLanguageMenuOpen((prev) => !prev)}
+            aria-haspopup="menu"
+            aria-expanded={languageMenuOpen}
+          >
+            <span className="truncate">{triggerLabel}</span>
+            <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+          </button>
 
-        <div className="ml-auto flex items-center gap-3">
+          {languageMenuOpen && (
+            <div
+              className="absolute left-0 mt-2 w-[10rem] rounded-md border border-white/10 bg-background/95 p-1 shadow-xl backdrop-blur z-50"
+              role="menu"
+            >
+              {allLanguages.map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm hover:bg-white/10"
+                  disabled={lang === language}
+                  onClick={() => {
+                    setLanguage(lang)
+                    setLanguageMenuOpen(false)
+                  }}
+                >
+                  <span className="inline-flex h-4 w-4 items-center justify-center">
+                    {lang === language ? <Check className="h-4 w-4 text-primary" /> : null}
+                  </span>
+                  <span>{languageLabelMap[lang]}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="ml-auto flex min-w-0 items-center justify-end gap-2 sm:gap-3">
           {showPricing && (
             <Button
               variant="ghost"
-              className="h-9 px-4 cursor-pointer text-muted-foreground hover:text-foreground text-sm font-medium hover:bg-white/5 transition-colors"
+              className="hidden h-9 px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground md:inline-flex"
               onClick={() => navigate("/pricing")}
             >
               {t("nav.pricing")}
@@ -106,7 +135,7 @@ export default function AppHeader() {
 
           {showOpenApp && (
             <Button
-              className="h-9 px-4 text-sm font-medium shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
+              className="hidden h-9 px-4 text-sm font-medium shadow-lg shadow-primary/20 transition-all hover:shadow-primary/40 sm:inline-flex"
               onClick={() => navigate("/app")}
             >
               {t("nav.openApp")}
@@ -117,13 +146,13 @@ export default function AppHeader() {
             <div className="relative" ref={menuRef}>
               <button
                 type="button"
-                className="h-9 px-3 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 transition-colors flex items-center gap-2 text-sm max-w-[14rem] cursor-pointer"
+                className="flex h-9 max-w-[12rem] items-center gap-2 truncate rounded-md border border-white/10 bg-white/5 px-3 text-sm transition-colors hover:bg-white/10 sm:max-w-[14rem]"
                 onClick={() => setMenuOpen((prev) => !prev)}
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
               >
                 <span className="truncate">{user.email}</span>
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
               </button>
 
               {menuOpen && (
@@ -167,13 +196,13 @@ export default function AppHeader() {
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
-                className="h-9 px-4 cursor-pointer text-muted-foreground hover:text-foreground text-sm font-medium hover:bg-white/5 transition-colors"
+                className="hidden h-9 px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground sm:inline-flex"
                 onClick={() => navigate("/login")}
               >
                 {t("nav.signIn")}
               </Button>
               <Button
-                className="h-9 px-4 text-sm font-medium shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all group"
+                className="group h-9 px-3 text-sm font-medium shadow-lg shadow-primary/20 transition-all hover:shadow-primary/40 sm:px-4"
                 onClick={() => navigate("/register")}
               >
                 {t("nav.signUp")}

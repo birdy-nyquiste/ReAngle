@@ -35,7 +35,7 @@ export default function LandingPage() {
 
             <AppHeader />
 
-            <main className="flex-1 flex flex-col relative z-10 pt-16">
+            <main className="pt-header-offset relative z-10 flex flex-1 flex-col">
 
                 {/* --- Section 1: Hero --- */}
                 <section className="min-h-[85vh] flex items-center justify-center pt-20 pb-16 px-4">

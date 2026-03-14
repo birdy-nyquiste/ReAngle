@@ -52,8 +52,11 @@ describe("AppHeader", () => {
 
     renderHeader("/")
 
+    expect(screen.getByTestId("app-header-shell")).toHaveClass("floating-nav")
+    expect(screen.getByTestId("app-header-inner")).toHaveClass("h-14", "min-h-14")
     expect(screen.getByText("Sign In")).toBeInTheDocument()
     expect(screen.getByText("Sign Up")).toBeInTheDocument()
+    expect(screen.getByTestId("app-header-language-trigger")).toHaveClass("h-9")
   })
 
   it("shows account menu items after clicking email trigger", async () => {
@@ -87,5 +90,33 @@ describe("AppHeader", () => {
     expect(screen.getByText("Profile")).toBeInTheDocument()
     expect(screen.getByText("Settings")).toBeInTheDocument()
     expect(screen.getByText("Sign Out")).toBeInTheDocument()
+  })
+
+  it("keeps long email truncated without stretching header height", () => {
+    mockUseAuth.mockReturnValue({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      user: { email: "very-long-email-address-for-header-layout-check@example.com" } as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      session: null as any,
+      loading: false,
+      signIn: vi.fn(),
+      signOut: vi.fn(),
+      signUp: vi.fn(),
+    })
+    mockUseLanguage.mockReturnValue({
+      language: "en",
+      setLanguage: vi.fn(),
+      t: (key: string) =>
+        ({
+          "nav.openApp": "Open App",
+          "nav.pricing": "Pricing",
+        }[key] || key),
+    })
+
+    renderHeader("/")
+    expect(screen.getByTestId("app-header-inner")).toHaveClass("h-14", "min-h-14")
+    expect(
+      screen.getByRole("button", { name: /very-long-email-address-for-header-layout-check@example.com/i })
+    ).toHaveClass("max-w-[12rem]", "sm:max-w-[14rem]")
   })
 })
