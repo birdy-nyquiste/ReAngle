@@ -1,6 +1,6 @@
 # ReAngle
 
-**ReAngle** - 把叙事主动权还给每一个人。
+**ReAngle** - Reframe the story from your own Angle。
 
 在信息过载时代，事件是客观的，但叙事是被塑造的。ReAngle 的目标不是替你“给答案”，而是把“理解事件、选择立场、完成表达”的能力做成可复用的产品流程。
 
@@ -8,39 +8,29 @@
 
 [https://reangle.app/](https://reangle.app/)
 
-## 产品理念
+## 工作流
 
-同一事件，会被包装成不同版本：英雄化、道德化、丑闻化、立场化。
-
-ReAngle 的核心价值是：
-
-- 不被动消费现成叙事
-- 把事实与观点分离
-- 用自己的语气和目标重组表达
-
-## 标准工作流
-
-### 1. Gather
+### 1. Source
 
 围绕**同一主题**收集多个输入源，并进行主题一致性验证。
 
-### 2. DeAngle
+### 2. Reveal
 
 执行两步能力：
 
 - `Detach`：拆分客观事实与主观观点
 - `Fact Check`：对拆出的事实进行核查
 
-### 3. ReAngle
+### 3. Reframe
 
 基于已核查事实、选定观点和用户指令，生成最终叙事内容（摘要 + 正文）。
 
-## 订阅与用量（最新业务口径）
+## 订阅与用量
 
 - 币种：`USD`
 - Pro 定价：`$9.99 / month`
 
-| 计划 | ReAngle 生成 | TTS | Avatar |
+| 计划 | Reframe 生成 | TTS | Avatar |
 | --- | --- | --- | --- |
 | Free | 每月 5 次 | 每月 1 次 | 不可用 |
 | Pro | 不限次 | 每月 20 次 | 每账期 5 次 |
@@ -52,14 +42,14 @@ ReAngle 的核心价值是：
 - 认证与用户体系：Supabase Auth + 受保护路由
 - 支付订阅：Stripe Checkout + Customer Portal + Webhook 同步
 - 用量控制：
-  - ReAngle：按订阅状态控制 `usage_limit`（Free=5, Pro=-1）
+  - Reframe：按订阅状态控制 `usage_limit`（Free=5, Pro=-1）
   - TTS：按订阅状态控制 `tts_usage_limit`（Free=1, Pro=20）
   - Avatar：仅 Pro 可用，按账期限制次数
 - 媒体能力：
   - TTS（DashScope）
   - 口播稿生成（OpenAI）
   - 数字人视频（HeyGen）
-- 用户设置：支持按账号配置 DeAngle/ReAngle 模型与 system prompt
+- 用户设置：支持按账号配置 Reveal/Reframe 模型与 system prompt
 
 ## 技术栈
 
@@ -144,9 +134,9 @@ npm run dev
 
 ## 关键 API（v2）
 
-- `POST /api/v2/inputs/`：Gather 输入处理（含主题验证，计入用量）
-- `POST /api/v2/deangle/`：DeAngle（Detach + Fact Check）
-- `POST /api/v2/reangle/`：ReAngle 生成
+- `POST /api/v2/inputs/`：Source 输入处理（含主题验证，计入用量）
+- `POST /api/v2/deangle/`：Reveal 处理（Detach + Fact Check）
+- `POST /api/v2/reangle/`：Reframe 生成
 - `POST /api/v2/media/tts`：TTS
 - `POST /api/v2/media/voiceover`：口播稿
 - `POST /api/v2/media/avatar`：Avatar 视频（含 Pro/额度校验）
