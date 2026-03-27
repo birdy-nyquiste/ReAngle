@@ -11,11 +11,10 @@ from pydantic import BaseModel, Field
 class FactStatus(str, Enum):
     """事实核查状态 (5-tier accuracy assessment)。"""
 
-    SUPPORTED = "SUPPORTED"
-    MOSTLY_SUPPORTED = "MOSTLY_SUPPORTED"
-    PARTIALLY_SUPPORTED = "PARTIALLY_SUPPORTED"
-    CONTRADICTED = "CONTRADICTED"
-    UNVERIFIABLE = "UNVERIFIABLE"
+    VERIFIED = "VERIFIED"
+    PARTIALLY_VERIFIED = "PARTIALLY_VERIFIED"
+    FALSE_OR_FABRICATED = "FALSE_OR_FABRICATED"
+    UNVERIFIED = "UNVERIFIED"
 
 
 # ── 前端展示模型（对齐 DeAngleView.tsx）────────────────

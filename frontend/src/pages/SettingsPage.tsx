@@ -55,14 +55,14 @@ export default function SettingsPage() {
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [expandedSections, setExpandedSections] = useState({
-    deangle: true,
-    reangle: true,
+    reveal: true,
+    reframe: true,
     avatar: true,
   })
 
   const canSave = useMemo(() => Boolean(form) && !saving, [form, saving])
 
-  const toggleSection = (section: "deangle" | "reangle" | "avatar") => {
+  const toggleSection = (section: "reveal" | "reframe" | "avatar") => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }))
   }
 
@@ -202,29 +202,29 @@ export default function SettingsPage() {
                 <div className="space-y-5">
                   <section className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
                     <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/10 flex items-center justify-between gap-3">
-                      <h3 className="text-base font-semibold text-foreground/95">{t("settings.sectionDeangle")}</h3>
+                      <h3 className="text-base font-semibold text-foreground/95">{t("settings.sectionReveal")}</h3>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-                        onClick={() => toggleSection("deangle")}
-                        aria-expanded={expandedSections.deangle}
-                        aria-controls="settings-deangle-content"
-                        aria-label={expandedSections.deangle ? t("settings.collapseDeangle") : t("settings.expandDeangle")}
-                        title={expandedSections.deangle ? t("settings.collapse") : t("settings.expand")}
+                        onClick={() => toggleSection("reveal")}
+                        aria-expanded={expandedSections.reveal}
+                        aria-controls="settings-reveal-content"
+                        aria-label={expandedSections.reveal ? t("settings.collapseReveal") : t("settings.expandReveal")}
+                        title={expandedSections.reveal ? t("settings.collapse") : t("settings.expand")}
                       >
                         <ChevronRight
-                          className={`w-4 h-4 transition-transform ${expandedSections.deangle ? "rotate-90" : ""}`}
+                          className={`w-4 h-4 transition-transform ${expandedSections.reveal ? "rotate-90" : ""}`}
                         />
                       </Button>
                     </div>
-                    {expandedSections.deangle && (
-                      <div id="settings-deangle-content" className="p-4 lg:p-5 space-y-4">
+                    {expandedSections.reveal && (
+                      <div id="settings-reveal-content" className="p-4 lg:p-5 space-y-4">
                         <div className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-3">
                           <h4 className="text-sm font-medium text-foreground/90">{t("settings.modelLabel")}</h4>
                           <div className="space-y-2">
-                            <Label>{t("settings.deangleModel")}</Label>
+                            <Label>{t("settings.revealModel")}</Label>
                             <Select
                               value={form.deangle_model}
                               onValueChange={(value) =>
@@ -251,7 +251,7 @@ export default function SettingsPage() {
                           <h4 className="text-sm font-medium text-foreground/90">Prompt</h4>
 
                           <div className="space-y-2">
-                            <Label>{t("settings.deangleDetachPrompt")}</Label>
+                            <Label>{t("settings.revealDetachPrompt")}</Label>
                             <div className="text-xs text-muted-foreground">
                               {defaults.deangle_detach_uses_default
                                 ? t("settings.usingDefault")
@@ -274,7 +274,7 @@ export default function SettingsPage() {
                           </div>
 
                           <div className="border-t border-white/10 pt-4 space-y-2">
-                            <Label>{t("settings.deangleFactCheckPrompt")}</Label>
+                            <Label>{t("settings.revealFactCheckPrompt")}</Label>
                             <div className="text-xs text-muted-foreground">
                               {defaults.deangle_fact_check_uses_default
                                 ? t("settings.usingDefault")
@@ -302,29 +302,29 @@ export default function SettingsPage() {
 
                   <section className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
                     <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-white/10 flex items-center justify-between gap-3">
-                      <h3 className="text-base font-semibold text-foreground/95">{t("settings.sectionReangle")}</h3>
+                      <h3 className="text-base font-semibold text-foreground/95">{t("settings.sectionReframe")}</h3>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-                        onClick={() => toggleSection("reangle")}
-                        aria-expanded={expandedSections.reangle}
-                        aria-controls="settings-reangle-content"
-                        aria-label={expandedSections.reangle ? t("settings.collapseReangle") : t("settings.expandReangle")}
-                        title={expandedSections.reangle ? t("settings.collapse") : t("settings.expand")}
+                        onClick={() => toggleSection("reframe")}
+                        aria-expanded={expandedSections.reframe}
+                        aria-controls="settings-reframe-content"
+                        aria-label={expandedSections.reframe ? t("settings.collapseReframe") : t("settings.expandReframe")}
+                        title={expandedSections.reframe ? t("settings.collapse") : t("settings.expand")}
                       >
                         <ChevronRight
-                          className={`w-4 h-4 transition-transform ${expandedSections.reangle ? "rotate-90" : ""}`}
+                          className={`w-4 h-4 transition-transform ${expandedSections.reframe ? "rotate-90" : ""}`}
                         />
                       </Button>
                     </div>
-                    {expandedSections.reangle && (
-                      <div id="settings-reangle-content" className="p-4 lg:p-5 space-y-4">
+                    {expandedSections.reframe && (
+                      <div id="settings-reframe-content" className="p-4 lg:p-5 space-y-4">
                         <div className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-3">
                           <h4 className="text-sm font-medium text-foreground/90">{t("settings.modelLabel")}</h4>
                           <div className="space-y-2">
-                            <Label>{t("settings.reangleModel")}</Label>
+                            <Label>{t("settings.reframeModel")}</Label>
                             <Select
                               value={form.reangle_model}
                               onValueChange={(value) =>
@@ -349,7 +349,7 @@ export default function SettingsPage() {
 
                         <div className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-2">
                           <h4 className="text-sm font-medium text-foreground/90">Prompt</h4>
-                          <Label>{t("settings.reanglePrompt")}</Label>
+                          <Label>{t("settings.reframePrompt")}</Label>
                           <div className="text-xs text-muted-foreground">
                             {defaults.reangle_uses_default
                               ? t("settings.usingDefault")

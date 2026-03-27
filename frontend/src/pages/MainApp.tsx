@@ -1,15 +1,16 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
+import { Sparkles, X, Loader2, PanelLeftClose, PanelLeftOpen, Triangle, Wand2 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, Trash2, FileText, Link as LinkIcon, Youtube, Type, Sparkles, FolderInput, X, ChevronRight, Triangle, Wand2, PanelLeftClose, PanelLeftOpen } from "lucide-react"
-import { useLanguage } from "@/context/LanguageContext"
-import { useAuth } from "@/context/AuthContext"
 import AppHeader from "@/components/AppHeader"
 import { DeAngleView } from "@/components/DeAngleView"
 import { ReAngleView } from "@/components/ReAngleView"
+import { useLanguage } from "@/context/LanguageContext"
+import { useAuth } from "@/context/AuthContext"
 import { cn } from "@/lib/utils"
+// New Components
+import { SourceSection } from "@/components/main-app/SourceSection"
+import { RevealSection } from "@/components/main-app/RevealSection"
+import { ReframeSection } from "@/components/main-app/ReframeSection"
 
 // Types
 interface InputItem {
@@ -112,6 +113,23 @@ export default function MainApp() {
         return deAngleResult.angles.filter((a: any) => selectedDeAngleIds.has(a.id))
     }, [deAngleResult, selectedDeAngleIds])
 
+    // Custom Manual Inputs
+    const [customFacts, setCustomFacts] = useState<{ id: string, content: string }[]>([])
+    const [customAngles, setCustomAngles] = useState<{ id: string, title: string }[]>([])
+
+    const handleAddCustomFact = (content: string) => {
+        setCustomFacts(prev => [...prev, { id: "cf_" + Math.random().toString(36).substring(7), content }])
+    }
+    const handleRemoveCustomFact = (id: string) => {
+        setCustomFacts(prev => prev.filter(f => f.id !== id))
+    }
+    const handleAddCustomAngle = (title: string) => {
+        setCustomAngles(prev => [...prev, { id: "ca_" + Math.random().toString(36).substring(7), title }])
+    }
+    const handleRemoveCustomAngle = (id: string) => {
+        setCustomAngles(prev => prev.filter(a => a.id !== id))
+    }
+
     // ReAngle State
     const [prompt, setPrompt] = useState("")
     const [reAngleLoading, setReAngleLoading] = useState(false)
@@ -196,7 +214,10 @@ export default function MainApp() {
         avatarUsageLimit,
         avatarRemaining,
         avatarUsageCount,
+        t,
     ])
+
+
 
     const avatarQuotaText = useMemo(() => {
         if (!authSession?.access_token) return t("mainApp.avatarSignInRequiredQuota")
@@ -402,8 +423,8 @@ export default function MainApp() {
                 headers: getHeaders(),
                 body: JSON.stringify({
                     prompt,
-                    selected_facts: selectedFacts,
-                    selected_angles: selectedAngles
+                    selected_facts: [...selectedFacts, ...customFacts],
+                    selected_angles: [...selectedAngles, ...customAngles]
                 })
             })
 
@@ -581,8 +602,8 @@ export default function MainApp() {
                     className="fixed left-0 right-0 z-40 flex items-center justify-center gap-3 border-b border-green-500/30 bg-green-500/20 px-4 py-3 text-sm text-green-300 backdrop-blur"
                     style={{ top: "var(--app-header-offset)" }}
                 >
-                    <Sparkles className="h-4 w-4 flex-shrink-0" />
-                    <span>🎉 {t("mainApp.checkoutBanner")}</span>
+                    <Sparkles className="h-4 w-4 flex-shrink-0 text-emerald-400" />
+                    <span className="font-bold tracking-tight">{t("mainApp.checkoutBanner")}</span>
                     <button onClick={() => setCheckoutSuccess(false)} className="ml-auto opacity-70 hover:opacity-100">
                         <X className="h-4 w-4" />
                     </button>
@@ -591,7 +612,7 @@ export default function MainApp() {
             <AppHeader />
 
             {/* Main Content */}
-            <main className="pt-header-offset flex w-full flex-1 gap-6 overflow-hidden px-4 pb-6">
+            <main className="pt-2 flex w-full flex-1 gap-6 overflow-hidden px-4 pb-6">
 
                 {/* Expandable Sidebar */}
                 <div
@@ -606,7 +627,7 @@ export default function MainApp() {
                             "overflow-hidden transition-all duration-300 ease-in-out",
                             sidebarExpanded ? "w-[200px] opacity-100" : "w-0 opacity-0"
                         )}>
-                            <span className="font-semibold text-sm text-foreground/90 whitespace-nowrap">{t("mainApp.configureReAngle")}</span>
+                            <span className="font-semibold text-sm text-foreground/90 whitespace-nowrap">{t("mainApp.configuration")}</span>
                         </div>
                         <button
                             onClick={() => setSidebarExpanded(!sidebarExpanded)}
@@ -617,6 +638,8 @@ export default function MainApp() {
                     </div>
 
                     <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 w-[100%] custom-scrollbar">
+
+
                         {/* Unified Sidebar Sections */}
                         <div className="flex flex-col space-y-4">
 
@@ -635,296 +658,80 @@ export default function MainApp() {
                                 </div>
                             ) : null}
 
-                            {/* Gather Inputs Section */}
-                            <div className={cn(
-                                "rounded-xl overflow-hidden flex flex-col transition-colors",
-                                (expandedSections.gather && sidebarExpanded) ? "bg-white/5 border border-white/10 shadow-sm" : "border border-transparent hover:bg-white/5"
-                            )}>
-                                <button
-                                    onClick={() => {
-                                        if (!sidebarExpanded) {
-                                            setSidebarExpanded(true)
-                                            setExpandedSections(prev => ({ ...prev, gather: true }))
-                                        } else {
-                                            toggleSection("gather")
-                                        }
-                                    }}
-                                    className="flex items-center w-full h-[40px] px-1 group outline-none cursor-pointer"
-                                    title={!sidebarExpanded ? t("mainApp.gatherInputs") : undefined}
-                                >
-                                    <div className={cn(
-                                        "flex items-center justify-center shrink-0 border transition-colors w-7 h-7 rounded-full",
-                                        "bg-white/5 border-white/10 text-muted-foreground group-hover:border-white/20 group-hover:bg-white/10 group-hover:text-foreground"
-                                    )}>
-                                        <FolderInput className="w-3.5 h-3.5" />
-                                    </div>
-                                    <div className={cn(
-                                        "flex items-center justify-between overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap",
-                                        sidebarExpanded ? "w-[266px] opacity-100 ml-3 pr-2" : "w-0 opacity-0 ml-0 pr-0"
-                                    )}>
-                                        <span className="font-medium text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                                            {t("mainApp.step1Gather")}
-                                        </span>
-                                        <ChevronRight className={cn(
-                                            "w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300 group-hover:text-foreground",
-                                            expandedSections.gather && "rotate-90"
-                                        )} />
-                                    </div>
-                                </button>
+                            {/* Step 1: Source */}
+                            <SourceSection
+                                t={t}
+                                expanded={expandedSections.gather}
+                                onToggle={() => {
+                                    if (!sidebarExpanded) {
+                                        setSidebarExpanded(true)
+                                        setExpandedSections(prev => ({ ...prev, gather: true }))
+                                    } else {
+                                        toggleSection("gather")
+                                    }
+                                }}
+                                sidebarExpanded={sidebarExpanded}
+                                activeInputTab={activeInputTab}
+                                setActiveInputTab={setActiveInputTab}
+                                inputItems={inputItems}
+                                onAddInput={handleAddInput}
+                                onRemoveInput={handleRemoveInput}
+                                onCompleteInputs={handleCompleteInputs}
+                                inputsLoading={inputsLoading}
+                                inputsLocked={inputsLocked}
+                                inputText={inputText}
+                                setInputText={setInputText}
+                                inputUrl={inputUrl}
+                                setInputUrl={setInputUrl}
+                                setInputFile={setInputFile}
+                            />
 
-                                {sidebarExpanded && expandedSections.gather && (
-                                    <div className="px-4 pb-4 space-y-4 animate-in slide-in-from-top-2 fade-in duration-200">
-                                        <Tabs value={activeInputTab} onValueChange={setActiveInputTab} className="w-full">
-                                            <TabsList className="grid w-full grid-cols-4 bg-black/20 h-9 p-1 rounded-lg">
-                                                <TabsTrigger value="text" className="data-[state=active]:bg-white/10 text-xs py-1 cursor-pointer">
-                                                    <Type className="w-3.5 h-3.5" />
-                                                </TabsTrigger>
-                                                <TabsTrigger value="file" className="data-[state=active]:bg-white/10 text-xs py-1 cursor-pointer">
-                                                    <FileText className="w-3.5 h-3.5" />
-                                                </TabsTrigger>
-                                                <TabsTrigger value="url" className="data-[state=active]:bg-white/10 text-xs py-1 cursor-pointer">
-                                                    <LinkIcon className="w-3.5 h-3.5" />
-                                                </TabsTrigger>
-                                                <TabsTrigger value="youtube" className="data-[state=active]:bg-white/10 text-xs py-1 cursor-pointer">
-                                                    <Youtube className="w-3.5 h-3.5" />
-                                                </TabsTrigger>
-                                            </TabsList>
+                            {/* Step 2: Reveal */}
+                            <RevealSection
+                                t={t}
+                                expanded={expandedSections.deangle}
+                                onToggle={() => {
+                                    if (!sidebarExpanded) {
+                                        setSidebarExpanded(true)
+                                        setExpandedSections(prev => ({ ...prev, deangle: true }))
+                                    } else {
+                                        toggleSection("deangle")
+                                    }
+                                }}
+                                sidebarExpanded={sidebarExpanded}
+                                onDeAngleProcess={handleDeAngleProcess}
+                                deAngleLoading={deAngleLoading}
+                                inputsLocked={inputsLocked}
+                            />
 
-                                            <div className="mt-3">
-                                                {activeInputTab === 'text' && (
-                                                    <Textarea
-                                                        placeholder={t("mainApp.pastePlaceholder")}
-                                                        className="min-h-[100px] bg-black/20 border-white/5 text-sm resize-none focus-visible:ring-1"
-                                                        value={inputText}
-                                                        onChange={e => setInputText(e.target.value)}
-                                                    />
-                                                )}
-                                                {(activeInputTab === 'url' || activeInputTab === 'youtube') && (
-                                                    <Input
-                                                        placeholder={activeInputTab === 'url' ? t("mainApp.urlPlaceholder") : t("mainApp.ytPlaceholder")}
-                                                        value={inputUrl}
-                                                        onChange={e => setInputUrl(e.target.value)}
-                                                        className="bg-black/20 border-white/5 text-sm h-9"
-                                                    />
-                                                )}
-                                                {activeInputTab === 'file' && (
-                                                    <div className="space-y-2">
-                                                        <Input
-                                                            id="file"
-                                                            type="file"
-                                                            onChange={e => setInputFile(e.target.files?.[0] || null)}
-                                                            className="bg-black/20 border-white/5 file:text-foreground file:text-xs h-9 text-xs py-1.5 cursor-pointer"
-                                                        />
-                                                    </div>
-                                                )}
-
-                                                <Button
-                                                    className="w-full mt-3 bg-white/5 hover:bg-white/10 border border-white/5 text-xs h-8 cursor-pointer"
-                                                    variant="outline"
-                                                    onClick={handleAddInput}
-                                                >
-                                                    {t("mainApp.addToQueue")}
-                                                </Button>
-                                            </div>
-                                        </Tabs>
-
-                                        {/* Queue section */}
-                                        <div className="pt-2">
-                                            <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                                                {t("mainApp.queue")} ({inputItems.length})
-                                            </div>
-                                            <div className="space-y-1.5 max-h-[120px] overflow-y-auto custom-scrollbar">
-                                                {inputItems.map(item => (
-                                                    <div key={item.id} className="flex items-center justify-between p-2 rounded-md bg-black/20 border border-white/5 group">
-                                                        <div className="truncate flex-1 pr-2">
-                                                            <div className="text-xs truncate">{item.meta?.title}</div>
-                                                        </div>
-                                                        <button
-                                                            className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 cursor-pointer p-0.5"
-                                                            onClick={() => handleRemoveInput(item.id)}
-                                                        >
-                                                            <Trash2 className="h-3 w-3" />
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                                {inputItems.length === 0 && (
-                                                    <div className="text-xs text-muted-foreground/40 text-center py-4 border border-dashed border-white/5 rounded-md">
-                                                        {t("mainApp.noItemsInQueue")}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <Button
-                                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-9 cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                            onClick={handleCompleteInputs}
-                                            disabled={inputsLoading || inputsLocked || inputItems.length === 0}
-                                        >
-                                            {inputsLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                            {inputsLocked ? t("mainApp.inputsLocked") : t("mainApp.completeAndContinue")}
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* DeAngle Section */}
-                            <div className={cn(
-                                "rounded-xl overflow-hidden flex flex-col transition-colors",
-                                (expandedSections.deangle && sidebarExpanded) ? "bg-white/5 border border-white/10 shadow-sm" : "border border-transparent hover:bg-white/5"
-                            )}>
-                                <button
-                                    onClick={() => {
-                                        if (!sidebarExpanded) {
-                                            setSidebarExpanded(true)
-                                            setExpandedSections(prev => ({ ...prev, deangle: true }))
-                                        } else {
-                                            toggleSection("deangle")
-                                        }
-                                    }}
-                                    className="flex items-center w-full h-[40px] px-1 group outline-none cursor-pointer"
-                                    title={!sidebarExpanded ? t("mainApp.tabDeangle") : undefined}
-                                >
-                                    <div className={cn(
-                                        "flex items-center justify-center shrink-0 border transition-colors w-7 h-7 rounded-full",
-                                        "bg-white/5 border-white/10 text-muted-foreground group-hover:border-white/20 group-hover:bg-white/10 group-hover:text-foreground"
-                                    )}>
-                                        <Triangle className="w-3.5 h-3.5" />
-                                    </div>
-                                    <div className={cn(
-                                        "flex items-center justify-between overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap",
-                                        sidebarExpanded ? "w-[266px] opacity-100 ml-3 pr-2" : "w-0 opacity-0 ml-0 pr-0"
-                                    )}>
-                                        <span className="font-medium text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                                            {t("mainApp.step2Deangle")}
-                                        </span>
-                                        <ChevronRight className={cn(
-                                            "w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300 group-hover:text-foreground",
-                                            expandedSections.deangle && "rotate-90"
-                                        )} />
-                                    </div>
-                                </button>
-
-                                {sidebarExpanded && expandedSections.deangle && (
-                                    <div className="px-4 pb-4 space-y-4 animate-in slide-in-from-top-2 fade-in duration-200">
-                                        <p className="text-xs text-muted-foreground/80 leading-relaxed">
-                                            {t("mainApp.deangleDescription")}
-                                        </p>
-                                        <Button
-                                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-9 cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                            onClick={handleDeAngleProcess}
-                                            disabled={deAngleLoading || !inputsLocked}
-                                        >
-                                            {deAngleLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                            {t("mainApp.startDeangle")}
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* ReAngle Section */}
-                            <div className={cn(
-                                "rounded-xl overflow-hidden flex flex-col transition-colors",
-                                (expandedSections.reangle && sidebarExpanded) ? "bg-white/5 border border-white/10 shadow-sm" : "border border-transparent hover:bg-white/5"
-                            )}>
-                                <button
-                                    onClick={() => {
-                                        if (!sidebarExpanded) {
-                                            setSidebarExpanded(true)
-                                            setExpandedSections(prev => ({ ...prev, reangle: true }))
-                                        } else {
-                                            toggleSection("reangle")
-                                        }
-                                    }}
-                                    className="flex items-center w-full h-[40px] px-1 group outline-none cursor-pointer"
-                                    title={!sidebarExpanded ? t("mainApp.tabReangle") : undefined}
-                                >
-                                    <div className={cn(
-                                        "flex items-center justify-center shrink-0 border transition-colors w-7 h-7 rounded-full",
-                                        "bg-white/5 border-white/10 text-muted-foreground group-hover:border-white/20 group-hover:bg-white/10 group-hover:text-foreground"
-                                    )}>
-                                        <Wand2 className="w-3.5 h-3.5" />
-                                    </div>
-                                    <div className={cn(
-                                        "flex items-center justify-between overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap",
-                                        sidebarExpanded ? "w-[266px] opacity-100 ml-3 pr-2" : "w-0 opacity-0 ml-0 pr-0"
-                                    )}>
-                                        <span className="font-medium text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                                            {t("mainApp.step3Reangle")}
-                                        </span>
-                                        <ChevronRight className={cn(
-                                            "w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300 group-hover:text-foreground",
-                                            expandedSections.reangle && "rotate-90"
-                                        )} />
-                                    </div>
-                                </button>
-
-                                {sidebarExpanded && expandedSections.reangle && (
-                                    <div className="px-4 pb-4 space-y-4 animate-in slide-in-from-top-2 fade-in duration-200">
-
-                                        {/* Selected Events */}
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{t("mainApp.selectedFacts")}</label>
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {selectedFacts.length > 0 ? selectedFacts.map((f: { id: string, content: string }) => (
-                                                    <span
-                                                        key={f.id}
-                                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/15 text-blue-400 border border-blue-500/20 cursor-pointer hover:bg-blue-500/25 transition-colors"
-                                                        onClick={() => handleToggleDeAngleSelect(f.id, "fact")}
-                                                        title={f.content?.split('\n')[0] || t("mainApp.fact")}
-                                                    >
-                                                        <span className="truncate max-w-[140px]">{f.content?.split('\n')[0]?.slice(0, 30) || t("mainApp.fact")}...</span>
-                                                        <X className="w-2.5 h-2.5 shrink-0 opacity-60 hover:opacity-100" />
-                                                    </span>
-                                                )) : (
-                                                    <span className="text-xs text-muted-foreground/50 italic py-0.5">{t("mainApp.noEventsSelected")}</span>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Selected Angles */}
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{t("mainApp.selectedOpinions")}</label>
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {selectedAngles.length > 0 ? selectedAngles.map((a: { id: string, title: string }) => (
-                                                    <span
-                                                        key={a.id}
-                                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-500/15 text-purple-400 border border-purple-500/20 cursor-pointer hover:bg-purple-500/25 transition-colors"
-                                                        onClick={() => handleToggleDeAngleSelect(a.id, "angle")}
-                                                        title={a.title || t("mainApp.opinion")}
-                                                    >
-                                                        <span className="truncate max-w-[140px]">{a.title || t("mainApp.opinion")}</span>
-                                                        <X className="w-2.5 h-2.5 shrink-0 opacity-60 hover:opacity-100" />
-                                                    </span>
-                                                )) : (
-                                                    <span className="text-xs text-muted-foreground/50 italic py-0.5">{t("mainApp.noAnglesSelected")}</span>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Break line to separate from instruction textarea */}
-                                        <div className="border-t border-white/5 my-2"></div>
-
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-foreground/80">{t("mainApp.customization")}</label>
-                                            <Textarea
-                                                placeholder={t("mainApp.customizationPlaceholder")}
-                                                className="min-h-[100px] bg-black/20 border-white/5 text-sm resize-none focus-visible:ring-1"
-                                                value={prompt}
-                                                onChange={e => setPrompt(e.target.value)}
-                                            />
-                                        </div>
-
-                                        <Button
-                                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-9 cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                            onClick={handleReAngleProcess}
-                                            disabled={reAngleLoading || !deAngleResult}
-                                        >
-                                            {reAngleLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                            {t("mainApp.startReangle")}
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
+                            {/* Step 3: Reframe */}
+                            <ReframeSection
+                                t={t}
+                                expanded={expandedSections.reangle}
+                                onToggle={() => {
+                                    if (!sidebarExpanded) {
+                                        setSidebarExpanded(true)
+                                        setExpandedSections(prev => ({ ...prev, reangle: true }))
+                                    } else {
+                                        toggleSection("reangle")
+                                    }
+                                }}
+                                sidebarExpanded={sidebarExpanded}
+                                selectedFacts={selectedFacts}
+                                customFacts={customFacts}
+                                onAddCustomFact={handleAddCustomFact}
+                                onRemoveCustomFact={handleRemoveCustomFact}
+                                selectedAngles={selectedAngles}
+                                customAngles={customAngles}
+                                onAddCustomAngle={handleAddCustomAngle}
+                                onRemoveCustomAngle={handleRemoveCustomAngle}
+                                onToggleDeAngleSelect={handleToggleDeAngleSelect}
+                                prompt={prompt}
+                                setPrompt={setPrompt}
+                                onReAngleProcess={handleReAngleProcess}
+                                reAngleLoading={reAngleLoading}
+                                deAngleResult={deAngleResult}
+                            />
                         </div>
                     </div>
                 </div>
