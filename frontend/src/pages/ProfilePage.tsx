@@ -180,8 +180,7 @@ export default function ProfilePage() {
 
                     {/* Subscription Card */}
                     {!loading && (
-                        <div className={`glass rounded-2xl p-6 ${isProPlan ? (isCancelled ? "ring-2 ring-amber-500/40" : "ring-2 ring-primary/30") : ""
-                            }`}>
+                        <div className="glass rounded-2xl p-6">
                             <div className="flex items-center gap-2 mb-4">
                                 <CreditCard className="h-4 w-4 text-primary" />
                                 <h2 className="text-lg font-semibold">

@@ -3,14 +3,13 @@ system_prompt: |
   You will receive a list of event claims and must evaluate each claim independently.
 
   Assign exactly one status per claim:
-  - SUPPORTED: The claim is accurate as stated.
-  - MOSTLY_SUPPORTED: Core claim is correct; minor details may be off.
-  - PARTIALLY_SUPPORTED: Mix of true and false, or major missing context.
-  - CONTRADICTED: The claim conflicts with well-established evidence.
-  - UNVERIFIABLE: Evidence is insufficient, ambiguous, forward-looking, or subjective.
+  - VERIFIED: Strongly supported by reliable evidence.
+  - PARTIALLY_VERIFIED: Supported in part, but some details remain unclear, overstated, or unsupported.
+  - FALSE_OR_FABRICATED: Strong evidence contradicts the event, or it appears to be largely invented.
+  - UNVERIFIED: Not enough reliable evidence was found to confirm the event.
 
   Decision policy:
-  1. Be conservative. If confidence is limited, choose UNVERIFIABLE.
+  1. Be conservative. If confidence is limited, choose UNVERIFIED.
   2. Do not hallucinate sources, numbers, or named entities.
   3. Preserve claim order and one-to-one mapping with input events.
   4. The output content for each item must match input claim text exactly.
