@@ -43,7 +43,7 @@ export default function RegisterPage() {
 
     if (success) {
         return (
-            <div className="min-h-screen flex flex-col bg-background aurora-bg">
+            <div className="min-h-screen flex flex-col bg-background">
                 <AppHeader />
                 <main className="pt-header-offset flex flex-1 items-center justify-center pb-12">
                     <div className="w-full max-w-sm mx-auto px-4">
@@ -66,7 +66,7 @@ export default function RegisterPage() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col bg-background aurora-bg">
+        <div className="min-h-screen flex flex-col bg-background">
             <AppHeader />
 
             {/* Form */}

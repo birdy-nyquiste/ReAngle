@@ -100,8 +100,9 @@ export function AudioPlayer({ audioUrl, onDownload, className }: AudioPlayerProp
             <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 shrink-0 rounded-full hover:bg-white/10 text-primary hover:text-primary transition-colors cursor-pointer"
+                className="h-11 w-11 shrink-0 rounded-full hover:bg-white/10 text-primary hover:text-primary transition-colors cursor-pointer"
                 onClick={togglePlayPause}
+                aria-label={isPlaying ? "Pause" : "Play"}
             >
                 {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
             </Button>
@@ -131,8 +132,9 @@ export function AudioPlayer({ audioUrl, onDownload, className }: AudioPlayerProp
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-full hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                    className="h-11 w-11 rounded-full hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                     onClick={toggleMute}
+                    aria-label={isMuted || volume === 0 ? "Unmute" : "Mute"}
                 >
                     {isMuted || volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </Button>
@@ -152,9 +154,9 @@ export function AudioPlayer({ audioUrl, onDownload, className }: AudioPlayerProp
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 rounded-full hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        className="h-11 w-11 rounded-full hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                         onClick={onDownload}
-                        title="Download Audio"
+                        aria-label="Download audio"
                     >
                         <Download className="h-4 w-4" />
                     </Button>

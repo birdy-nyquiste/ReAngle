@@ -22,10 +22,6 @@ export default function LandingPage() {
 
                 {/* --- Section 1: Hero (Refractive Display) --- */}
                 <section className="min-h-[90vh] flex flex-col items-center justify-center px-6 relative">
-                    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-                        <div className="scanning-bar" />
-                    </div>
-
                     <div className="container max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 items-center">
                         <div className="lg:col-span-8 flex flex-col items-start translate-x-0 lg:-translate-x-12">
                             <h1 className="text-[clamp(4.5rem,14vw,11.5rem)] font-bold tracking-tighter leading-[0.85] font-heading mb-12 reveal-skew">
@@ -76,46 +72,39 @@ export default function LandingPage() {
                             <div className="h-1.5 w-16 bg-white/10 rounded-full" />
                         </div>
 
-                        <div className="grid md:grid-cols-3 gap-6">
-                                {[
-                                    {
-                                        id: "01",
-                                        icon: <FolderInput className="w-5 h-5" />,
-                                        title: t("landing.engineFeature1Title"),
-                                        desc: t("landing.engineFeature1Desc"),
-                                    },
-                                    {
-                                        id: "02",
-                                        icon: <Triangle className="w-5 h-5" />,
-                                        title: t("landing.engineFeature2Title"),
-                                        desc: t("landing.engineFeature2Desc"),
-                                    },
-                                    {
-                                        id: "03",
-                                        icon: <Wand2 className="w-5 h-5" />,
-                                        title: t("landing.engineFeature3Title"),
-                                        desc: t("landing.engineFeature3Desc"),
-                                    }
-                                ].map((feature, i) => (
-                                    <div key={i} className="group glass-card p-12 transition-all duration-700 hover:bg-white/[0.03] hover:border-white/10 overflow-hidden relative">
-                                        <span className="absolute -right-8 -bottom-8 text-9xl font-bold text-white/[0.02] group-hover:text-white/[0.04] transition-colors duration-700 select-none">
-                                            {feature.id}
-                                        </span>
-                                        <div className="relative z-10 space-y-8">
-                                            <div className="p-4 rounded-full bg-white/5 w-fit border border-white/5 transition-colors group-hover:border-white/20">
-                                                {feature.icon}
-                                            </div>
-                                            <div className="space-y-4">
-                                                <h3 className="text-3xl font-bold font-heading text-white">
-                                                    {feature.title}
-                                                </h3>
-                                                <p className="text-xl text-white/50 font-light leading-relaxed max-w-md">
-                                                    {feature.desc}
-                                                </p>
+                        <div className="grid md:grid-cols-12 gap-4">
+                                {/* Step 01 — full-width anchor card */}
+                                <div className="md:col-span-5 group glass-card p-10 transition-all duration-700 hover:bg-white/[0.03] hover:border-white/10 overflow-hidden relative flex flex-col justify-between gap-12">
+                                    <span className="absolute -right-6 -bottom-6 text-[8rem] font-bold text-white/[0.025] select-none leading-none">01</span>
+                                    <div className="relative z-10">
+                                        <FolderInput className="w-5 h-5 text-white/40 group-hover:text-white transition-colors mb-8" />
+                                        <h3 className="text-2xl font-bold font-heading text-white mb-4">{t("landing.engineFeature1Title")}</h3>
+                                        <p className="text-base text-white/50 font-light leading-relaxed">{t("landing.engineFeature1Desc")}</p>
+                                    </div>
+                                </div>
+                                {/* Steps 02 + 03 — stacked */}
+                                <div className="md:col-span-7 flex flex-col gap-4">
+                                    <div className="group glass-card p-8 transition-all duration-700 hover:bg-white/[0.03] hover:border-white/10 overflow-hidden relative flex-1">
+                                        <span className="absolute -right-4 -bottom-4 text-7xl font-bold text-white/[0.025] select-none leading-none">02</span>
+                                        <div className="relative z-10 flex items-start gap-6">
+                                            <Triangle className="w-5 h-5 text-white/40 group-hover:text-white transition-colors shrink-0 mt-1" />
+                                            <div>
+                                                <h3 className="text-2xl font-bold font-heading text-white mb-3">{t("landing.engineFeature2Title")}</h3>
+                                                <p className="text-base text-white/50 font-light leading-relaxed">{t("landing.engineFeature2Desc")}</p>
                                             </div>
                                         </div>
                                     </div>
-                                ))}
+                                    <div className="group glass-card p-8 transition-all duration-700 hover:bg-white/[0.03] hover:border-white/10 overflow-hidden relative flex-1">
+                                        <span className="absolute -right-4 -bottom-4 text-7xl font-bold text-white/[0.025] select-none leading-none">03</span>
+                                        <div className="relative z-10 flex items-start gap-6">
+                                            <Wand2 className="w-5 h-5 text-white/40 group-hover:text-white transition-colors shrink-0 mt-1" />
+                                            <div>
+                                                <h3 className="text-2xl font-bold font-heading text-white mb-3">{t("landing.engineFeature3Title")}</h3>
+                                                <p className="text-base text-white/50 font-light leading-relaxed">{t("landing.engineFeature3Desc")}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                         </div>
                     </div>
                 </section>

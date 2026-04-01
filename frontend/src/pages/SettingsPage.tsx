@@ -183,7 +183,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background aurora-bg">
+    <div className="min-h-screen flex flex-col bg-background">
       <AppHeader />
       <main className="pt-header-offset flex flex-1 items-start justify-center px-4 pb-12">
         <div className="w-full max-w-4xl space-y-6">

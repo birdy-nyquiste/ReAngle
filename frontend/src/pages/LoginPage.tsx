@@ -31,7 +31,7 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col bg-background aurora-bg">
+        <div className="min-h-screen flex flex-col bg-background">
             <AppHeader />
 
             {/* Form */}

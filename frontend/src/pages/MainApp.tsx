@@ -62,8 +62,8 @@ export default function MainApp() {
     const [sidebarExpanded, setSidebarExpanded] = useState(true)
     const [expandedSections, setExpandedSections] = useState({
         gather: true,
-        deangle: true,
-        reangle: true
+        deangle: false,
+        reangle: false
     })
 
     const toggleSection = (section: "gather" | "deangle" | "reangle") => {
@@ -542,12 +542,12 @@ export default function MainApp() {
                 if (res.status === 402) {
                     fetchAvatarUsage()
                 }
-                throw new Error(data?.error || data?.message || data?.detail || "口播稿生成失败")
+                throw new Error(data?.error || data?.message || data?.detail || t("mainApp.voiceoverGenerateFailed"))
             }
             setVoiceoverScript(data.script ?? "")
         } catch (err) {
             console.error("Voiceover Error:", err)
-            setError(err instanceof Error ? err.message : "口播稿生成失败，请稍后重试")
+            setError(err instanceof Error ? err.message : t("mainApp.voiceoverGenerateFailedRetry"))
         } finally {
             setVoiceoverLoading(false)
         }
@@ -565,7 +565,7 @@ export default function MainApp() {
         }
         if (script.length > AVATAR_SCRIPT_MAX_CHARS) {
             console.warn(`[Avatar] Voiceover exceeds ${AVATAR_SCRIPT_MAX_CHARS} chars, blocked.`)
-            setError(`口播稿超过 ${AVATAR_SCRIPT_MAX_CHARS} 字，请缩短后再生成数字人视频。`)
+            setError(t("mainApp.avatarScriptTooLong").replace("{n}", String(AVATAR_SCRIPT_MAX_CHARS)))
             return
         }
         setError(null)
@@ -582,20 +582,20 @@ export default function MainApp() {
                 if (res.status === 402) {
                     fetchAvatarUsage()
                 }
-                throw new Error(data?.error || data?.message || data?.detail || "数字人视频生成失败")
+                throw new Error(data?.error || data?.message || data?.detail || t("mainApp.avatarVideoGenerateFailed"))
             }
             setAvatarVideoUrl(data.video_url ?? null)
             fetchAvatarUsage()
         } catch (err) {
             console.error("Avatar Error:", err)
-            setError(err instanceof Error ? err.message : "数字人视频生成失败，请稍后重试")
+            setError(err instanceof Error ? err.message : t("mainApp.avatarVideoGenerateFailedRetry"))
         } finally {
             setAvatarLoading(false)
         }
     }
 
     return (
-        <div className="flex h-screen flex-col bg-background aurora-bg">
+        <div className="flex h-screen flex-col bg-background">
             {/* Checkout Success Banner */}
             {checkoutSuccess ? (
                 <div
@@ -631,7 +631,8 @@ export default function MainApp() {
                         </div>
                         <button
                             onClick={() => setSidebarExpanded(!sidebarExpanded)}
-                            className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                            aria-label={sidebarExpanded ? "Collapse sidebar" : "Expand sidebar"}
+                            className="w-11 h-11 rounded-lg hover:bg-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                         >
                             {sidebarExpanded ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
                         </button>
@@ -662,6 +663,7 @@ export default function MainApp() {
                             <SourceSection
                                 t={t}
                                 expanded={expandedSections.gather}
+                                completed={inputsLocked}
                                 onToggle={() => {
                                     if (!sidebarExpanded) {
                                         setSidebarExpanded(true)
@@ -690,6 +692,7 @@ export default function MainApp() {
                             <RevealSection
                                 t={t}
                                 expanded={expandedSections.deangle}
+                                completed={deAngleResult !== null}
                                 onToggle={() => {
                                     if (!sidebarExpanded) {
                                         setSidebarExpanded(true)
@@ -708,6 +711,7 @@ export default function MainApp() {
                             <ReframeSection
                                 t={t}
                                 expanded={expandedSections.reangle}
+                                completed={reAngleResult !== null}
                                 onToggle={() => {
                                     if (!sidebarExpanded) {
                                         setSidebarExpanded(true)
@@ -737,7 +741,21 @@ export default function MainApp() {
                 </div>
 
                 {/* Right Pane: Results Area */}
-                <div className="flex-1 flex flex-col min-w-0 bg-transparent">
+                <div className="flex-1 flex flex-col min-w-0 bg-transparent gap-2">
+                    {/* Error bar — always visible regardless of sidebar state */}
+                    {error && !isUsageLimitError && !sidebarExpanded ? (
+                        <div className={cn(
+                            "shrink-0 text-xs px-4 py-2.5 rounded-xl border flex items-center gap-2",
+                            error.includes("peak capacity") || error.includes("try again") || error.includes("繁忙") || error.includes("重试")
+                                ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                : "bg-red-500/10 text-red-400 border-red-500/20"
+                        )}>
+                            <span className="font-semibold uppercase tracking-wider text-[10px] opacity-70 shrink-0">
+                                {error.includes("peak capacity") || error.includes("繁忙") ? t("mainApp.serverBusy") : t("mainApp.executionError")}
+                            </span>
+                            <span>{error}</span>
+                        </div>
+                    ) : null}
                     {/* Collapsed Sidebar Mode (Split View) */}
                     {!sidebarExpanded ? (
                         <div className="flex-1 flex flex-row gap-6 h-full min-h-0 overflow-hidden animate-in fade-in zoom-in-[0.99] duration-300 fill-mode-both">
@@ -753,7 +771,10 @@ export default function MainApp() {
                                             <p>{t("mainApp.runDeangleToShowResult")}</p>
                                         </div>
                                     ) : deAngleLoading ? (
-                                        <div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
+                                        <div className="h-full flex flex-col items-center justify-center gap-3 text-muted-foreground">
+                                            <Loader2 className="w-7 h-7 animate-spin text-blue-400/60" />
+                                            <p className="text-sm">{t("mainApp.revealAnalyzing")}</p>
+                                        </div>
                                     ) : (
                                         <div className="rounded-2xl shrink-0">
                                             <DeAngleView
@@ -780,7 +801,10 @@ export default function MainApp() {
                                             <p>{t("mainApp.runReangleToShowResult")}</p>
                                         </div>
                                     ) : reAngleLoading ? (
-                                        <div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
+                                        <div className="h-full flex flex-col items-center justify-center gap-3 text-muted-foreground">
+                                            <Loader2 className="w-7 h-7 animate-spin text-purple-400/60" />
+                                            <p className="text-sm">{t("mainApp.reframeGenerating")}</p>
+                                        </div>
                                     ) : (
                                         <div className="h-full">
                                             <ReAngleView
@@ -837,7 +861,10 @@ export default function MainApp() {
                                                 <p>{t("mainApp.runDeangleToShowResult")}</p>
                                             </div>
                                         ) : deAngleLoading ? (
-                                            <div className="h-full flex items-center justify-center rounded-2xl"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
+                                            <div className="h-full flex flex-col items-center justify-center gap-3 text-muted-foreground rounded-2xl">
+                                                <Loader2 className="w-7 h-7 animate-spin text-blue-400/60" />
+                                                <p className="text-sm">{t("mainApp.revealAnalyzing")}</p>
+                                            </div>
                                         ) : (
                                             <div className="h-full rounded-2xl overflow-hidden">
                                                 <DeAngleView
@@ -857,7 +884,10 @@ export default function MainApp() {
                                                 <p>{t("mainApp.runReangleToShowResult")}</p>
                                             </div>
                                         ) : reAngleLoading ? (
-                                            <div className="h-full flex items-center justify-center rounded-2xl"><Loader2 className="w-8 h-8 animate-spin text-primary opacity-50" /></div>
+                                            <div className="h-full flex flex-col items-center justify-center gap-3 text-muted-foreground rounded-2xl">
+                                                <Loader2 className="w-7 h-7 animate-spin text-purple-400/60" />
+                                                <p className="text-sm">{t("mainApp.reframeGenerating")}</p>
+                                            </div>
                                         ) : (
                                             <div className="h-full">
                                                 <ReAngleView

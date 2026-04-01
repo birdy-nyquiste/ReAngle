@@ -1,5 +1,5 @@
 import React from "react"
-import { Wand2, ChevronRight, X, Loader2 } from "lucide-react"
+import { Wand2, ChevronRight, X, Loader2, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -23,6 +23,7 @@ interface ReframeSectionProps {
     onReAngleProcess: () => void
     reAngleLoading: boolean
     deAngleResult: { facts: { id: string }[], angles: { id: string }[] } | null
+    completed?: boolean
 }
 
 export const ReframeSection: React.FC<ReframeSectionProps> = ({
@@ -44,14 +45,18 @@ export const ReframeSection: React.FC<ReframeSectionProps> = ({
     onReAngleProcess,
     reAngleLoading,
     deAngleResult,
+    completed = false,
 }) => {
     const [factInput, setFactInput] = React.useState("")
     const [angleInput, setAngleInput] = React.useState("")
 
+    const handleToggleFactSelect = React.useCallback((id: string) => onToggleDeAngleSelect(id, "fact"), [onToggleDeAngleSelect])
+    const handleToggleAngleSelect = React.useCallback((id: string) => onToggleDeAngleSelect(id, "angle"), [onToggleDeAngleSelect])
+
     return (
         <div className={cn(
             "rounded-xl overflow-hidden flex flex-col transition-colors",
-            (expanded && sidebarExpanded) ? "bg-white/5 border border-white/10 shadow-sm" : "border border-transparent hover:bg-white/5"
+            (expanded && sidebarExpanded) ? "section-active" : "border border-transparent hover:bg-white/5"
         )}>
             <button
                 onClick={onToggle}
@@ -59,16 +64,20 @@ export const ReframeSection: React.FC<ReframeSectionProps> = ({
                 title={!sidebarExpanded ? t("mainApp.tabReangle") : undefined}
             >
                 <div className={cn(
-                    "flex items-center justify-center shrink-0 border transition-colors w-7 h-7 rounded-full",
-                    "bg-white/5 border-white/10 text-muted-foreground group-hover:border-white/20 group-hover:bg-white/10 group-hover:text-foreground"
+                    "flex items-center justify-center shrink-0 border transition-all w-7 h-7 rounded-full",
+                    completed
+                        ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-400"
+                        : "bg-white/5 border-white/10 text-muted-foreground group-hover:border-white/20 group-hover:bg-white/10 group-hover:text-foreground"
                 )}>
-                    <Wand2 className="w-3.5 h-3.5" />
+                    <span key={completed ? 'done' : 'idle'} className={completed ? "complete-pop block" : "block"}>
+                        {completed ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Wand2 className="w-3.5 h-3.5" />}
+                    </span>
                 </div>
                 <div className={cn(
                     "flex items-center justify-between overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap",
-                    sidebarExpanded ? "w-[266px] opacity-100 ml-3 pr-2" : "w-0 opacity-0 ml-0 pr-0"
+                    sidebarExpanded ? "w-[min(266px,75vw)] opacity-100 ml-3 pr-2" : "w-0 opacity-0 ml-0 pr-0"
                 )}>
-                    <span className="font-medium text-sm text-neutral-400 group-hover:text-neutral-50 transition-colors">
+                    <span className="font-medium text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                         {t("mainApp.step3Reangle")}
                     </span>
                     <ChevronRight className={cn(
@@ -80,10 +89,13 @@ export const ReframeSection: React.FC<ReframeSectionProps> = ({
 
             {sidebarExpanded && expanded && (
                 <div className="px-4 pb-4 space-y-4 animate-in slide-in-from-top-2 fade-in duration-200">
+                    <p className="text-xs text-muted-foreground leading-relaxed italic border-l-2 border-neutral-800 pl-3">
+                        {t("mainApp.reframeDescription")}
+                    </p>
 
                     {/* Selected & Custom Events */}
                     <div className="space-y-3">
-                        <label className="text-[11px] font-bold text-neutral-500 flex items-center gap-2">
+                        <label className="text-[11px] font-bold text-muted-foreground flex items-center gap-2">
                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/50"></span>
                              {t("mainApp.selectedFacts")}
                         </label>
@@ -93,15 +105,16 @@ export const ReframeSection: React.FC<ReframeSectionProps> = ({
                             <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest">{t("mainApp.selectFromReveal")}</label>
                             <div className="flex flex-wrap gap-1.5">
                                 {selectedFacts.length > 0 ? selectedFacts.map((f: { id: string, content: string }) => (
-                                    <span
+                                    <button
                                         key={f.id}
-                                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/10 cursor-pointer hover:bg-emerald-500/20 transition-all"
-                                        onClick={() => onToggleDeAngleSelect(f.id, "fact")}
-                                        title={f.content?.split('\n')[0] || t("mainApp.fact")}
+                                        type="button"
+                                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/10 cursor-pointer hover:bg-emerald-500/20 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500/50"
+                                        onClick={() => handleToggleFactSelect(f.id)}
+                                        aria-label={`${t("mainApp.fact")}: ${f.content?.split('\n')[0] || t("mainApp.fact")} — ${t("mainApp.removeSelection") || "remove"}`}
                                     >
-                                        <span className="truncate max-w-[140px] uppercase tracking-wide">{f.content?.split('\n')[0]?.slice(0, 30) || t("mainApp.fact")}...</span>
-                                        <X className="w-2.5 h-2.5 shrink-0 opacity-40 group-hover:opacity-100" />
-                                    </span>
+                                        <span className="truncate max-w-[100px] sm:max-w-[140px] uppercase tracking-wide">{f.content?.split('\n')[0]?.slice(0, 30) || t("mainApp.fact")}...</span>
+                                        <X className="w-2.5 h-2.5 shrink-0 opacity-40" />
+                                    </button>
                                 )) : (
                                     <span className="text-[11px] text-neutral-600 italic py-1">{t("mainApp.noEventsSelected")}</span>
                                 )}
@@ -114,15 +127,16 @@ export const ReframeSection: React.FC<ReframeSectionProps> = ({
                             {customFacts.length > 0 && (
                                 <div className="flex flex-wrap gap-1.5 pb-1">
                                     {customFacts.map((f: { id: string, content: string }) => (
-                                        <span
+                                        <button
                                             key={f.id}
-                                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 cursor-pointer hover:bg-emerald-500/30 transition-all shadow-sm"
+                                            type="button"
+                                            className="tag-appear inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 cursor-pointer hover:bg-emerald-500/30 transition-all shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500/50"
                                             onClick={() => onRemoveCustomFact(f.id)}
-                                            title={f.content}
+                                            aria-label={`Remove custom fact: ${f.content}`}
                                         >
-                                            <span className="truncate max-w-[140px] tracking-wide">{f.content.slice(0, 30)}...</span>
-                                            <X className="w-2.5 h-2.5 shrink-0 opacity-40 group-hover:opacity-100" />
-                                        </span>
+                                            <span className="truncate max-w-[100px] sm:max-w-[140px] tracking-wide">{f.content.slice(0, 30)}...</span>
+                                            <X className="w-2.5 h-2.5 shrink-0 opacity-40" />
+                                        </button>
                                     ))}
                                 </div>
                             )}
@@ -157,7 +171,7 @@ export const ReframeSection: React.FC<ReframeSectionProps> = ({
 
                     {/* Selected & Custom Angles */}
                     <div className="space-y-3">
-                        <label className="text-[11px] font-bold text-neutral-500 flex items-center gap-2">
+                        <label className="text-[11px] font-bold text-muted-foreground flex items-center gap-2">
                              <span className="w-1.5 h-1.5 rounded-full bg-purple-500/50"></span>
                              {t("mainApp.selectedOpinions")}
                         </label>
@@ -167,15 +181,16 @@ export const ReframeSection: React.FC<ReframeSectionProps> = ({
                             <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest">{t("mainApp.selectFromReveal")}</label>
                             <div className="flex flex-wrap gap-1.5">
                                 {selectedAngles.length > 0 ? selectedAngles.map((a: { id: string, title: string }) => (
-                                    <span
+                                    <button
                                         key={a.id}
-                                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/10 cursor-pointer hover:bg-purple-500/20 transition-all"
-                                        onClick={() => onToggleDeAngleSelect(a.id, "angle")}
-                                        title={a.title || t("mainApp.opinion")}
+                                        type="button"
+                                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/10 cursor-pointer hover:bg-purple-500/20 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-500/50"
+                                        onClick={() => handleToggleAngleSelect(a.id)}
+                                        aria-label={`${t("mainApp.opinion")}: ${a.title || t("mainApp.opinion")} — ${t("mainApp.removeSelection") || "remove"}`}
                                     >
-                                        <span className="truncate max-w-[140px] uppercase tracking-wide">{a.title || t("mainApp.opinion")}</span>
-                                        <X className="w-2.5 h-2.5 shrink-0 opacity-40 group-hover:opacity-100" />
-                                    </span>
+                                        <span className="truncate max-w-[100px] sm:max-w-[140px] uppercase tracking-wide">{a.title || t("mainApp.opinion")}</span>
+                                        <X className="w-2.5 h-2.5 shrink-0 opacity-40" />
+                                    </button>
                                 )) : (
                                     <span className="text-[11px] text-neutral-600 italic py-1">{t("mainApp.noAnglesSelected")}</span>
                                 )}
@@ -188,15 +203,16 @@ export const ReframeSection: React.FC<ReframeSectionProps> = ({
                             {customAngles.length > 0 && (
                                 <div className="flex flex-wrap gap-1.5 pb-1">
                                     {customAngles.map((a: { id: string, title: string }) => (
-                                        <span
+                                        <button
                                             key={a.id}
-                                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20 cursor-pointer hover:bg-purple-500/30 transition-all shadow-sm"
+                                            type="button"
+                                            className="tag-appear inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20 cursor-pointer hover:bg-purple-500/30 transition-all shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-500/50"
                                             onClick={() => onRemoveCustomAngle(a.id)}
-                                            title={a.title}
+                                            aria-label={`Remove custom angle: ${a.title}`}
                                         >
-                                            <span className="truncate max-w-[140px] tracking-wide">{a.title}</span>
-                                            <X className="w-2.5 h-2.5 shrink-0 opacity-40 group-hover:opacity-100" />
-                                        </span>
+                                            <span className="truncate max-w-[100px] sm:max-w-[140px] tracking-wide">{a.title}</span>
+                                            <X className="w-2.5 h-2.5 shrink-0 opacity-40" />
+                                        </button>
                                     ))}
                                 </div>
                             )}
@@ -232,7 +248,7 @@ export const ReframeSection: React.FC<ReframeSectionProps> = ({
 
 
                     <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-neutral-400 flex items-center gap-2">
+                        <label className="text-[11px] font-bold text-muted-foreground flex items-center gap-2">
                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500/50"></span>
                              {t("mainApp.customization")}
                         </label>

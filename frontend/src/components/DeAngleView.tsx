@@ -111,15 +111,24 @@ export function DeAngleView({ facts, angles, selectedIds, onToggleSelect, layout
                                 {group.map(fact => {
                                     const isSelected = selectedIds.has(fact.id)
                                     return (
-                                        <div 
-                                            key={fact.id} 
+                                        <div
+                                            key={fact.id}
+                                            role="button"
+                                            tabIndex={0}
                                             onClick={() => onToggleSelect(fact.id, "fact")}
-                                            className={`p-4 lg:p-5 rounded-2xl text-sm border cursor-pointer transition-all duration-300 group
+                                            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggleSelect(fact.id, "fact") } }}
+                                            aria-pressed={isSelected}
+                                            className={`relative p-4 lg:p-5 rounded-2xl text-sm border cursor-pointer transition-all duration-200 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/20
                                                 ${isSelected ? `${Config.bg} ${Config.border} ring-1 ring-white/10 shadow-lg shadow-black/20` : 'bg-white/[0.02] border-white/5 hover:bg-white/5 hover:border-white/10'}`}
                                         >
+                                            {isSelected && (
+                                                <div className="absolute top-2.5 right-2.5 animate-in zoom-in-50 fade-in duration-150">
+                                                    <CheckCircle2 className={`w-3.5 h-3.5 ${Config.color}`} />
+                                                </div>
+                                            )}
                                             {/* Process content to safely split out [Analysis] if it was appended by backend */}
                                             {fact.content.split('\n\n[Analysis]:').map((part, i) => (
-                                                <div key={i} className={i === 1 ? "mt-4 pt-4 border-t border-white/10 text-[11px] text-neutral-500 leading-relaxed italic" : "leading-relaxed text-neutral-200"}>
+                                                <div key={i} className={i === 1 ? "mt-4 pt-4 border-t border-white/10 text-[11px] text-neutral-500 leading-relaxed italic" : "leading-relaxed text-neutral-200 pr-5"}>
                                                     {i === 1 && <strong className="block mb-2 text-neutral-400 not-italic uppercase tracking-widest text-[9px] font-black">{t("mainApp.analysisLabel")}</strong>}
                                                     {part}
                                                 </div>
@@ -150,13 +159,22 @@ export function DeAngleView({ facts, angles, selectedIds, onToggleSelect, layout
                         const isSelected = selectedIds.has(angle.id)
                         const Config = angleColorConfig.purple
                         return (
-                            <div 
-                                key={angle.id} 
+                            <div
+                                key={angle.id}
+                                role="button"
+                                tabIndex={0}
                                 onClick={() => onToggleSelect(angle.id, "angle")}
-                                className={`p-3 lg:p-4 rounded-xl text-sm border cursor-pointer transition-all duration-200 
+                                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggleSelect(angle.id, "angle") } }}
+                                aria-pressed={isSelected}
+                                className={`relative p-3 lg:p-4 rounded-xl text-sm border cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/20
                                     ${isSelected ? `${Config.bg} ${Config.border} ring-1 ring-white/20` : 'bg-white/5 border-white/5 hover:bg-white/10'}`}
                             >
-                                <div className="leading-relaxed">
+                                {isSelected && (
+                                    <div className="absolute top-2.5 right-2.5 animate-in zoom-in-50 fade-in duration-150">
+                                        <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
+                                    </div>
+                                )}
+                                <div className="leading-relaxed pr-5">
                                     {angle.title}
                                 </div>
                                 <div className="mt-3 pt-3 border-t border-white/10 text-xs text-muted-foreground">

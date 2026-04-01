@@ -73,23 +73,19 @@
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
   }
 
-  .text-glow {
-    text-shadow: 0 0 40px rgba(255,255,255,0.1);
-  }
-
-  .scanning-bar {
-    @apply absolute w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent;
-    animation: scan 8s linear infinite;
-  }
-
   .pt-header-offset {
     padding-top: var(--app-header-offset);
+  }
+
+  /* Shared section state — active expanded panel */
+  .section-active {
+    @apply bg-white/5 border border-white/10 shadow-sm;
   }
 
   /* Reveal animation */
   .reveal-skew {
     opacity: 0;
-    animation: reveal-skew 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: reveal-fade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 }
 
@@ -99,24 +95,43 @@
   .animation-delay-300 { animation-delay: 300ms; }
   .animation-delay-400 { animation-delay: 400ms; }
   .animation-delay-500 { animation-delay: 500ms; }
+  .tag-appear { animation: tag-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .complete-pop { animation: complete-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
 }
 
-@keyframes reveal-skew {
+@keyframes reveal-fade {
   0% {
     opacity: 0;
-    transform: translateY(40px) skewY(2deg);
+    transform: translateY(24px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) skewY(0);
+    transform: translateY(0);
   }
 }
 
-@keyframes scan {
-  0% { transform: translateY(-100%); opacity: 0; }
-  20% { opacity: 0.3; }
-  80% { opacity: 0.3; }
-  100% { transform: translateY(100%); opacity: 0; }
+/* New custom tag entrance */
+@keyframes tag-in {
+  0% { opacity: 0; transform: scale(0.75); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Step complete icon pop — brief confirmation when a step finishes */
+@keyframes complete-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Custom Scrollbar */

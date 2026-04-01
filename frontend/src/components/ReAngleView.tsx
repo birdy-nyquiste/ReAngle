@@ -28,7 +28,7 @@ interface ReAngleViewProps {
     onVoiceoverChange?: (script: string) => void
 }
 
-const actionButtonClass = "h-8 w-8 shrink-0 hover:bg-white/10 text-muted-foreground hover:text-foreground disabled:opacity-50"
+const actionButtonClass = "h-11 w-11 shrink-0 hover:bg-white/10 text-muted-foreground hover:text-foreground disabled:opacity-50"
 
 /** 与后端/生成校验保持一致：使用字符串字符长度（trim 后） */
 function getTextLength(text: string): number {
@@ -106,7 +106,7 @@ export function ReAngleView({
                             onClick={handlePlayClick}
                             disabled={ttsLoading || !summary || !!audioUrl}
                             className={actionButtonClass}
-                            title={t("mainApp.readAloud")}
+                            aria-label={t("mainApp.readAloud")}
                         >
                             {ttsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Headphones className="w-4 h-4" />}
                         </Button>
@@ -116,7 +116,7 @@ export function ReAngleView({
                             onClick={() => handleCopy(summary, setCopiedSummary)}
                             disabled={!summary}
                             className={actionButtonClass}
-                            title={t("mainApp.copySummary")}
+                            aria-label={t("mainApp.copySummary")}
                         >
                             {copiedSummary ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                         </Button>
@@ -126,7 +126,7 @@ export function ReAngleView({
                             onClick={onDownloadSummary}
                             disabled={!summary || !onDownloadSummary}
                             className={actionButtonClass}
-                            title={t("mainApp.downloadSummaryTxt")}
+                            aria-label={t("mainApp.downloadSummaryTxt")}
                         >
                             <Download className="w-4 h-4" />
                         </Button>
@@ -134,7 +134,7 @@ export function ReAngleView({
                 </div>
                 <div className="p-4 lg:p-5 space-y-3">
                     {summary ? (
-                        <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{summary}</p>
+                        <p key="summary-content" className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90 animate-in fade-in slide-in-from-bottom-2 duration-500">{summary}</p>
                     ) : (
                         <p className="text-sm text-muted-foreground italic">{t("mainApp.noSummaryGenerated")}</p>
                     )}
@@ -163,7 +163,7 @@ export function ReAngleView({
                             onClick={onOpenAvatarPanel}
                             disabled={!rewrittenContent || !onOpenAvatarPanel || !avatarEnabled}
                             className={actionButtonClass}
-                            title={avatarEnabled ? t("mainApp.avatarBroadcast") : (avatarDisabledReason || t("mainApp.avatarUnavailable"))}
+                            aria-label={avatarEnabled ? t("mainApp.avatarBroadcast") : (avatarDisabledReason || t("mainApp.avatarUnavailable"))}
                         >
                             <Video className="w-4 h-4" />
                         </Button>
@@ -173,7 +173,7 @@ export function ReAngleView({
                             onClick={() => handleCopy(rewrittenContent, setCopiedContent)}
                             disabled={!rewrittenContent}
                             className={actionButtonClass}
-                            title="Copy Content"
+                            aria-label={t("mainApp.copyContent")}
                         >
                             {copiedContent ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                         </Button>
@@ -183,7 +183,7 @@ export function ReAngleView({
                             onClick={onDownload}
                             disabled={!rewrittenContent}
                             className={actionButtonClass}
-                            title={t("mainApp.downloadAsTxt")}
+                            aria-label={t("mainApp.downloadAsTxt")}
                         >
                             <Download className="w-4 h-4" />
                         </Button>
@@ -191,7 +191,7 @@ export function ReAngleView({
                 </div>
                 <div className="p-4 lg:p-5">
                     {rewrittenContent ? (
-                        <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{rewrittenContent}</p>
+                        <p key="content-result" className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90 animate-in fade-in slide-in-from-bottom-2 duration-500">{rewrittenContent}</p>
                     ) : (
                         <p className="text-sm text-muted-foreground italic">{t("mainApp.noContentGenerated")}</p>
                     )}
@@ -278,7 +278,7 @@ export function ReAngleView({
                                         size="icon"
                                         variant="ghost"
                                         className={actionButtonClass}
-                                        title={t("mainApp.downloadAvatarVideo")}
+                                        aria-label={t("mainApp.downloadAvatarVideo")}
                                         onClick={async () => {
                                             const downloadUrl = `/api/v2/media/avatar/download?url=${encodeURIComponent(avatarVideoUrl!)}`
                                             try {
@@ -316,6 +316,7 @@ export function ReAngleView({
                                         controls
                                         className="w-full max-h-[360px] rounded-lg bg-black/30"
                                         preload="metadata"
+                                        poster=""
                                     />
                                 </div>
                             ) : (

@@ -1,5 +1,5 @@
 import React from "react"
-import { Triangle, ChevronRight, Loader2 } from "lucide-react"
+import { Triangle, ChevronRight, Loader2, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
@@ -11,6 +11,7 @@ interface RevealSectionProps {
     onDeAngleProcess: () => void
     deAngleLoading: boolean
     inputsLocked: boolean
+    completed?: boolean
 }
 
 export const RevealSection: React.FC<RevealSectionProps> = ({
@@ -21,11 +22,12 @@ export const RevealSection: React.FC<RevealSectionProps> = ({
     onDeAngleProcess,
     deAngleLoading,
     inputsLocked,
+    completed = false,
 }) => {
     return (
         <div className={cn(
             "rounded-xl overflow-hidden flex flex-col transition-colors",
-            (expanded && sidebarExpanded) ? "bg-white/5 border border-white/10 shadow-sm" : "border border-transparent hover:bg-white/5"
+            (expanded && sidebarExpanded) ? "section-active" : "border border-transparent hover:bg-white/5"
         )}>
             <button
                 onClick={onToggle}
@@ -33,16 +35,20 @@ export const RevealSection: React.FC<RevealSectionProps> = ({
                 title={!sidebarExpanded ? t("mainApp.tabDeangle") : undefined}
             >
                 <div className={cn(
-                    "flex items-center justify-center shrink-0 border transition-colors w-7 h-7 rounded-full",
-                    "bg-white/5 border-white/10 text-muted-foreground group-hover:border-white/20 group-hover:bg-white/10 group-hover:text-foreground"
+                    "flex items-center justify-center shrink-0 border transition-all w-7 h-7 rounded-full",
+                    completed
+                        ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-400"
+                        : "bg-white/5 border-white/10 text-muted-foreground group-hover:border-white/20 group-hover:bg-white/10 group-hover:text-foreground"
                 )}>
-                    <Triangle className="w-3.5 h-3.5" />
+                    <span key={completed ? 'done' : 'idle'} className={completed ? "complete-pop block" : "block"}>
+                        {completed ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Triangle className="w-3.5 h-3.5" />}
+                    </span>
                 </div>
                 <div className={cn(
                     "flex items-center justify-between overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap",
-                    sidebarExpanded ? "w-[266px] opacity-100 ml-3 pr-2" : "w-0 opacity-0 ml-0 pr-0"
+                    sidebarExpanded ? "w-[min(266px,75vw)] opacity-100 ml-3 pr-2" : "w-0 opacity-0 ml-0 pr-0"
                 )}>
-                    <span className="font-medium text-sm text-neutral-400 group-hover:text-neutral-50 transition-colors">
+                    <span className="font-medium text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                         {t("mainApp.step2Deangle")}
                     </span>
                     <ChevronRight className={cn(

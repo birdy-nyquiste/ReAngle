@@ -7,7 +7,7 @@ import { useLanguage, type Language } from "@/context/LanguageContext"
 
 const logoNode = (
   <>
-    <img src="/favicon.png" alt="ReAngle" className="h-8 w-8 rounded-lg" />
+    <img src="/favicon.png" alt="ReAngle logo" className="h-8 w-8 rounded-lg" />
     <span className="font-bold text-lg font-heading tracking-tight">ReAngle</span>
   </>
 )

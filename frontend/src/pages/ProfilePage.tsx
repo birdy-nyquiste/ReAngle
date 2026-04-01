@@ -91,7 +91,7 @@ export default function ProfilePage() {
     const avatarUsageLimitDisplay = usage?.avatar_usage_limit === -1 ? "∞" : usage?.avatar_usage_limit ?? 0
 
     return (
-        <div className="min-h-screen flex flex-col bg-background aurora-bg">
+        <div className="min-h-screen flex flex-col bg-background">
             <AppHeader />
 
             {/* Content */}
